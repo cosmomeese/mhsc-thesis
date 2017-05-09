@@ -7,7 +7,8 @@ importExcelSheet <- function(fileName, basePath = getwd(), baseToFilePath = "", 
 {#NOTE: the ... means any other variables we pass to it
   
   ## Specify File Location
-  fullFilePath <- paste(basePath,"/",baseToFilePath,fileName,sep="")
+  fullFilePath <- paste(basePath,"/",baseToFilePath,fileName,
+						sep="")
   
   ## Perform Data Import
   

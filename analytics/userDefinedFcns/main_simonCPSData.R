@@ -15,9 +15,11 @@ fcns <- list("importSimonCPSData",
 # Perform actual import
 srcCreateFcn <- function(sfcn,sourceDir) #helper function to import
 {
-  source(paste(sourceDir,"/",sfcn,".R",sep=""))
+  source(paste(sourceDir,"/",sfcn,".R",
+				sep=""))
 }
-invisible(lapply(fcns,srcCreateFcn,sourceDir=sourceDir)) #use function
+invisible(lapply(fcns,srcCreateFcn,
+					sourceDir=sourceDir)) #use function
 rm(fcns,srcCreateFcn) #remove the extra unneeded variables
 
 ## Do Science!

@@ -3,7 +3,8 @@
 ## Import Required Libraries
 
 sourceDir <- "userDefinedFcns"
-source(paste(sourceDir,"/","importExcelSheet.R",sep=""))
+source(paste(sourceDir,"/","importExcelSheet.R",
+				sep=""))
 rm(sourceDir)
 
 #local functions

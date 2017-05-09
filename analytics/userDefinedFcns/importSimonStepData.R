@@ -2,7 +2,8 @@
 
 ## Import Required Libraries
 sourceDir <- "userDefinedFcns"
-source(paste(sourceDir,"/","importExcelSheet.R",sep=""))
+source(paste(sourceDir,"/","importExcelSheet.R",
+				sep=""))
 rm(sourceDir)
        
 #local functions
@@ -29,15 +30,18 @@ importSimonStepData <- function(VIEW=FALSE)
   ## Reformat Data for Use
   
   inputFormat <- "%d/%m/%Y %H:%M:%S"
-  importedData$DateTime <- as.POSIXlt(importedData[[1]], format = inputFormat) #access 1's column & change from 'character' (string) type to date 
+  importedData$DateTime <- as.POSIXlt(importedData[[1]], 
+										format = inputFormat) #access 1's column & change from 'character' (string) type to date 
   
   #Time
   outputFormat <- "%H:%M:%S"
-  importedData['Time'] <- format(importedData$DateTime,format=outputFormat) #access new DateTime column & change from POSIXlt format to time
+  importedData['Time'] <- format(importedData$DateTime,
+									format=outputFormat) #access new DateTime column & change from POSIXlt format to time
   
   #Date  
   outputFormat <- "%d/%m/%Y"
-  importedData['Date'] <- format(importedData$DateTime,format=outputFormat) #access new DateTime column & change from POSIXlt format to time
+  importedData['Date'] <- format(importedData$DateTime,
+									format=outputFormat) #access new DateTime column & change from POSIXlt format to time
   
   #Steps
   importedData['Steps'] <- importedData$Steps
