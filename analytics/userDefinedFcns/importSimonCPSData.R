@@ -3,7 +3,7 @@
 ## Import Required Libraries
 
 sourceDir <- "userDefinedFcns"
-source(paste(sourceDir,"/","importExcelSheet.R",
+source(paste(sourceDir,"/","importExcelSheets.R",
 				sep=""))
 rm(sourceDir)
 
@@ -21,10 +21,10 @@ importSimonCPSData <- function(VIEW=FALSE)
   
   ## Perform Data Import
   
-  importedData <- importExcelSheet(fileName,basePath,baseToFilePath,
-                                   skip = initialRowsToSkip)
+  importedData.sheets <- importExcelSheets(fileName,basePath,baseToFilePath,
+                                            skip = initialRowsToSkip)
     
-  ## !Assign to the variable name you want
+  importedData <- importedData.sheets[1]
   
   return(importedData)
 }
