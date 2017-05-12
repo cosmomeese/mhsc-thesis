@@ -2,7 +2,7 @@
 
 ## Import Required Libraries
 # Install if it's not installed on this computer
-pkg <- c("tidyr")
+pkg <- c("tidyr","dplyr")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -11,6 +11,7 @@ if (length(new.pkg)) {
 rm(pkg,new.pkg)
 # load the library
 library(tidyr)
+library(dplyr)
 
 #local functions
 
@@ -51,10 +52,10 @@ processSimonStepData <- function(importedData)
     processedData.listItem$DateTime <- NULL
     
     # Nest all other variables (Step & Time) for each Date
-    processedData.listItem <- tidyr::nest(data = group_by(processedData.listItem,Date),
+    processedData.listItem <- tidyr::nest(data = dplyr::group_by(processedData.listItem,Date),
                                           .key = "Intraday")
     
-    processedData.listItem["Study.Identifier"] <- sheetName
+    processedData.listItem["StudyIdentifier"] <- as.factor(sheetName)
     
     # Combine data frame with our existing list of data frames
     if(!exists("processedData")) # Create the data frame initially if it hasn't yet been created
@@ -69,7 +70,7 @@ processSimonStepData <- function(importedData)
   }
   
   #tidy it up
-  processedData <- tidyr::nest(data = group_by(processedData,Study.Identifier),
+  processedData <- tidyr::nest(data = group_by(processedData,StudyIdentifier),
                                .key = "StepData")
   
   return(processedData)

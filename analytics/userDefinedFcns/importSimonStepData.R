@@ -18,7 +18,7 @@ importSimonStepData <- function(VIEW=FALSE)
   fileName1 <- "structure_ThesisDummyData_1.xlsx"
   fileName2 <- "structure_ThesisDummyData_2.xlsx"
   initialRowsToSkip <- 2 #skip the first two
-  excludeSheets = c("Daily","template")
+  excludeSheets = c("Summary","Daily","template")
   #columnTypes <- c("text","numeric","skip","skip")
   columnTypes = NULL
   
@@ -38,6 +38,6 @@ importSimonStepData <- function(VIEW=FALSE)
   importedData <-c(importedData.part1,importedData.part2)
   
   
-  return(importedData) #change the name on the right side of the assignment to whatever you want
+  return(importedData)
 }
 

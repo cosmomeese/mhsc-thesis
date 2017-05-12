@@ -7,7 +7,7 @@
 mergeSimonData <- function(metaData,stepData,CPSData)
 {
   #combine all the data frames together!
-  mergeBy = "Study.Identifier"
+  mergeBy = "StudyIdentifier"
   mergedData <- merge(x = metaData,
                       y = CPSData,
                       by = mergeBy)

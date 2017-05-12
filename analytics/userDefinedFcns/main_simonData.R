@@ -55,8 +55,10 @@ p_combinedData <- mergeSimonData(p_metaData,p_stepData,p_cpsData)
   # Clean up some more space in memory
 rm(p_metaData,p_stepData,p_cpsData)
 
+
 # Analyze
 #a_Data <- analyzeSimonData(p_combinedData)
+
 
 # Display
 #displaySimonData(p_combinedData,a_data)
