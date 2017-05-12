@@ -9,14 +9,26 @@ rm(sourceDir)
 
 #local functions
 
-importSimonCPSData <- function(VIEW=FALSE) 
+importSimonCPSData <- function(VIEW=FALSE,USE.CHOOSEDIALOG=FALSE) 
 {
   
   ## Specify File Location
-  basePath <- getwd() #if local
-  #basePath <- "" #for network drive... tbd
-  baseToFilePath <- "data(gitignored)/" #again if needed
-  fileName <- "structure_CPSDummyData.xlsx"
+  if(USE.CHOOSEDIALOG)
+  {
+    fileName <- NULL
+    basePath <- NULL
+    baseToFilePath <- NULL
+    dialogTitle <- "Select CPS Data File"
+  }
+  else
+  {
+    basePath <- getwd() #if local
+    #basePath <- "" #for network drive... tbd
+    baseToFilePath <- "data(gitignored)/" #again if needed
+    fileName <- "structure_CPSDummyData.xlsx"
+    dialogTitle <- NULL
+  }
+  ## Specify Important Excel Import Parameters
   initialRowsToSkip <- 3 #skip the first two (Simon left hidden data there...) +  1 (since we specify col_names)
   excludeSheets <- c("Sheet2","Minute conv")
   #date helper function for later
@@ -167,7 +179,7 @@ importSimonCPSData <- function(VIEW=FALSE)
                                as.character, #Empty Column (included because import function will complain otherwise)
                                as.character) #Empty Column w/ 1 spurious entry  (included because import function will complain otherwise)
   names(columnTypeConversionFcns) <- columnNames #key columnType values to columnName keys
-  
+  ## END SPECIFY IMPORTANT EXCEL IMPORT PARAMETERS
   
   ## Perform Data Import
   
@@ -176,7 +188,8 @@ importSimonCPSData <- function(VIEW=FALSE)
                                            excludeSheets = excludeSheets,
                                            col_types = columnTypes,
                                            col_names = columnNames,
-                                           col_conversionFcns = columnTypeConversionFcns)
+                                           col_conversionFcns = columnTypeConversionFcns,
+                                           CHOOSE.DIALOGTITLE = dialogTitle)
     
   importedData <- importedData.sheets
   

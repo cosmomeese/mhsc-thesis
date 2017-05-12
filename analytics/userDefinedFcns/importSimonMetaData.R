@@ -9,14 +9,27 @@ rm(sourceDir)
 
 #local functions
 
-importSimonMetaData <- function(VIEW=FALSE) 
+importSimonMetaData <- function(VIEW=FALSE,USE.CHOOSEDIALOG=FALSE) 
 {
   
   ## Specify File Location
-  basePath <- getwd() #if local
-  #basePath <- "" #for network drive... tbd
-  baseToFilePath <- "data(gitignored)/" #again if needed
-  fileName <- "structure_ParticipantStudyInfo.xlsx"
+  if(USE.CHOOSEDIALOG)
+  {
+    fileName <- NULL
+    basePath <- NULL
+    baseToFilePath <- NULL
+    dialogTitle <- "Select Participant (Meta) Data File"
+  }
+  else
+  {
+    
+    basePath <- getwd() #if local
+    #basePath <- "" #for network drive... tbd
+    baseToFilePath <- "data(gitignored)/" #again if needed
+    fileName <- "structure_ParticipantStudyInfo.xlsx"
+    dialogTitle <- NULL
+  }
+  ## Specify Important Excel Import Parameters
   initialRowsToSkip <- 1 #skip the first one (since we specify col_names)
   #date helper function for later
     dateInputFormat = "%m/%d/%Y"
@@ -116,14 +129,16 @@ importSimonMetaData <- function(VIEW=FALSE)
                                 as.factor, #CPT collected
                                 as.character) #Notes
   names(columnTypeConversionFcns) <- columnNames #key columnType values to columnName keys
-  
+  ## END SPECIFY IMPORTANT EXCEL IMPORT PARAMETERS
+    
   ## Perform Data Import
   
   importedData.sheets <- importExcelSheets(fileName,basePath,baseToFilePath,
                                            skip = initialRowsToSkip,
                                            col_types = columnTypes,
                                            col_names = columnNames,
-                                           col_conversionFcns = columnTypeConversionFcns)
+                                           col_conversionFcns = columnTypeConversionFcns,
+                                           CHOOSE.DIALOGTITLE = dialogTitle)
   
 
   

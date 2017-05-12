@@ -36,12 +36,21 @@ invisible(lapply(fcns,srcCreateFcn,
 rm(fcns,srcCreateFcn) #remove the extra unneeded variables
 
 #------------------------------------------------------
+if(exists("force.ChooseDialog") && !is.null(force.ChooseDialog) && (TRUE == force.ChooseDialog))
+{
+  force.ChooseDialog = TRUE
+} else { #why R must you force your own coding style on me. >:(
+  force.ChooseDialog = FALSE
+}
+  
+
+#------------------------------------------------------
 ## Do Science!
 
 # Import
-stepData <- importSimonStepData()
-cpsData <- importSimonCPSData()
-metaData <- importSimonMetaData()
+stepData <- importSimonStepData(USE.CHOOSEDIALOG=force.ChooseDialog)
+cpsData <- importSimonCPSData(USE.CHOOSEDIALOG=force.ChooseDialog)
+metaData <- importSimonMetaData(USE.CHOOSEDIALOG=force.ChooseDialog)
 
 
 # Process

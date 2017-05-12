@@ -2,7 +2,7 @@
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("readxl")
+pkg <- c("readxl","tcltk")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -11,13 +11,52 @@ if (length(new.pkg)) {
 rm(pkg,new.pkg)
 # load the library
 library(readxl)
+library(tcltk)
 
-importExcelSheets <- function(fileName, basePath = getwd(), baseToFilePath = "", view=FALSE, excludeSheets=NULL, col_conversionFcns=NULL, ...)
+importExcelSheets <- function(fileName, basePath = getwd(), baseToFilePath = "", view=FALSE, excludeSheets=NULL, col_conversionFcns=NULL, CHOOSE.DIALOGTITLE="Select file",...)
 {#NOTE: the ... means any other variables we pass to it
   
   ## Specify File Location
-  fullFilePath <- paste(basePath,"/",baseToFilePath,fileName,
-						sep="")
+  if(is.null(fileName))
+  {
+    if(is.null(CHOOSE.DIALOGTITLE))
+    {
+      CHOOSE.DIALOGTITLE<-"Select file"
+    }
+    FILTS <- matrix(c("Excel",".xls","Excel", ".xlsx", "All Files", "*"),3,2,byrow = TRUE)
+    cat("\nOpened Dialog Box (may be hidden behind RStudio - thanks Studio :S) -> Please ",CHOOSE.DIALOGTITLE, "\n", sep = "")
+    fullFilePath <- tcltk::tk_choose.files(default = "",
+                                           caption = CHOOSE.DIALOGTITLE,
+                                           multi = FALSE,
+                                           filters = FILTS,
+                                           index = 1)
+    if(0 == length(fullFilePath)) #if user hasn't selected anything (i.e. cancelled) then error
+    {
+      cat("Cancelled File Selection Dialog or Failed to Retrieve File","\n",sep="")
+      stop('Filename not specified or chosen. (fcn: importExcelSheets)')
+    }
+    else
+    {
+      cat("Retrieved file @ \n", fullFilePath, "\n\n", sep = "")
+    }
+  }
+  else
+  {
+    if(is.null(basePath))
+    {
+      fullFilePath <- fileName #if no basePath
+    }
+    else
+    {
+      if(is.null(baseToFilePath)) #if baseToFilePath is unspecified by this point but basePath & fileName are specified it's fair to assume that there is nothing special here so given how we construct the fullFilePath we replace this with an empty string
+      {
+        baseToFilePath = "" 
+      }
+      
+      fullFilePath <- paste(basePath,"/",baseToFilePath,fileName,
+                            sep="") #if basePath & baseToFilePath are specified (even by default) then combine them all to get complete path
+    }
+  }
   
   ## Perform Data Import
 
