@@ -10,10 +10,12 @@ mergeSimonData <- function(metaData,stepData,CPSData)
   mergeBy = "StudyIdentifier"
   mergedData <- merge(x = metaData,
                       y = CPSData,
-                      by = mergeBy)
+                      by = mergeBy,
+                      all = TRUE) #don't drop any rows you couldn't match
   mergedData <- merge(x = mergedData,
                       y = stepData,
-                      by = mergeBy)
+                      by = mergeBy,
+                      all = TRUE) #don't drop any rows you couldn't match
   
   return(mergedData)
   

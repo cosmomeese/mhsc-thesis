@@ -23,9 +23,9 @@ processSimonStepData <- function(importedData)
   {
     importedData.listItem <- importedData[[sheetName]]
     
-    if(!(is.null(importedData.listItem[["Date"]]) || 
-         is.null(importedData.listItem[["Steps"]]))) #i.e. if data exists
-    {
+    if(!(is.null(importedData.listItem[["Date"]]) || #Only include if "Date" & "steps" included 
+         is.null(importedData.listItem[["steps"]]))) #WARN!: MUST BE LOWERCASE steps
+    { #i.e. if data exists
       
       ## Reformat Data for Use
       #Make sure data frame names are compatible with R
