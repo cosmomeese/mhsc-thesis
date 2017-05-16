@@ -64,10 +64,12 @@ p_combinedData <- mergeSimonData(p_metaData,p_stepData,p_cpsData)
   # Clean up some more space in memory
 rm(p_metaData,p_stepData,p_cpsData)
 
+# Calculate Step Metric
+m_cData <- calculateSimonDataMetrics(p_combinedData)
 
 # Analyze
-#a_Data <- analyzeSimonData(p_combinedData)
+#a_Data <- analyzeSimonData(m_cData)
 
 
 # Display
-#displaySimonData(p_combinedData,a_data)
+#displaySimonData(m_cData,a_data)
