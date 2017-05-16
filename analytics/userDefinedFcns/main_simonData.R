@@ -68,8 +68,7 @@ rm(p_metaData,p_stepData,p_cpsData)
 m_cData <- calculateSimonDataMetrics(p_combinedData)
 
 # Analyze
-#a_Data <- analyzeSimonData(m_cData)
-
+a_Data <- analyzeSimonData(m_cData)
 
 # Display
-#displaySimonData(m_cData,a_data)
+displaySimonData(m_cData,a_data)
