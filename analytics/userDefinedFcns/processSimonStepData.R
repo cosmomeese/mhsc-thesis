@@ -17,6 +17,7 @@ library(dplyr)
 
 processSimonStepData <- function(importedData)
 {
+  system.tz = "EST" #if you actually need timezone support then you will need to us something other than as.POSIXlt and as.POSIXct since these do not support timezones well: https://stackoverflow.com/questions/6071155/how-to-extract-the-correct-timezones-from-posixct-and-posixlt-objects
   
   #for every sheet apply
   for(sheetName in names(importedData))
@@ -35,20 +36,47 @@ processSimonStepData <- function(importedData)
       #DateTime (and create new processedData object)
       inputFormat <- "%m/%d/%Y %H:%M:%S"
       DateTime <- as.POSIXlt(importedData.listItem[["Date"]], 
-                             format = inputFormat) #access Date's column & change from 'character' (string) type to date
+                             format = inputFormat,
+                             tz = system.tz) #access Date's column & change from 'character' (string) type to date
     
       processedData.listItem <- data.frame(DateTime) #remember df = data.frame(x) will be referred to as df$x
       rm(DateTime) #remove DateTime since we only need it to initialize data.frame
       
+      #Timestamp
+      processedData.listItem['Timestamp'] <- processedData.listItem$DateTime #save the date time, just in case...
+      
       #Time
       outputFormat <- "%H:%M:%S"
-      processedData.listItem['Time'] <- format(processedData.listItem$DateTime,
-                                      format=outputFormat) #access new DateTime column & change from POSIXlt format to time
+      tempTimeAsChar <- format(processedData.listItem$DateTime,
+                     format=outputFormat) #access new DateTime column & change from POSIXlt format to character (stripping date)
+      processedData.listItem['TimeResolution'] <- "minute"
+      time.lookupTable <- format(seq(
+                                      as.POSIXlt(min(tempTimeAsChar),
+                                                 format = outputFormat,
+                                                 tz = system.tz), 
+                                      as.POSIXlt(max(tempTimeAsChar),
+                                                 format = outputFormat,
+                                                 tz = system.tz), 
+                                      by = "1 min")) #use POSIXlt to avoid time zone problem
+      processedData.listItem['Time.Index'] <- match(as.POSIXlt(tempTimeAsChar,
+                                                               format = outputFormat,
+                                                               tz = system.tz),
+                                                    time.lookupTable) - 1 #match on lookup table (-1 offset since 
+      processedData.listItem['Time'] <- as.POSIXct(tempTimeAsChar, 
+                                                   format = outputFormat,
+                                                   tz = "GMT") #convert to POSIXct format (using arbitrary date (today's date) + time desired)
       
-      #Date  
+      #Date
       outputFormat <- "%Y/%m/%d"
-      processedData.listItem['Date'] <- format(processedData.listItem$DateTime,
-                                      format=outputFormat) #access new DateTime column & change from POSIXlt format to time
+      tempDateAsChar <- format(processedData.listItem$DateTime,
+                                      format=outputFormat) #access new DateTime column & change from POSIXlt format to character
+      processedData.listItem['BaseDay'] <- as.Date(min(tempDateAsChar))
+      date.lookupTable <- format(seq(as.Date(min(tempDateAsChar)),
+                                     as.Date(max(tempDateAsChar)),
+                                     by = "1 day"),
+                                 format = outputFormat)
+      processedData.listItem['Day'] <- match(tempDateAsChar,
+                                             date.lookupTable)
       
       #Steps
       processedData.listItem['Steps'] <- importedData.listItem$steps #make everything consistently uppercase
@@ -57,7 +85,7 @@ processSimonStepData <- function(importedData)
       processedData.listItem$DateTime <- NULL
       
       # Nest all other variables (Step & Time) for each Date
-      processedData.listItem <- tidyr::nest(data = dplyr::group_by(processedData.listItem,Date),
+      processedData.listItem <- tidyr::nest(data = dplyr::group_by(processedData.listItem,Day),
                                             .key = "Intraday")
       
       processedData.listItem["StudyIdentifier"] <- sheetName

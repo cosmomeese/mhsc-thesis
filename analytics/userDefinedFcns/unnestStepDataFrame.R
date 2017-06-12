@@ -36,7 +36,7 @@ unnestStepDataFrame <- function(originalOutputDataFrame)
       #only keep the ones we want
       stepDataAlone.Trimmed <- data.frame(Steps = stepDataAlone$Steps,
                                           Time = stepDataAlone$Time,
-                                          Date = stepDataAlone$Date,
+                                          Day = stepDataAlone$Day,
                                           stringsAsFactors = FALSE)
       #tag with the appropriate study identifier
       stepDataAlone.Trimmed$StudyIdentifier <- originalOutputDataFrame$StudyIdentifier[[sheetIndex]]

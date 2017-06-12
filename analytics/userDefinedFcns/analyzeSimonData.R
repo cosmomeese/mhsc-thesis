@@ -6,7 +6,7 @@
 
 analyzeSimonData <- function(processedData)
 {
-  processedData <- m_cData
+  #processedData <- m_cData
   #processedData <- pD_removedNYHA.NAs
    
   ##### START #####
@@ -126,8 +126,8 @@ analyzeSimonData <- function(processedData)
                     family=binomial(link="logit"))
   
   # Show summary statistics
-  summary(nyha.weight_hr1minDrop_meanDailyMaxSteps)
-  models[["nyha.weight_hr1minDrop_meanDailyMaxSteps"]] <- nyha.weight_hr1minDrop_meanDailyMaxSteps
+  summary(nyha.weight_meanDailyTotalSteps)
+  models[["nyha.weight_meanDailyTotalSteps"]] <- nyha.weight_meanDailyTotalSteps
   
   ##### Weight + HR Drop in 1 min + Daily Steps
   #Create a linear regression model: DV = NYHAClass, IV = Weight, Daily Average Total Steps

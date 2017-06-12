@@ -61,7 +61,6 @@ displaySimonData <- function(processedData,analyzedData)
                caption = "Simon Bromberg's Thesis Data") +
           xlab("NYHA Class")
   print(plot)
-  rm(pD_removedNYHA.NAs)
   
   #Plot of Steps.DailyAverageStepCount, HR.1minDrop, Weight (Note: Opens in Seperate Window)
   open3d()
@@ -77,7 +76,7 @@ displaySimonData <- function(processedData,analyzedData)
   text3d(0,0,0,"Mean Daily Max Steps")
   
   #
-  
+  rm(pD_removedNYHA.NAs)
   
 }
 
