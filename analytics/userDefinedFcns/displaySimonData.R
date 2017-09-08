@@ -47,29 +47,29 @@ displaySimonData <- function(processedData,analyzedData)
                    numInSecondaryVar[3])
   plot <- ggplot(data = pD_removedNYHA.NAs, 
                  aes(NYHAClass,StepData.MeanDailyTotalSteps)) +
-          theme_tufte(base_family = "serif", 
-                      ticks = FALSE) +
-          geom_jitter(alpha = 0.60, 
-               aes(shape = factor(Sex, levels=rev(levels(Sex))), 
-                   color = HR.1minDrop),
-               size = 2,
-               width = 0.1) +
-          geom_tufteboxplot(outlier.colour="transparent", #boxplot
-                            na.rm=TRUE,
-                            median.type = "point") +
-          stat_summary(fun.y = "median", size = 1, geom = "point") +
-          coord_cartesian(xlim = NULL, 
-                          ylim = NULL, 
-                          expand = TRUE) +
-          scale_y_continuous(name = "Daily Average Step Count (Five Num Summary)", 
-                             breaks = fiveNumSum[1,],
-                             sec.axis = sec_axis(trans=~., #i.e. 1:1 transformation
-                                                 breaks=fiveNumSum[2,])) +
-          labs(title = "Daily Average Steps per NYHA Class",
-               subtitle = sTitle,
-               caption = "Simon Bromberg's Thesis Data") +
-          xlab("NYHA Class") +
-          scale_colour_gradient2(low="blue", mid="white", midpoint= 15, high="red")
+              theme_tufte(base_family = "serif", 
+                          ticks = FALSE) +
+              geom_jitter(alpha = 0.60, 
+                   aes(shape = factor(Sex, levels=rev(levels(Sex))), 
+                       color = HR.1minDrop),
+                   size = 2,
+                   width = 0.1) +
+              geom_tufteboxplot(outlier.colour="transparent", #boxplot
+                                na.rm=TRUE,
+                                median.type = "point") +
+              stat_summary(fun.y = "median", size = 1, geom = "point") +
+              coord_cartesian(xlim = NULL, 
+                              ylim = NULL, 
+                              expand = TRUE) +
+              scale_y_continuous(name = "Daily Average Step Count (Five Num Summary)", 
+                                 breaks = fiveNumSum[1,],
+                                 sec.axis = sec_axis(trans=~., #i.e. 1:1 transformation
+                                                     breaks=fiveNumSum[2,])) +
+              labs(title = "Daily Average Steps per NYHA Class",
+                   subtitle = sTitle,
+                   caption = "Simon Bromberg's Thesis Data") +
+              xlab("NYHA Class") +
+              scale_colour_gradient2(low="blue", mid="white", midpoint= 15, high="red")
   print(plot)
   
   #Mean Daily Total Steps + Standard Deviation #--------------------------------------------------------------------------------------------------------------
@@ -143,6 +143,7 @@ displaySimonData <- function(processedData,analyzedData)
     # Complete plot
     for(threshold in c(0,1,50,100,125))
     {
+      #Raw density plot
       plot <- basePlot +
         geom_density(data=subset(summar_stepDistr,
                                  Steps >= threshold), 
@@ -151,6 +152,25 @@ displaySimonData <- function(processedData,analyzedData)
         ggtitle(paste(baseTitle,threshold))
       print(plot)
     }
+    
+    # Complete stacked plots
+    baseTitle <- "Stacked Density Plot of Subjects Minute by Minute Step Count, excluding step counts < "
+    for(threshold in c(0,1,50,100,125))
+    {
+    
+      #Stacked density plot (can 'elucidate average/common peaks')
+      plot <- basePlot +
+        geom_density(data=subset(summar_stepDistr,
+                                 Steps >= threshold), 
+                     position = "stack", 
+                     alpha = 0.4,
+                     inherit.aes = TRUE,
+                     aes(fill=StudyIdentifier)) +
+        ggtitle(paste(baseTitle,threshold))
+      print(plot)
+    }
+    
+    #Clean up
     rm(basePlot,baseTitle)
     
   #Plot of NYHA Class vs Activity Time #--------------------------------------------------------------------------------------------------------------------
