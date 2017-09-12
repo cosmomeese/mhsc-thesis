@@ -23,9 +23,12 @@ source(paste(sourceDir,"/","unnestStepDataFrame.R",
              sep=""))
 rm(sourceDir)
 
-displaySimonData <- function(processedData,analyzedData)
+displaySimonData <- function(processedData,analyzedData,printHeatMap=FALSE)
 {
-  
+  if(!printHeatMap)
+  {
+    warning("Reminder that function is set to not print patient activity heat maps. Set printHeatMap = TRUE to print these.")
+  }
   #http://motioninsocial.com/tufte/#minimal-boxplot
   
   #Mean Daily Total Steps + Five Number Summary #--------------------------------------------------------------------------------------------------------------
@@ -125,6 +128,8 @@ displaySimonData <- function(processedData,analyzedData)
   summar_stepDistr <- unnestedDF %>% 
                         filter(!is.na(NYHAClass)) %>%
                         group_by(StudyIdentifier,NYHAClass)
+  classCounts <- count(processedData, NYHAClass) %>% mutate(n = 1/n) %>% rename(stackedDensityWeighting = n)
+  summar_stepDistr <- inner_join(summar_stepDistr,classCounts,by = "NYHAClass")
     
     # Baseplot
     baseTitle <- "Density Plot of Subjects Minute by Minute Step Count, excluding step counts < "
@@ -154,7 +159,8 @@ displaySimonData <- function(processedData,analyzedData)
     }
     
     # Complete stacked plots
-    baseTitle <- "Stacked Density Plot of Subjects Minute by Minute Step Count, excluding step counts < "
+    displaySimonData <- list()
+    baseTitle <- "Stacked Weighted Density Plot of Subjects Min. by Min. Step Count, excluding step counts < "
     for(threshold in c(0,1,50,100,125))
     {
     
@@ -165,8 +171,11 @@ displaySimonData <- function(processedData,analyzedData)
                      position = "stack", 
                      alpha = 0.4,
                      inherit.aes = TRUE,
-                     aes(fill=StudyIdentifier)) +
+                     aes(fill=StudyIdentifier,
+                         weight=stackedDensityWeighting)) +
         ggtitle(paste(baseTitle,threshold))
+      
+      displaySimonData[threshold %>% toString] <- ggplot_build(plot)
       print(plot)
     }
     
@@ -188,65 +197,100 @@ displaySimonData <- function(processedData,analyzedData)
   print(plot)
   
   #Plot of Step Distribution #------------------------------------------------------------------------------------------------------------------------------
-  summar_stepDistr <- unnestedDF %>% 
-    filter(Steps >= 100,!is.na(NYHAClass)) %>%
-    group_by(StudyIdentifier,NYHAClass)
-  plot <- ggplot(data = summar_stepDistr) +
-    theme_tufte(base_family = "serif", 
-                ticks = FALSE) +
-    geom_density(aes(x = Steps, fill=NYHAClass, color=NYHAClass), position = "identity", alpha = 0.4) +
-    facet_wrap(~StudyIdentifier)
-  print(plot)  
-    
   
-  #Heat Map of Activity vs Day for each Patient
-  heatMapData <- mutate(unnestedDF,Time=as.hms(Time)) %>%
-                  group_by(StudyIdentifier,NYHAClass,Day)
+  #individual step distributions
+  baseTitle <- "Individual Patient Density Plots, Minute by Minute Step Count, excluding step counts < "
+    #so that facets are grouped by NYHAClass (vs Study Identifier#) we need to the factor levels for ggplot 
+  oldorder <- unnestedDF$StudyIdentifier %>% levels
+  neworder <- list()
   
-  maxSteps <- max(heatMapData$Steps, na.rm = TRUE)
-  maxDays <- max(heatMapData$Day, na.rm = TRUE)
-  
-  for(class in c("II","III"))
+  for(class in levels(unnestedDF$NYHAClass))
   {
-    currentPage <- 0
-    hasNextPage <- TRUE
-    numPages <- 0
-    while(hasNextPage)
-    {
-      
-      plot <- ggplot(data = subset(heatMapData,class==NYHAClass),aes(Time,Day)) +
-              theme_tufte(base_family = "serif",
-                          ticks = FALSE) +
-              geom_raster(aes(fill = Steps)) +
-              #facet_wrap(~StudyIdentifier) +
-              expand_limits(y=c(0,maxDays)) +
-              facet_wrap_paginate(~StudyIdentifier, ncol = 5, nrow = 3, page = currentPage) +
-              #scale_fill_gradientn(colors=c("white","#e5f5e0","#a1d99b","#31a354"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #from Greens color scheme from http://colorbrewer2.org/#type=sequential&scheme=Greens&n=3
-              #scale_fill_gradientn(colors=c("white","#fee6ce","#fdae6b","#e6550d"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #from Orange color scheme from http://colorbrewer2.org/#type=sequential&scheme=Oranges&n=3
-              scale_fill_gradientn(colors=c("#92c5de","#f7f7f7","#f4a582","#ca0020"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #modified from diverging red & blue color color scheme from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=5
-              #scale_fill_distiller()
-      
-      if(0 >= currentPage)
-      {
-        numPages <- n_pages(plot)
-        currentPage <- 0 #make sure it's 0 so that it gets incremented to 1 for next time
-      }
-      else
-      {
-        #save plot (verbosely)
-        fileName <- paste('heatmapNYHAClass',class,'_page',currentPage,'.png',sep="") 
-        ggsave(fileName, path = getwd())
-        cat("\nPrinted ",fileName,"\n",sep="")
-        
-        #determine if there's a next page
-        if(currentPage >= numPages)
-        {
-          hasNextPage <- FALSE
-        }
-      }
-      currentPage <- currentPage + 1
-    }
+    #for each NYHAClass remove all data points that don't have a matching class, extract the remaining StudyIdentifiers (apply factor function again to drop all unused StudyIdentifiers) and then extract the levels
+    subsetBelongingToClass <- unnestedDF %>% filter(NYHAClass == class) %$% StudyIdentifier %>% factor %>% levels
+    #append this subsetted group for this particular NYHAClass to the rest of the list
+    neworder <- append(neworder,subsetBelongingToClass)
   }
+  #now add any factors that were dropped out because they didn't have a NYHAClass
+  neworder <- append(neworder,
+                     unnestedDF %>% filter(is.na(NYHAClass)) %$% StudyIdentifier %>% factor %>% levels)
+  
+  summar_stepDistr <- unnestedDF %>% 
+                        filter(!is.na(NYHAClass)) %>%
+                        group_by(StudyIdentifier,NYHAClass) %>% 
+                        arrange %>% transform(StudyIdentifier=factor(StudyIdentifier,levels=neworder),StudyIdentifier)
+  
+  for(threshold in c(0,1,50,100,125))
+  {
+    plot <- ggplot(data = subset(summar_stepDistr,
+                                 Steps >= threshold)) +
+      theme_tufte(base_family = "serif", 
+                  ticks = FALSE) +
+      geom_density(aes(x = Steps, fill=NYHAClass, color=NYHAClass), position = "identity", alpha = 0.4) +
+      facet_wrap(~StudyIdentifier) +
+      ggtitle(paste(baseTitle,threshold))
+    print(plot)
+  }
+  rm(summar_stepDistr,oldorder,neworder)
+  
+  #Plot of Activity Heat Map #------------------------------------------------------------------------------------------------------------------------------
+    
+  if(printHeatMap)
+  {
+  
+    #Heat Map of Activity vs Day for each Patient
+    heatMapData <- mutate(unnestedDF,Time=as.hms(Time)) %>%
+      group_by(StudyIdentifier,NYHAClass,Day)
+    
+    maxSteps <- max(heatMapData$Steps, na.rm = TRUE)
+    maxDays <- max(heatMapData$Day, na.rm = TRUE)
+    
+    for(class in c("II","III"))
+    {
+      currentPage <- 0
+      hasNextPage <- TRUE
+      numPages <- 0
+      while(hasNextPage)
+      {
+        
+        plot <- ggplot(data = subset(heatMapData,class==NYHAClass),aes(Time,Day)) +
+          theme_tufte(base_family = "serif",
+                      ticks = FALSE) +
+          geom_raster(aes(fill = Steps)) +
+          #facet_wrap(~StudyIdentifier) +
+          expand_limits(y=c(0,maxDays)) +
+          facet_wrap_paginate(~StudyIdentifier, ncol = 5, nrow = 3, page = currentPage) +
+          #scale_fill_gradientn(colors=c("white","#e5f5e0","#a1d99b","#31a354"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #from Greens color scheme from http://colorbrewer2.org/#type=sequential&scheme=Greens&n=3
+          #scale_fill_gradientn(colors=c("white","#fee6ce","#fdae6b","#e6550d"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #from Orange color scheme from http://colorbrewer2.org/#type=sequential&scheme=Oranges&n=3
+          scale_fill_gradientn(colors=c("#92c5de","#f7f7f7","#f4a582","#ca0020"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #modified from diverging red & blue color color scheme from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=5
+        #scale_fill_distiller()
+        
+        if(0 >= currentPage)
+        {
+          numPages <- n_pages(plot)
+          currentPage <- 0 #make sure it's 0 so that it gets incremented to 1 for next time
+          cat("Print path: ",getwd(), sep="")
+        }
+        else
+        {
+          #save plot (verbosely)
+          fileName <- paste('heatmapNYHAClass',class,'_page',currentPage,'.png',sep="") 
+          ggsave(fileName, path = getwd())
+          cat("Printed ",fileName,"\n",sep="")
+          
+          #determine if there's a next page
+          if(currentPage >= numPages)
+          {
+            hasNextPage <- FALSE
+          }
+        }
+        currentPage <- currentPage + 1
+      }
+      cat("\n")
+    }
+     
+  }
+  
   
   #Plot of Signal Match Image #------------------------------------------------------------------------------------------------------------------------------
   
