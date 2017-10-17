@@ -1,0 +1,320 @@
+\documentclass[]{article}
+\usepackage{seqsplit}  % for breaking of long lones
+\usepackage{enumitem}  % for roman letter enumerations (lists)
+\usepackage [english]{babel}  % to fix the backwards quotes problem
+\usepackage [autostyle, english = american]{csquotes}  % to fix the backwards quotes problem
+\usepackage{indentfirst}  % causes indent on first paragraph
+\MakeOuterQuote{"}  % to fix the backwards quotes problem
+
+\providecommand{\e}[1]{\ensuremath{\times 10^{#1}}}  % for sci-notation
+
+% TRIPOD Protocol: goo.gl/oWstcC
+% Explanation & Elaboration (w/ Examples): http://annals.org/aim/article/2088542/transparent-reporting-multivariable-prediction-model-individual-prognosis-diagnosis-tripod-explanation
+
+\title{TRIPOD Protocol:
+	\linebreak
+	Development and internal validation of a NYHA functional class prediction algorithm for patients with (severe to moderate) heart failure}  % Item 1
+	% possibly missing: clinical context (diagnostic or prognostic?)
+\author{Jonathan-F. Baril}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract} % Item 2
+\noindent OBJECTIVE: To develop and validate an NYHA functional class prediction algorithm for patients with (severe to moderate) heart failure
+
+\noindent DESIGN: Sets, composed of one model for each target NYHA class (II \& II), of multivariate hidden (pure- or semi-)Markov models
+
+\noindent SETTING: Tertiary care clinic specializing in the management of heart failure (The Heart Function Clinic at Toronto General Hospital, a part of the University Health Network (UHN) in Toronto, Canada) from November 2017 to April 2017.
+
+\noindent PARTICIPANTS: consecutive sample of {n} consenting heart failures patients participating in program evaluation and quality improvement efforts for Medly, a telemonitoring platform used and developed for the test site.  [Development; Internal Validation]
+
+\noindent PRIMARY OUTCOME: NYHA functional classification as assessed by patient's attending cardiologist at clinic visits during study period.
+
+\noindent RESULTS: TBD % In the first stage, the original decision rules were found to have sensitivities of 1.0 (95% confidence interval [CI], 0.97 to 1.0) for detecting 121 malleolar zone fractures, and 0.98 (95% CI, 0.88 to 1.0) for detecting 49 midfoot zone fractures. For interpretation of the rules in 116 patients, kappa values were 0.56 for the ankle series rule and 0.69 for the foot series rule. Recursive partitioning of 20 predictor variables yielded refined decision rules for ankle and foot radiographic series. In the second stage, the refined rules proved to have sensitivities of 1.0 (95% CI, 0.93 to 1.0) for 50 malleolar zone fractures, and 1.0 (95% CI, 0.83 to 1.0) for 19 midfoot zone fractures. The potential reduction in radiography is estimated to be 34% for the ankle series and 30% for the foot series. The probability of fracture, if the corresponding decision rule were “negative,” is estimated to be 0% (95% CI, 0% to 0.8%) in the ankle series, and 0% (95% CI, 0% to 0.4%) in the foot series.
+% another example of RESULTS: 3076 (15%) patients died in the CRASH 2 trial and 1765 (12%) in the TARN dataset. Glasgow coma score, age, and systolic blood pressure were the strongest predictors of mortality. Other predictors included in the final model were geographical region (low, middle, or high income country), heart rate, time since injury, and type of injury. Discrimination and calibration were satisfactory, with C statistics above 0.80 in both CRASH 2 and TARN. A simple chart was constructed to readily provide the probability of death at the point of care, and a web based calculator is available for a more detailed risk assessment (http://crash2.lshtm.ac.uk).
+
+\noindent CONCLUSIONS: TBD % Refinement and validation have shown the Ottawa ankle rules to be 100% sensitive for fractures, to be reliable, and to have the potential to allow physicians to safely reduce the number of radiographs ordered in patients with ankle injuries by one third. Field trials will assess the feasibility of implementing these rules into clinical practice (124). [Diagnosis; Validation; Updating]
+% another example of CONCLUSIONS: This prognostic model can be used to obtain valid predictions of mortality in patients with traumatic bleeding, assisting in triage and potentially shortening the time to diagnostic and lifesaving procedures (such as imaging, surgery, and tranexamic acid). Age is an important prognostic factor, and this is of particular relevance in high income countries with an aging trauma population (123). [Prognosis; Development]
+
+\centering [Prognosis; Development; Internal Validation]
+
+\end{abstract}
+
+\clearpage
+
+%\setcounter{section}{2}  % therefore next will start at 3
+\section{Introduction}
+\subsection{Background \& Objectives} % Item 3
+
+Heart failure, the complex chronic terminal phase of all cardiovascular disease, is slowly becoming a worldwide silent pandemic [\seqsplit{https://www.ncbi.nlm.nih.gov/pubmed/26462110}]. The symptoms of heart failure are complex and difficult to manage for both patients and their physicians. Care is made even more difficult because there is no reliable objective method for assessing the moment-to-moment state of given patient’s HF, never mind determining if it is likely to worsen – though certainly not for lack of possible metrics. The current clinical gold standard for communicating a patient’s state of Heart Failure is the New York Heart Association (NYHA) functional classification. This system grades a patient's degree of heart failure based on the physicians interpretation of patient reported symptoms (mainly with respect to their degree of exercise/activity intolerance). Despite these limitations clinical evidence and medical research have established many important relationships between a patient's NYHA class and their prognostic outcomes. 
+
+Finding an objective means of determining a patient's NYHA class would provide a great boon to both heart failure care and research as it would cause intra- and inter-physician and patient assessments of heart failure class to more consistent. Doing so would make communication of patient heart failure states in research, clinic notes, or other medical documentation more transparent and reliable.
+
+Subjectivity in the current NYHA classification is introduced through two primary sources: patients and clinicians. A continuously worn activity tracker and an intelligent classification algorithm executed by a computer could feasibly replace these two sources and provide a consistent and purely objective method of assessing NYHA class.
+
+Modern commercially available activity/fitness trackers, can fairly reliably track minute-by-minute step count and heart rate, promising to provide a human memory-independent and precise (even if not a 100\% accurate) picture of a patient's response to activity. "Replacing" patient memory with activity trackers would eliminate a significant source of subjectivity and potential error in trying to determine a patient's level of activity intolerance.
+
+An intelligent classification algorithm could then be trained to mimic expert grading by an experienced "model" physician (and to compensate for inherent biases and inaccuracies in the recording sensors). By imbuing artificial intelligence into such an algorithm so that it could translate relevant data into the desired clinical outcome (NYHA classification) or a sufficiently equivalent outcome (an NYH-AI or NYHAI classification) we could provide a way for to assess a patient's functional classification in an objective, universally-consistent manner that still leverages the advantages and benefits of the existing 'traditional' NYHA classification method.
+
+% Methods
+\section{Methods}
+\subsection{Source of Data/Study Design} % Item 4
+
+The data used for algorithm development was sourced between November 2017 and April 2017 from an open (prospective) cohort of adult outpatients at a tertiary care clinic specializing in the management of advanced heart failure (The Heart Function Clinic at Toronto General Hospital, a part of the University Health Network (UHN), in Toronto, Canada).
+
+The same data used for algorithm development was used for internal validation of the algorithm. No additional sufficiently large dataset was available for external validation at the time of the study.
+
+% The start date of the study (November 2017) coincided with the release of #a software update to the telemonitoring collection of required supplementary Heart Rate \& Activity data from a commercially available activity tracker (specifically Fitbit) enabling the has been in use from November 2017 to ) 
+
+\subsection{Participants} % Item 5
+
+The cohort consisted of all consecutive patients prescribed, enrolled and using (i.e. being monitored by) the Medly telemonitoring program (Medly) consenting to be included in program evaluation and quality improvement efforts for Medly.
+
+A patient was considered for inclusion into Medly only if they were:
+\begin{enumerate}
+	\item a consenting adult (18+ years of age), 
+	\item diagnosed with heart failure,
+	\item followed by a licensed cardiologist at the UHN Heart Function Clinic who in turn bore the primary responsibility for the management and care of that patients heart failure diagnosis (the responsible or attending cardiologist),
+	\item sufficiently capable of speaking and reading English, or having an informal caregiver (spouse, parent, etc.) capable of the same so as to both: 
+	\begin{enumerate}
+		\item undergo the process of and provision of informed consent for participation in the Medly program
+		\item understand and follow the text prompts provided by the Medly patient-side application
+	\end{enumerate}
+	\item capable of complying with the use of Medly (e.g. capable of truthfully answering symptom questions, capable of safely and correctly using the peripherals such as the weight scale, activity tracker and blood pressure cuff)
+\end{enumerate}
+
+While there were no explicit exclusion criteria for the study, we note that the decision to prescribe or exclude a patient from the Medly program was ultimately up to the professional judgment of the attending cardiologist. During the study period a total of 6 attending cardiologists prescribed Medly as part of patient care although one of the cardiologists (the medical director of the clinic) was disproportionately responsible for a majority of the patients monitored (X/N or Y\%).
+
+During the study period patients received no special treatment with regards to the medical interventions used and prescribed to them. Their cardiologist continued to treat them according to the (evolving) standard-of-care at the Heart Function Clinic, which also included regular updates and bug-fixes to the Medly platform. %It is worth noting that as part of regular heart failure care patients received medications (such as beta-blockers) which are known to affect heart rate. However, this data was not available for inclusion into the dataset.
+
+\subsection{Outcome} % Item 6
+
+The outcomes of interest are the New York Heart Association (NYHA) functional class for each patient. While competing methods of reporting the severity of heart failure experienced by a patient exist, the NYHA classification is arguably the most commonly used system for functional classification of heart failure and many well established relationships have been identified between a patient's NYHA class and prognostic outcomes for the condition. NYHA class is assessed for each patient as part of each visit at the Heart Function Clinic. The assessment is performed by the physician seeing the patient (resident, fellow or otherwise) and verified by the attending physician. Within the context of this study it means that outcomes measures are recorded at the date of on-boarding and then only recorded sporadically during the study period as patients return for clinic visits. The interval between regularly scheduled clinic visits varies between 1-2 weeks to 3-6 months. Patients with more severe or less stable conditions will visit more frequently. As well, patient's who are undergoing a change in their heart failure medication (e.g. up- or down- titrating) will also visit more frequency, usually a few times within a period of a few weeks as the medication is adjusted. Since patients were on-boarded on a rolling basis over a period of 5 months there is no guarantee that a given patient (especially the more stable patients) will return to physically visit the clinic within the study period and be reassessed for any potential change in their NYHA class. % Patients at the test site however have historically been stable between clinic visits with only x\% showing a change in their NYHA class during the X week period from T0 to T1 [insert ref].
+
+If NYHA functional class is too unstable, the Medly symptoms questionnaire could be used as a proxy outcome to detect suspected drops/aggravations in NYHA class. Every morning patients are prompted by the telemonitoring system to answer the following series of questions to ascertain their current condition. Note that questions \ref{q-swollen}-\ref{q-pillows} only appear if a patient has answered yes to any of question previous questions (\ref{q-fainted}-\ref{q-shortbreath}).
+\begin{enumerate}
+	\item Have you fainted? \label{q-fainted}
+	\item Has your ICD (Implantable Cardiverter Defibrillator) gone off? \label{q-icd}
+	\item Has your breathing as night worsened? \label{q-worsebreath}
+	\item Do you have more chest pain than usual? \label{q-chestpain}
+	\item Are you more tired than usual? \label{q-tired}
+	\item Are you more short of breath than usual? \label{q-shortbreath}
+	% the following only occur if symptom_status is not normal
+	\item Are your ankles swollen? \label{q-swollen}
+	\item Do you feel that your heart is beating unusually? \label{q-arrhythmia}
+	\item Do you feel lightheaded? \label{q-lightheaded}
+	\item Did you have to stop any of your usual daily activities because of your health? \label{q-dailyactivity}
+	\item Enter the number of pillows you used to sleep. \label{q-pillows}
+\end{enumerate}
+
+While all of the questions target some specific symptom or set of symptoms experienced by heart failure patients, questions \ref{q-fainted}, \ref{q-icd}, \ref{q-chestpain}-\ref{q-shortbreath}, \& \ref{q-arrhythmia}-\ref{q-dailyactivity} specifically try to determine whether there have been an increase in a patients exercise/activity intolerance. Since a patient's level of activity intolerance is the primary determinant of their NYHA classification, an increase in the frequency of affirmative responses to these questions over a sustained period, say 1-3 weeks, would be a strong indicator that a patient's NYHA class may have changed. Baseline response frequency can be determined from the 2 week period immediately following the first clinic visit moving to the 2 week period immediately preceding the last clinic visit for all following visits.
+
+\subsection{Predictors} % Item 7
+
+The predictors used to generate the prediction outcome are as follows:
+\begin{enumerate}
+	\item Heart Rate [beats per minute] - recorded using commercially available activity-tracker (Fitbit Charge HR, Charge 2 or Alta HR) continuously throughout the day
+	\item Step Count  [steps per minute] - recorded using commercially available activity-tracker (Fitbit Charge HR, Charge 2 or Alta HR) continuously throughout the day 
+	\item Blood Pressure [systolic/diastolic in mmHg] - recorded using a bluetooth enabled blood pressure cuff (A\&D Medical UA-651BLE or Omron 10 Series BP786N) once daily in the morning, and then at will by the patient or if symptoms worsen during the rest of the day 
+	\item Weight [kg] - recorded using a bluetooth enabled smart scale (A\&D Medical UC-352BLE or Ivation IVA-BTS351-B) once daily in the morning, and then at will by the patient or if symptoms worsen during the rest of the day 
+	\item Symptom Questionnaire Responses (when not used as surrogate outcome) - recorded using a smartphone (iPhone Y or Samsung Galaxy Grand Prim) running Medly app version Y.X+ or Z.X+ (respectively) once daily in the morning, and then at will by the patient or if symptoms worsen during the rest of the day. Specifically of interest are the responses to the following subset of questions:
+		\begin{enumerate}
+			\item Have you fainted? [yes or no]
+			\item Has your Implantable Cardioverter-Defibrillator (ICD) gone off? [yes or no]
+			\item Do you have more chest pain than usual? [yes or no]
+			\item Are you more tired than usual? [yes or no]
+			\item Are you more short of breath than usual? [yes or no]
+			% the following only occur if symptom_status is not normal
+			\item Do you feel that your heart is beating unusually? [yes or no]
+			\item Do you feel lightheaded? [yes or no]
+			\item Did you have to stop any of your usual daily activities because of your health? [yes or no]
+		\end{enumerate}
+	\item Patient Demographic/Meta Data - recorded when prescribed Medly (carried over from onboarding process before this study), namely:
+		\begin{enumerate}
+			\item Sex [Male or Female]
+			\item Age [years]
+			\item Height [centimeters]
+			\item Handedness [left or right]
+			\item Wristband Handedness Preference: [left or right]
+			\item (Left Ventricle) Ejection Fraction: [\%]
+			\item Heart Failure Diagnosis Date [time since in months]
+		\end{enumerate}
+	\item Heart Failure Treatment to Date - recorded when prescribed Medly (carried over from onboarding process before study), namely:
+		\begin{enumerate}
+			\item Lifestyle changes [yes or no]
+			\item Implantable Cardioverter-Defibrillator (ICD) [yes or no]
+			\item Left Ventricular Assist Device (LVAD) [yes or no]
+			\item Heart transplant [yes or no]
+			\item Other surgical intervention [yes or no]
+		\end{enumerate}
+	\item Prescribed Medications - recorded at onboarding and updated as required at every clinic visit, sourced from clinic notes:
+	\begin{enumerate}
+		%\item Angiotensin-Converting Enzyme (ACE) Inhibitors [mean daily dose in mg]  % lowers blood pressure
+		%\item Antiotensin II Receptor Blockers [mean daily dose in mg]  % lowers blood pressure
+		%\item Angiotensin-Receptor Neprilysin Inhibitors [mean daily dose in mg]  % lowers blood pressure
+		\item I$_f$ Channel Blocker [mean daily dose in mg]  % reduces heart rate
+		\item Beta Blockers [mean daily dose in mg]  % reduces heart rate
+		\item Aldosterone Antagonists [mean daily dose in mg]  % reduces heart rate
+		%\item Hydralazine and isosorbide dinitrate: (mean daily dose in mg)  % lowers blood pressure
+		\item Diuretics [mean daily dose in mg]  % can affect heart rate but typically as a result of hyperkalemia (slows heart rate)
+		\item Digoxin [mean daily dose in mg]  % increases vagal activity -> slows depolarization thereby decreasing HR
+	\end{enumerate} 
+\end{enumerate}
+
+\subsection{Sample Size} % Item 8
+
+As a general heuristic (or even simply a frame of reference) machine learning practitioners generally consider data sets on the order of hundreds of samples to be relatively small [ref 'Sample size planning for classification models', Predicting Sample size required for classification performance, How Much Training Data is Required for Machine Learning?]. The exact size of a data set required to properly train a typical Hidden Markov Model (or any machine learning algorithm in general) depends on a number of different factors including the, method of classification, complexity of the classifier, separation between classes, variance and presence of noise in the data, amongst many other factors. The noisier, the more complex and the greater the variance in the data, typically the larger the dataset required to achieve good performance. There is no upper limit for how much data should be used for training but there point at which increasing input data begins to yield diminishing returns in improving predictive performance [How Much Training Data is Required for Machine Learning?]. The exact relationship between training set size and predictive performance for an algorithm and problem in question is often shown as a 'learning curve' graph (which plots training set size versus prediction error(s)). To the best of the author's knowledge the learning curve for this particular application (or a sufficiently analogous application) has not yet been determined. Given however that we expect that the data collected in this study will be relatively noisy and complex we expect that the model may lean towards requiring more data rather than less data. Therefore, we collected as much data as was available in order to not prematurely limit the power nor the generalizability of the algorithm developed.
+
+\subsection{Missing Data} % Item 9
+
+Due to the nature of the data collection methods used we don't expect to have a lot of missing data. However, despite initial expectations missing data is still often an inevitable reality for scientific studies. We handle missing data in the following manner:
+
+Missing Heart Rate and Step Count data is not explicitly reported by the activity tracker. If the device is not being worn it will report both step count and heart rate values as 0; therefore the devices automatically perform imputation of all missing values replacing them with 0.
+
+Blood pressure data which always comes as a set of systolic/diastolic readings are imputed using non-parametric multiple imputation using the 'missForest' R package (which uses a random forest algorithm to predict missing values and makes no assumption about the underlying distribution of the data and supports both missing categorical and continuous variables) [ref: \seqsplit{https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/}  \& \seqsplit{https://cran.r-project.org/web/packages/missForest/missForest.pdf}]. Weight, symptom questionnaire responses, heart failure treatments to date and prescribed medications are dealt with using the same approach.
+
+Patients without any specified NYHA class (i.e. missing outcome data) are ignored completely, however gaps in NYHA class outcomes are imputed using the same approach as missing predictors (namely blood pressure, weight, etc.).
+
+\subsection{Statistical Analysis Methods} % Item 10
+
+Before using the data to train the classification algorithm the predictors will be normalized to values between 0 and 1 (after imputation of missing data as required). The normalization procedure for each of the predictors is as follows:
+
+\begin{enumerate}
+	\item Heart Rate - linear scaling using: \(min = 0\), \(max = 208 - 0.7*age\) (where patient's age is measured in years) [ref: \seqsplit{http://www.onlinejacc.org/content/37/1/153}]
+	\item Step Count - linear scaling using: \(min = 0\), \(max = 300\) 
+	\item Blood Pressure (Systolic) - linear scaling: \(min = 50\), \(max = 300\) 
+	\item Blood Pressure (Systolic) - linear scaling: \(min = 30\), \(max = 160\) 
+	\item Weight - linear scaling: \(min = 0\), \(max = 200\) (the maximum capacity of the weight scales used)
+	\item Symptom Questionnaire Responses -
+	\begin{enumerate}
+		\item Have you fainted?: \(no = 0\), \(yes = 1\)
+		\item Has your Implantable Cardioverter-Defibrillator (ICD) gone off?: \(no = 0\), \(yes = 1\)
+		\item Do you have more chest pain than usual?: \(no = 0\), \(yes = 1\)
+		\item Are you more tired than usual?: \(no = 0\), \(yes = 1\)
+		\item Are you more short of breath than usual?: \(no = 0\), \(yes = 1\)
+		% the following only occur if symptom_status is not normal
+		\item Do you feel that your heart is beating unusually?: \(no = 0\), \(yes = 1\)
+		\item Do you feel lightheaded?: \(no = 0\), \(yes = 1\)
+		\item Did you have to stop any of your usual daily activities because of your health?: \(no = 0\), \(yes = 1\)
+	\end{enumerate}
+	\item Patient Demographic/Meta Data -
+	\begin{enumerate}
+		\item Sex: \(Male = 0\), \(Female = 1\)
+		\item Age - linear scaling: \(min = 18\), \(max = 150\) 
+		\item Height - linear scaling: \(min = 50\), \(max = 300\) 
+		\item Handedness: \(Left = 0\), \(Right = 1\)
+		\item Wristband Handedness Preference: \(Left = 0\), \(Right = 1\)
+		\item (Left Ventricle) Ejection Fraction: \(min = 0\), \(max = 100\)
+		\item Heart Failure Diagnosis Date: \(min = 0\), \(max = 30*12\)
+	\end{enumerate}
+	\item Heart Failure Treatment to Date -
+	\begin{enumerate}
+		\item Lifestyle changes: \(no = 0\), \(yes = 1\)
+		\item Implantable Cardioverter-Defibrillator (ICD): \(no = 0\), \(yes = 1\)
+		\item Left Ventricular Assist Device (LVAD): \(no = 0\), \(yes = 1\)
+		\item Heart transplant: \(no = 0\), \(yes = 1\)
+		\item Other surgical intervention: \(no = 0\), \(yes = 1\)
+	\end{enumerate}
+	\item Prescribed Medications -
+	\begin{enumerate}
+		%\item Angiotensin-Converting Enzyme (ACE) Inhibitors [mean daily dose in mg]  % lowers blood pressure
+		%\item Antiotensin II Receptor Blockers [mean daily dose in mg]  % lowers blood pressure
+		%\item Angiotensin-Receptor Neprilysin Inhibitors [mean daily dose in mg]  % lowers blood pressure
+		\item I$_f$ Channel Blocker - linear scaling: ivabradine \(min = 0\), \(max = 15\) [ref: https://www.drugs.com/dosage/ivabradine.html]
+		\item Beta Blockers - linear scaling: Acebutolol \(min = 0\), \(max = 1200\) [ref: \seqsplit{http://reference.medscape.com/drug/sectral-acebutolol-342354}] \linebreak \& Atenolol \(min = 0\), \(max = 300\)  % no max
+		\& Bisprolol \(min = 0\), \(max = 20\)  % rec. max daily
+		\linebreak \& Carvedilol \(min = 0\), \(max = 80\)  % rec max daily
+		\& Labetalol \(min = 0\), \(max = 2400\)  % hard max
+		\& Metaprolol \(min = 0\), \(max = 450\)  % hard Hypertension max
+		\& Nadolol \(min = 0\), \(max = 320\)  % hard max
+		\linebreak \& Pindolol \(min = 0\), \(max = 60\)  % hard max
+		\& Propranolol \(min = 0\), \(max = 640\)  % hard max
+		\& Timolol \(min = 0\), \(max = 60\)  % hard max
+		[Ref: \seqsplit{http://www.globalrph.com/beta.htm}]
+		[Ref: \seqsplit{https://www.heartandstroke.ca/heart/treatments/medications/beta-blockers}]
+		\item Aldosterone Antagonists - linear scaling: Spironolactone \(min = 0\), \(max = 200\) 
+		\& Eplerenone \(min = 0\), \(max = 50\) [ref: \seqsplit{http://www.globalrph.com/aldosterone\_antag.htm}] [ref: \seqsplit{https://www.heartandstroke.ca/heart/treatments/medications/aldosterone-antagonists}]
+		\item Diuretics - linear scaling: Chlorthalidone \(min = 0\), \(max = 100\) 
+		\& Ethacrynic acid \(min = 0\), \(max = 100\) 
+		\& Furosemide \(min = 0\), \(max = 600\) 
+		\& Hydrochlorothiazide \(min = 0\), \(max = 100\) 
+		\& Indapamide \(min = 0\), \(max = 5\) 
+		\& Metolazone \(min = 0\), \(max = 20\)  [ref: \seqsplit{http://www.globalrph.com/diuretics.htm}] [ref: \seqsplit{https://www.heartandstroke.ca/heart/treatments/medications/diuretics}]
+		\item Digoxin - linear scaling: \(min = 0\), \(max = 15\e{-3} *weightMax\) [ref: http://www.globalrph.com/antiarrhythmics.htm\#digoxin\_]
+	\end{enumerate} 
+\end{enumerate}
+
+To perform the classification we create and train multivariate hidden Markov models for each of the target risk groups (NYHA class II, III). Since it is probably unreasonable to assume that there no some time-dependence in state changes due to the dynamic nature of human exercise and activity (e.g. people who are performing high-intensity activity are less likely to continue as time goes by since they get tired) we also train equivalent multivariate hidden semi-Markov models for each of the target risk groups to explore the effect of relaxing the Markovian assumption (or time-independence) of pure Markov models.
+
+We identified five candidate sets of variables for inclusion into the predictive models:
+\begin{enumerate}
+	\item heart rate + step count
+	\item the above + weight
+	\item the above + blood pressure
+	\item the above + Symptom Questionnaire Responses specifically targeting activity intolerance
+	\item the above + Prescribed Medications
+\end{enumerate}
+
+We opted not to use the 'Heart Failure Treatments to Date' data since we suspected that it would render the model far too complex rendering it even more prone to over fitting and preferred to focus our efforts on the five models already identified.
+
+To further trim the set of variables we propose running a Pearson cross-correlation analysis on the collected data to identify the sets of highly correlated variables. These sets can be trimmed down to the single most useful predictor (whether clinically relevant, easiest to collect, or otherwise). Eliminating needlessly redundant information should help reign in the model complexity.
+% Interaction Terms?
+
+To verify the classification algorithm we can an internal validation, recognizing that such a validation is likely to produce optimistic results. To verify the algorithm and models we select sets of hidden (semi-)Markov models - one for each risk group - and ask each model in the set to calculate the likelihood that a two-week window of data from a test patient was generated using that model. The model with the highest associated probability predicts the outcome (NYHA class) for that window of test data. By performing this test on each two-week window (incremented by day) for each patient and comparing the predicted value with the most recent physician reported value we can determine the sensitivity and specificity of each classification model set and thereby identify the best model.
+
+\subsection{Risk Groups} % Item 11
+
+Patients in the study are classified into one of four risk groups. NYHA class I, II , III \& IV. As a specialized tertiary care center the Heart Function Clinic rarely sees NYHA class I patients as they are often asymptomatic with regards to their heart failure, or at least rarely require the specialized level of care offered by the clinic. NYHA class IV patients, while seen at the clinic, often derive little benefit with regards to physical activity monitoring since these patients are known to be often bedridden or severely activity intolerant. Classes II and III however represent a classification challenge since the dividing line between mild and marked activity intolerance can sometimes be unclear especially given the inherent subjective nature of the NYHA classification; training a machine to classify between class II \& II patients is therefore likely to produce the greatest benefit to clinical and medical research so we focus on these two risk groups in this study.
+
+NYHA class is typically assessed for every patient with known cardiac disease (usually first objectively verified through the use of some sort of medical imaging modality). It is then reassessed at every clinic visit by the physician responsible for patient's care. At minimum the physician will pose questions to attempt to elucidate the patients' degree of exercise intolerance, for example: "How far can you walk before becoming short of breath?", or "How many flights of stairs can you climb before needing to stop?". The physician will then select an NYHA class based on their clinical experience, professional judgment according to the NYHA class definitions. These definitions are copied below for the reader's convenience [ref: \seqsplit{http://professional.heart.org/professional/General/UCM\_423811\_Classification-of-Functional-Capacity-and-Objective-Assessment.jsp}]:
+\begin{enumerate}[label=\Roman{*}:]
+	\item "Patients with cardiac disease but without resulting limitation of physical activity. Ordinary physical activity does not cause undue fatigue, palpitation, dyspnea, or anginal pain."
+	\item "... slight limitation of physical activity. They are comfortable at rest. Ordinary physical activity results in fatigue, palpitation, dyspnea, or anginal pain."
+	\item "... marked limitation of physical activity. They are comfortable at rest. Less than ordinary activity causes fatigue, palpitation, dyspnea, or anginal pain."
+	\item "Patients with cardiac disease resulting in inability to carry on any physical activity without discomfort. Symptoms of heart failure or the anginal syndrome may be present even at rest. If any physical activity is undertaken, discomfort is increased."
+\end{enumerate} 
+
+\subsection{Development vs. Validation} % Item 12
+
+Since we reuse a single dataset the setting, eligibility criteria, outcome, and predictor remain unchanged for both development and (internal) validation.
+
+% Results
+\section{Results}
+\subsection{Participants} % Item 13
+
+\subsection{Model Development} % Item 14
+
+\subsection{Model Specification} % Item 15
+
+\subsection{Model Performance} % Item 16
+
+\subsection{Model-updating} % Item 17
+
+
+% Discussion
+\section{Discussion}
+\subsection{Limitations} % Item 18
+
+\subsection{Interpretation} % Item 19
+
+\subsection{Implications} % Item 20
+
+% Other Info
+\section{Other Information}
+\subsection{Supplementary Information} % Item 21
+
+\subsection{Funding} % Item 22
+Funding for this project was provided by the:
+\begin{enumerate}[label=,itemsep=0mm]
+	\item Centre for Global eHealth Innovation (Heart Function Clinic?)  % yes?
+	\item Canadian Institutes of Health Research (Government of Canada)
+	\item Government of Ontario
+	\item University of Toronto
+\end{enumerate} 
+
+
+
+
+\end{document}
