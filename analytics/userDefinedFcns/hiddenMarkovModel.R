@@ -57,6 +57,14 @@ mhsmm_global.env <- new.env()
 
 ####1#### Parameters & Starting Values -----------------------------------------
 
+debugLevel = 4
+#DEBUGLVL.ERR = 1
+#DEBUGLVL.WARN = 2
+#DEBUGLVL.INFO = 3
+DEBUGLVL.DEBUG = 4
+DEBUGLVL.ALL = DEBUGLVL.DEBUG + 1
+
+
 ## Starting values for model (define some reasonable ones)
 
 # rescale parameters
@@ -69,7 +77,7 @@ rescaleFactor.steps <- (rescaledMax.steps - rescaledMin.steps) / (unscaledMax.st
 # hmm parameters
 states <- 3
 maxIter <- 1000
-trainSetPercentage <- 0.7  # fraction of
+trainSetPercentage <- 0.7  # fraction of data set to use as trainingSet
 nyhaClasses <- c("II","III")
 init.P <- c(1,0,0) #pi
 init.trans <- matrix(c(0.9, 0.3, 0.33,
@@ -103,11 +111,28 @@ init.emis <- list(shape = (c(10, 80, 100)), scale = c(1,1,1), type = "gamma")  #
 ddist.hsmm = function (x, j, model)
               {
                 result = dgamma(x, shape=model$parms.emission$shape[j],scale=model$parms.emission$scale[j])
+                
+                printDebug = FALSE
+                invalidParameters = ""
+                if(any(is.na(result)))
+                {
+                  printDebug = TRUE
+                  invalidParameters = "invalid "
+                }
+                if(debugLevel >= DEBUGLVL.DEBUG)
+                {
+                  printDebug = TRUE
+                }
+                if(printDebug)
+                {
+                 cat("\n\tattempted ", invalidParameters, "parameters (shape=",
+                     model$parms.emission$shape[j],
+                     " & scale=",
+                     model$parms.emission$scale[j],")")
+                }
+                
                 result[is.na(result)] = 0  #if it returns an na then it's an invalid result
-                cat("\n\tattempted invalid parameters (shape=",
-                    model$parms.emission$shape[j],
-                    " & scale=",
-                    model$parms.emission$scale[j],")")
+
                 return(result)
               }
 mstep.dist = function (x, wt) 
@@ -148,6 +173,9 @@ for(class in nyhaClasses)
   dataSet[[class]] <- dataSetRAW %>% filter(NYHAClass == class)
   cat("\nM: Isolating class ",class," data set", sep="")
 }
+
+hmm.test <- select(dataSetRAW, StudyIdentifier, NYHAClass)
+
 rm(dataSetRAW)
 
 trainSet <- list()
@@ -212,6 +240,17 @@ for(class in nyhaClasses)
     #class(trainData) <- "hsmm.data" #convert 'train' to 'hsmm.data' class
     #COWS EXAMPLE FOR REFERENCE
 }
+
+# deal w/ edge cases if trainSetPercentage is set to 1 or 0
+
+#if(1==trainSetPercentage)
+#{
+#  testData.class = trainData.class
+#}
+#if(0==trainSetPercentage)
+#{
+#  trainData.class = testData.class
+#}
   
 ####3#### Data Setup ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -274,7 +313,28 @@ for(class in nyhaClasses)
 
 ####6#### Test & Verify Model --------------------------------------------------
 ## Test Predictive Ability
-yhat <- predict(hmm.activity, trainData)$s
+
+hmm.test['predictedClass'] = NaN
+
+getModelDFTestColForClass <- function(class){
+  return(paste('class',class,'ModelProb',sep=""))
+}
+
+for(class in nyhaClasses)
+{
+  hmm.test[getModelDFTestColForClass(class)] = NaN
+}
+
+#for(modelClass in nyhaClasses)
+#{
+#  for(patientClass in nyhaClasses)
+#  {
+#    predictFun <- function(class,
+#    hmm.test %>% mutate %>% getModelDFTestColForClass(class)=
+#    
+#    loglik <- predict(hmm.activity[[class]], testData.class[[class]])$loglik
+#  
+#}
 
   #cow specific
 last.heat.hour <- cumsum(rle(yhat)$lengths)[rle(yhat)$values == 2]
