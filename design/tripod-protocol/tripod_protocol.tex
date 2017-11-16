@@ -10,8 +10,13 @@
 \usepackage{multirow}
 \usepackage{graphicx}  % for graphics
 \usepackage{pdflscape}  % for landscape pages
-\usepackage{rotating} % for rotating graphics
+\usepackage{geometry}
 \usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linktoc=all
+}
 
 % ------------------------------------------- NEW COMMANDS -------------------------------------------
 % Command for Scientific Notation
@@ -20,23 +25,21 @@
 % Command for Tabs
 \newcommand\tab[1][1cm]{\hspace*{#1}} % for some tabs in enumerates
 
-% Command to insert a landscape page filled with a centred figure. (https://tex.stackexchange.com/a/249997)
+% Command to insert a landscape page filled with a centred figure. (loosely based on https://tex.stackexchange.com/a/249997)
 % The arguments are: {marginsize}{tunable parameter to adjust for aspect ratio}{caption}{imagepath}
-% Example usage: \hFigure{1cm}{2cm}{This is a big image}{pics/myImage.png}{fig:label}
-\newcommand\hFigure[5]{
-	% \newgeometry{left=#1,right=#1,top=#1,bottom=#1}
+% Example usage: \landscapeFigure{1cm}{This is a big image}{pics/myImage.png}{fig:label}
+\newcommand\landscapeFigure[4]{
+	%\clearpage
+	\newgeometry{left=#1,right=#1,top=#1}
 	\begin{landscape}
-		%\thispagestyle{empty}  % disable page numbering for this page
-		\begin{center}
-			\begin{figure}
-				\centering
-				\includegraphics[width=\paperwidth]{#2}
-				\label{#3}
-				\caption{#1}
-			\end{sidewaysfigure}
-		\end{center}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.95\hsize]{#3}
+			\caption{#2}
+			\label{#4}
+		\end{figure}
 	\end{landscape}
-	% \restoregeometry
+	\restoregeometry
 }
 % ------------------------------------------- END NEW COMMANDS -------------------------------------------
 
@@ -54,20 +57,26 @@
 
 \maketitle
 
+\clearpage
+
 \begin{abstract} % Item 2
-\noindent BACKGROUND: [NEED TO UPDATE]
+\noindent BACKGROUND: Care for Heart Failure while already challenging is made even more difficult as there is no reliable objective method for assessing the moment-to-moment state of given patient’s HF, never mind determining if it is likely to worsen. Finding an objective, or at least consistently replicable, means of determining a patient's NYHA class would provide a great boon to both heart failure care and research as it would cause intra- and inter-physician and patient assessments of heart failure class to more consistent making communication of patient heart failure states in research, clinic notes, or other medical documentation more transparent, reliable and generalizable.
 
-\noindent OBJECTIVE: To develop and validate an NYHA functional class prediction algorithm for patients with (severe to moderate) heart failure
+\noindent SCIENTIFIC OBJECTIVES: 
+\begin{enumerate}
+	\item Establish a robust and general foundational framework for developing and assessing intelligent NYHA machine classification algorithms that can be trained to mirror grading by experienced physicians with the goal of making NYHA classification more consistent and reliable for the medical research and clinical community.
+	\item To perform a pilot study using this framework to determine if Hidden Markov Models show promise for NYHA classification.
+\end{enumerate}
 
-\noindent STUDY QUESTIONS: [NEED TO UPDATE]
+\noindent STUDY QUESTIONS: Are Hidden Markov Models or common variants such as Hidden Semi-Markov Models a promising method of performing reliable, objective and consistent NYHA Classification?
 
-\noindent HYPOTHESIS: [NEED TO UPDATE]
+\noindent HYPOTHESIS: The developed Hidden Markov Model based classifier will have an 'inter-rater reliability' within the range of or greater than the prevailing norm amongst human physicians (50\%-75\%) when comparing it's classifications in the test data labelled by an expert physician \cite{Carroll2014,Goldman1981a,Christensen2006,Raphael2007a,Kubo2004}.
 
 \noindent DESIGN METHODOLOGY: Sets, composed of one model for each target NYHA class (II \& II), of multivariate hidden (pure- or semi-) Markov models. 
 
 \noindent SETTING: Tertiary care clinic specializing in the management of heart failure (The Heart Function Clinic at Toronto General Hospital, a part of the University Health Network (UHN) in Toronto, Canada) from November 2017 to April 2017.
 
-\noindent PARTICIPANTS: consecutive sample of {n} consenting heart failures patients participating in program evaluation and quality improvement efforts for Medly, a telemonitoring platform used and developed for the test site.  [Development; Internal Validation]
+\noindent PARTICIPANTS: consecutive sample of {n} consenting heart failures patients participating in program evaluation and quality improvement efforts for Medly, a telemonitoring platform used and developed for the test site. Patient data collected using digital questionnaires, clinic notes and fitness tracker (Fitbit Charge HR).
 
 \noindent PRIMARY OUTCOME: NYHA functional classification as assessed by patient's attending cardiologist at clinic visits during study period.
 
@@ -80,6 +89,10 @@
 \centering [Classification; Development; Internal Validation]
 
 \end{abstract}
+
+\clearpage
+
+\tableofcontents
 
 \clearpage
 
@@ -107,7 +120,7 @@ The general the objectives of this study are as follows:
 \begin{enumerate}
 	\item The primary goal is to establish a robust and general foundational framework for use by researchers, data scientists and engineers to develop and assess intelligent NYHA machine classification algorithms that can be trained to mirror grading by experienced physicians with the goal of making NYHA classification more consistent and reliable for the medical research and clinical community.
 	\item A secondary goal is to initiate the start the collection of continuously monitored activity and heart data from heart failure patient at the test site for use in this and future studies and algorithm development.
-	\item The tertiary aim is to perform an pilot study using data collected during an initial brief data collection period as well as the foundational framework developed, to explore if Hidden Markov Models show promise for classifying NYHA classification algorithm.
+	\item The tertiary aim is to perform an pilot study using data collected during an initial brief data collection period as well as the foundational framework developed, to explore if Hidden Markov Models show promise as a means of developing an intelligent NYHA classification algorithm.
 \end{enumerate}
 
 	
@@ -165,7 +178,7 @@ NYHA class is typically assessed for every patient with known cardiac disease (u
 
 At the study site (the Heart Function Clinic) NYHA class is assessed for each patient as part of each visit at the Heart Function Clinic. The assessment is performed by the physician seeing the patient (resident, fellow or otherwise) and verified by the attending physician. Within the context of this study it means that outcome measures are recorded at the date of on-boarding and then only recorded sporadically during the study period as patients return for clinic visits. The interval between regularly scheduled clinic visits varies between 1-2 weeks to 3-6 months. Patients with more severe or less stable conditions will visit more frequently. As well, patient's who are undergoing a change in their heart failure medication (e.g. up- or down- titrating) will also visit more frequency, usually a few times within a period of a few weeks as the medication is adjusted. Since patients were on-boarded on a rolling basis over a period of 5 months there is no guarantee that a given patient (especially the more stable patients) will return to physically visit the clinic within the study period and be reassessed for any potential change in their NYHA class. % Patients at the test site however have historically been stable between clinic visits with only x\% showing a change in their NYHA class during the X week period from T0 to T1 [insert ref].
 
-The sporadicity and instability of the outcome measure presents a significant challenge to this study for several reasons. There is however a further challenge with regards to NYHA label assignment: physicians are notoriously unreliable and inconsistent at assessing NYHA class in the first place \cite{Carroll2014,Goldman1981a,Christensen2006,Raphael2007a,Kubo2004}. Caroll et al.\@ report: (bibliographic reference numbers updated to reflect ours)
+The sporadicity and instability of the outcome measure presents a significant challenge to this study for several reasons. There is however a further challenge with regards to NYHA label assignment: physicians are notoriously unreliable and inconsistent at assessing NYHA class in the first place \cite{Carroll2014,Goldman1981a,Christensen2006,Raphael2007a,Kubo2004}. Caroll et al.\@ report (bibliographic reference numbers updated to reflect ours):
 
 \blockquote{[One study] used two physicians to estimate NYHA functional class in 75 patients on the same day without chronic heart failure, reporting an interrater reliability of 56\% (weighted kappa = 0.41)\cite{Goldman1981a}. In a second study, two cardiologists assessed the same 50 chronic heart failure patients on the same day in random order, observing 54\% agreement in NYHA classes\cite{Raphael2007a}. In a third study, two physicians assigned NYHA class to 56 patients with stable angina within the same hour, resulting in the highest reported agreement of 75\%\cite{Christensen2006}. Among these studies, disagreement by more than one functional class was low and, for the most part, was concentrated on determining the discrete differences between Classes II and III. Taken together, the reliability of the NYHA system is limited in the few trials that have measured it directly. \cite{Carroll2014}}
 
@@ -197,7 +210,7 @@ While all of the questions target some specific symptom or set of symptoms exper
 
 The patient data streams will be segmented into two-week chunks with each chunk representing one time-unit of analysis so that the algorithm will be made to attempt to independently classify (and trained on) each of these two-week chunks of data.
 
-\subsection{Predictors} % Item 7
+\subsection{Predictors} \label{sec:predictors} % Item 7
 
 The predictors used to generate the prediction outcome are as follows:
 \begin{enumerate}
@@ -358,89 +371,146 @@ Before using the data to train the classification algorithm the predictors will 
 	\end{enumerate} 
 \end{enumerate}
 
-\subsubsection{Model Development}
+\subsubsection{Classifier (Model) Development}
 
-The algorithm we develop to classify patients into their corresponding NYHA class will be designed to perform binary classification of class II and II patients, or multi-class classification of class II, III and IV dependant on out ability to capture class IV patients for analysis. The following section outlines the details of the development in both cases (which are very similar except for the addition of a third class).
+The algorithm we develop to classify patients into their corresponding NYHA class will be designed to perform either binary classification of class II and II patients, or, dependant on our ability to capture class IV patients for analysis, multi-class classification of class II, III and IV . The following section outlines the details of the development in both cases (which are very similar except for the addition of a third class).
 
-To perform the classification we create and train multivariate hidden Markov models for each of the target risk groups (NYHA class II, III, IV). 
-
----------------------------------------------
-
-{\centering\large [[ELABORATION ON MARKOV MODELS: STILL IN PROGRESS]]}
-Diagrams, explanations etc. are still in progress. I need to organize the following into something more coherent but the basic substance is included for completeness.
-
-\textbf{What they are:}
-Markov Models - probabilistic state machine where transitions between states are performed randomly according to pre-specified transition probabilities. These probabilities along with the number of states form the model parameters
-
-Hidden Markov Models - where the underlying states are hidden (i.e. not observable). We only know the number of states, and don't know the specific state the system may be in
-
-Markov chains/processes - are stochastic (random) processes that satisfy the Markovian property: the probability of the immediate next (and all next) future states is dependant only the present state (and therefore not on any other states the system may have existed in). Alternatively this is referred to as the memoryless property; essentially that the markov process has no memory of the past.
-
-Hidden Markov Models generally operate under the Markovian assumption, so they assume that process/data they model adheres to the Markovian property. This is not always true, and in fact Hidden Markov Models in certain cases have been found to be able to fairly successfully model process that sometimes even grossly violate this Markovian assumption. Which brings us to:
-
-Hidden Semi-Markov Models - are like hidden markov models but they officially relax the 'Markovian' assumption of the model by permitting the model to retain memory of how long it has been in a certain state (usually to force it to not exist in a state for too long).
-
-Part of contributions of this study will be to determine if Hidden Markov Models are suitable for modelling patient activity and heart rate data which violates the Markovian assumption 'demanded' of Hidden Markov Models.
-
-The complete set of parameters that must be determined for a Hidden Markov Model are as follows:
-the emission probabilities
-the state probabilities
-the starting probabilities
-For a Hidden semi-Markov Model there is an additional set of probabilities
-the transition probabilities
-
-Determining the best Hidden Markov Model parametrization for given data stream is an intractable problem. That being said there is a known algorithm for efficiently computing locally optimal parameterizations for a steam. Generally speaking these class of algorithms are known as expectation-maximization (EM) algorithm but the specific algorithm used for Hidden Markov Model training is the Baum-Welch algorithm which is able to run more efficiently due to some simplifying assumptions that can be made due to the nature of Hidden Markov Models.
-
-This being said, the Baum-Welch algorithm is unable to determine all of the parameters by itself. Some of the parameters must be provided as 'initial conditions' for the algorithm to execute. Typically these are the emission probabilities, the starting probabilities (and the transition probabilities). Although it is possible (and encouraged) to try various combinations of parameters to determine the most effective set - in fact more fully featured software libraries will sometimes offer to do this automatically, it is up to the researcher to determine appropriate 'initial conditions.'
-
-In our case we use the 'mhsmm' package for the R software platform \cite{OConnell2011,OConnell2017} which requires the user to provide the number of desired states, the fixed emission probabilities as well as a starting point for the state probabilities and starting probabilities (which the algorithm adjusts as it searches for a local optimum). 
-
-=====
-\textbf{So far:}
-I've used this as starting points -
-
-\textbf{States:} 3 (plan to sweep them from 3 to 6-8 depending on computational power available. Computation complexity increases to the square of number of states (i.e. 3 states = 9 possible transitions, 6 states = 36 possible transitions, 8 states = 64 possible) which makes high state HMM's unwieldly to train.
-
-\textbf{Starting Probabilities:} 1 for one of the states, 0 for all others since based on Simon's data patients spend most of the time in the non-active state.
-
-\textbf{Starting Transition Probabilities:} Uniform => each 1/number of possible transitions
-Emission Probabilities: based on the Simon's data, emission probabilities look to be gamma distributed. The distribution parameters are set such that the distribution centers around a peak identified in the data (20 steps/min, 80 steps/min, 100 steps/min for 3 state HMM)
-In the case where a gamma distribution doesn't work out the package implements normal distributions which we can try instead.
-
-\textbf{The transition probabilities:} For exploration of Hidden semi-Markov Models the plan is to use a gamma distribution and to try it with the distribution centered around a certain period of time, sweeping that period of time in 1hr intervals from 1 to 12 hrs (or possibly the maximum human bladder retention period).
-
-\clearpage
-\begin{landscape}
-	\begin{figure}
-		\centering
-		\includegraphics[scale=0.32]{../modelDevelopmentFlowcharts/P0-Preprocessing_Data.png}
-		\caption{P0: Preprocessing Data}
-		\label{fig:label}
-	\end{figure}
-\end{landscape}
-
----------------------------------------------
-
-Since it is probably unreasonable to assume that there no some time-dependence in state changes due to the dynamic nature of human exercise and activity (e.g. people who are performing high-intensity activity are less likely to continue as time goes by since they get tired) we also train equivalent multivariate hidden semi-Markov models for each of the target risk groups to explore the effect of relaxing the Markovian assumption (or time-independence) of pure Markov models.
-
-We identified five candidate sets of variables for inclusion into the predictive models:
+In either case we propose initially exploring three different levels of classifiers complexity, i.e. that take into account a varying subset of the available predictors outlined in section \ref{sec:predictors}, specifically the three following subsets:
 \begin{enumerate}
-	\item heart rate + step count
-	\item the above + weight
-	\item the above + blood pressure
-	\item the above + Symptom Questionnaire Responses specifically targeting activity intolerance
-	\item the above + Prescribed Medications
+	\item step count only
+	\item step count + heart rate
+	%\item the above + weight
+	%\item the above + blood pressure
+	%\item the above + Symptom Questionnaire Responses specifically targeting activity intolerance
+	\item step count + heart rate + prescribed medications
+\end{enumerate}
+Looking at three different levels of classifier complexity will be informative since while the Medly telemonitoring platform supports the highest level of complexity specified above, certain researchers and clinicians may only have integrated access to prescribed medications along with activity and heart rate monitoring and furthermore possibly have ready access to fitness monitors that monitor both activity and heart rate. It may be that using too many variables would make our model too complex rendering it even more prone to over fitting given the available data.
+
+%To further trim the set of variables we propose running a Pearson cross-correlation analysis on the collected data to identify the sets of highly %correlated variables. These sets can be trimmed down to the single most useful predictor (whether clinically relevant, easiest to collect, or otherwise). %Eliminating needlessly redundant information should help reign in the model complexity.
+%Interaction Terms?
+
+Additionally, as a reminder both for training and classification, we segment each patient data stream into two-week rolling windows of data so that the algorithm developed will be designed to classify patients using rolling-two week chunks of data instead of requiring a several month long window.
+
+All this said, returning to the task at hand; to perform the classification we create and train multivariate Hidden Markov Models for each of the target risk groups (NYHA class II, III, IV) and so before we begin however it is probably important that we review some basics about Hidden Markov Models.
+
+\paragraph{Basics of Markov Models (Hidden or Otherwise)}
+
+Markov Models are probabilistic state machines where the transitions between states are executed randomly according to pre-specified transition probabilities between states \cite{Jurafsky2017,Bobick2015,Gagniuc2017,OConnell2011,Rabiner1989}. Markov Models are used to model Markov chains/processes which are stochastic (i.e. random) processes that satisfy the Markovian property: that is, the transitions from a given state in the chain to the next immediate state (and by extension all future states) must be dependant solely on the current state of the model \cite{Jurafsky2017,Bobick2015,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989}. They must not depend on the path taken to arrive to that state, i.e. it cannot depend on any previous states in which the system has existed. The Markovian property is alternatively known as the 'memoryless' property; essentially that the Markov process or markov chain has no memory of the past \cite{Jurafsky2017,Bobick2015,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989}. And so, the transition probabilities along with the number of states form the fundamental model parameters that can be used to uniquely describe the Markov Model. Where relevant a Markov Model may also have initial starting parameters which dictate the likelihood associated with the Markov Model starting in each possible state (e.g. 10\% chance to start in State S1, 20\% chance to start in State S2 and so on) \cite{Jurafsky2017,Bobick2015,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989}.
+
+In many Markov Models (and in every Hidden Markov Model) there are also an associated set of possible observations that are linked to each state, i.e. that can possibly be output by each state. For example assume a Markov Model that models weather outside an office with possible states S1 = Sunny, S2 = Cloudy and S3 = Rainy with associated transition probabilities between each state \cite{Bobick2015}. The observations associated with each state might be the clothing that a given person in a stream of passers-by are wearing, say a shirt, a sweater or a rainjacket \cite{Bobick2015}. It is possible that a person might be wearing any of these types of clothing in any given type of weather but it is likely the case that the likelihood of observing each clothing type will differ based on the underlying weather state; for example rainjackets are probably more likely to be observed in rainy weather than in sunny weather \cite{Bobick2015}. These probabilities are termed observation probabilities and link the states in the Markov Model to the observations that are measured as outputs of the Markov Model. These observations could be speech phonemes, written characters of the alphabet, or genome sequences \cite{Rabiner1989,Altman2007}. Figure \ref{fig:HMM} shows a hypothetical example Markov Model for our weather example (including the starting, transition and observation probabilities).
+
+\begin{figure}
+	\includegraphics[width=0.82\linewidth]{../modelDevelopmentFlowcharts/HMMDiagram.png}
+	\caption{Markov Model}
+	\label{fig:HMM}
+\end{figure}
+
+The appropriately named Hidden Markov Models (HMM) are simply Markov Models where the underlying states are hidden - i.e. cannot directly be observable \cite{Jurafsky2017,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989}. Specifically, while we may know the number of states in the model, the transition probabilities of the model, we don't know the exact state the system is in or the sequence of states it has been through \cite{Jurafsky2017,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989}. However, given the observation probabilities it is possible for us to try and infer the current state of the Model, including the sequence of states that a particular Markov Model went through \cite{Jurafsky2017,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989,Mailund2014}. This is because Hidden Markov Models, as with Markov Models, operate under the Markovian assumption: they assume that the process they model adhere to the Markovian property \cite{Rabiner1989,Jurafsky2017,Bobick2015,Bobick2015a}. However, it has been found that Hidden Markov Model are able in certain cases to fairly successfully model processes that violate this Markovian assumption such as speech recognition and gesture recognition \cite{Altman2007,Jelinek,Rabiner1989}. Part of contributions of this study will be to determine if Hidden Markov Models are suitable for modelling patient activity and heart rate data both of which likely violate the Markovian assumption 'demanded' of Hidden Markov Models.
+
+\paragraph{Semi-Markov Model}
+
+The violation of the pure Markovian assumption leads us to a variation on Hidden Markov Models: Hidden Semi-Markov Models (HSMM) \cite{OConnell2011}. HSMMs are HMMs that formally relax the 'Markovian' assumption of the model by permitting the model to specifically retain the memory of how long it has been in a certain state (typically in order to force the model to not exist in a state for more than a desired time) \cite{OConnell2011}. As such, HSMMs require that an additional set of parameters be defined: the sojourn distribution of each state \cite{OConnell2011}. That is, the distribution of expected mean waiting times in each given state. These waiting times can follow any distribution desired - normal, geometric, gamma, etc. - or appropriate for the problem at hand \cite{OConnell2011}. 
+
+In our case, since it is probably unreasonable to assume that there no some time-dependence in state changes due to the dynamic nature of human exercise and activity (e.g. people who are performing high-intensity activity are less likely to continue as time goes by since they get tired) we propose also training equivalent multivariate hidden semi-Markov models for each of the target risk groups to explore the effect of relaxing the Markovian assumption (or time-independence) of pure Markov models if the regular pure Markov models prove to be unsuitable for our study. 
+
+\paragraph{Parameters Required for Hidden Markov \& Semi-Markov Models}
+
+To summarize, the complete set of parameters that must be determined for a Hidden Markov Model are as follows:
+\begin{enumerate}
+	\item the number of states in the model
+	\item the starting probabilities
+	\item the transition probabilities
+	\item the (observation) emission probabilities
+\end{enumerate}
+For Hidden Semi-Markov Models, we add the additional parameter of the individual state sojourn distributions.
+
+\paragraph{Determining Markov Model Parameters}
+
+Determining the single best or most optimal Hidden Markov Model parametrization for given data stream is unfortunately, an intractable problem \cite{Rabiner1989,Gagniuc2017,Jurafsky2017}. That being said, there is a known algorithm for efficiently computing the most likely locally optimal parametrization, the maximum likelihood estimation, for a stream. Generally speaking the specific sub-class of algorithms used to solve this problem in the markov model space are known as expectation-maximization (EM) algorithm \cite{Rabiner1989,Gagniuc2017,Jurafsky2017}. One of the most common EM algorithm implementations used for Hidden Markov Model training is the Baum-Welch algorithm \cite{Rabiner1989,Gagniuc2017,User347902016,Jurafsky2017}. Another common algorithm used to approximate EM is the Viterbi \textit{training} algorithm (N.B. not the Viterbi algorithm) which can yield less accurate models than the Baum-Welch algorithm but is usually much less computationally intensive \cite{Rodriguez2003,User347902016}. We eschew further discussion of the implementation details of either of these algorithms since the availability of pre-programmed libraries implementing these algorithms makes it unnecessary for any given arbitrary reader to have the in-depth knowledge required to implement the algorithms and because there are many excellent sources available that explain the fine details of algorithm probably much better than this author could \cite{Rabiner1989,Rodriguez2003,Gagniuc2017,Jurafsky2017}. In any case none of these algorithms is able to determine all of the parameters by itself. Some of the parameters must be provided as 'initial conditions' for the algorithm to execute. Typically these are the emission probabilities, the starting probabilities, the sojourn distributions (and sometimes even initial transition probabilities). Depending on the library used it may try to make an educated guess for starting points or leave the 'initial conditions' to be specified solely by the author. It is possible (and encouraged) to try various combinations of parameters to determine the most effective set - in fact more fully featured software libraries will also sometimes offer to do this automatically, although it is ultimately up to the researcher to determine appropriate 'initial conditions.'
+
+In our case we use the 'mhsmm' package for the R software platform \cite{OConnell2011,OConnell2017} which requires the user to provide the number of desired states, the emission probabilities (which are assumed to remain fixed) as well as an initial starting point for the state probabilities and transition probabilities, which the algorithm then adjusts as it searches for a local optimum.
+
+\paragraph{Proposed Initial Markov Model Parameters}
+
+For this study we anticipate to start with the following initial conditions:
+\begin{enumerate}
+	\item \textbf{States}: We begin with 3 initial states and then sweep from 3 to 6-8 states depending on the available computational power. The computational power limit is important since computational complexity for training Hidden Markov Models increases to the square of the number of states as a result of the states being interconnected. That is, with 3 states there are 9 possible transitions between states which must be solved. Doubling the number of states to 6 causes a quadrupling of the number of possible transitions to 36. At 8 states there are 64 possible transitions, almost double that of the 6 state case which may make such an HMM too unwieldly for us to train given available resources.
+	\item \textbf{Starting State Probabilities}: We set a probability of 1 (i.e. 100\% likelihood) for one of the states and 0 for all the others. We anticipate that this will be a good starting point based on initial exploration of the data that seemed to indicate that patients spend most of their time in a non-active state. In other words, at any given moment of we were to look at the time stream it is most likely that a patient will be in the non-active state as opposed to any other state so we reflect this in the starting probabilities.
+	\item \textbf{Transition Probabilities}: Given a lack of evidence to the contrary we make the simple assumption that the transition probabilities are uniform and so set each to be the reciprocal of the number of state transitions. In other words, if the we let $n_s$ be the number of possible states, and $n_t$ be the number of possible state transitions, the initial transition probabilities $P_t$ are each $P_t = \frac{1}{{n_s}^2} = \frac{1}{n_t}$.
+	\item \textbf{Emission Probabilities}: Based on previous analysis of the data the minute-by-minute step counts appear to be approximately gamma distributed with peaks (or sub-peaks) clusters. We therefore propose setting the emission probabilities to be gamma distributed such that the distributions center around prominent peaks visually identified from the data: e.g. 20 steps/min, 80 steps/min, 100 steps/min for a 3 state HMM. For heart rate emission probabilities we similarly propose using normal distributions initially centred around the traditional heart rate zones which for a normal healthy human are defined as follows \cite{FitbitInc.2017}:
+	\begin{enumerate}
+		\item resting: 60 bpm
+		\item above resting but \textless50\% of max, slightly elevated: 89 bpm
+		\item 50 to 69\% of max, low intensity exercise: 110 bpm
+		\item 70 to 84\% of max, medium intensity exercise: 135 bpm
+		\item 85\% to 100\% of max, high intensity exercise: 152 bpm
+		\item $\geq$100\% of max, maximum intensity exercise: 220 bpm - age
+	\end{enumerate}
+	\item \textbf{Sojourn Distributions}: For exploration of Hidden semi-Markov Models the propose using an identical gamma distribution for each state to model the mean waiting time. The gamma distributions would be centered around a certain period of time, sweeping that period of time in 1hr intervals from 1 to 12 hrs, under the assumption that our patients person, despite their condition, will likely have to get up (or attempt to get up - thereby registering even momentary activity) once a day to attend to essential needs.
 \end{enumerate}
 
-We opted not to use the 'Heart Failure Treatments to Date' data since we suspected that it would render the model far too complex rendering it even more prone to over fitting and preferred to focus our efforts on the five models already identified.
+Now that we have reviewed the essentials of Markov Models and how to compute the parameters of a Hidden Markov Model in general (including the proposed initial parametrizations of each of the models) we proceed to discuss how we propose to use Hidden Markov models to classify patients.
 
-To further trim the set of variables we propose running a Pearson cross-correlation analysis on the collected data to identify the sets of highly correlated variables. These sets can be trimmed down to the single most useful predictor (whether clinically relevant, easiest to collect, or otherwise). Eliminating needlessly redundant information should help reign in the model complexity.
-% Interaction Terms?
+\paragraph{Classification}
 
-To verify the classification algorithm we can an internal validation, recognizing that such a validation is likely to produce optimistic results. To verify the algorithm and models we select sets of hidden (semi-)Markov models - one for each risk group - and ask each model in the set to calculate the likelihood that a two-week window of data from a test patient was generated using that model. The model with the highest associated probability predicts the outcome (NYHA class) for that window of test data. By performing this test on each two-week window (incremented by day) for each patient and comparing the predicted value with the most recent physician reported value we can determine the sensitivity and specificity of each classification model set and thereby identify the best model.
+A previously mentioned to perform the classification we propose creating and train multivariate Hidden Markov Models for each of the target risk groups (NYHA class II, III, IV). We can collect the Hidden Markov Models that were generated into a sets with a Hidden Markov Model for each risk group, i.e. for a binary classifier the sets would consist of 1 HMM trained using NYHA class II patients, and 1 using NYHA class III patients. By extension for the 3 class multi-class classifier the sets would additional contain a HMM trained using NYHA class IV patients. Classification can then be performed by evaluating the likelyhood that a given (unclassified) patient's sequence (i.e. activity, heart rate data stream) was generated from each of the corresponding HMMs in a set - the evaluation of which can performed using either the forward or backward algorithm detailed in any of these referenced works, and whose functionality is included in most HMM programming libraries \cite{Jurafsky2017,Bobick2015a,Gagniuc2017,OConnell2011,Rabiner1989}. The predicted classification of the patient would then correspond to the class of the model with the highest likelihood of having 'generated' that data stream. This process is detailed graphically in Figure \ref{fig:C2}. In an ideal system we would select the single set of Hidden Markov Models that would be able to best classify patients into their appropriate class - how we go about selecting this set is detailed later in this section as part of the Hidden Markov Model training. In general though, and in particular within the context of a larger system in which patients might be stratified by other variables, such as sex or the use of a certain medications (e.g. beta-blockers), one could feasible also train an ideal Hidden Markov Model set for each patient sub-group or stratification. This process by which this is done for a group of patients, collected together as the \textit{Data} block is detailed graphically in Figure \ref{fig:C0C1}. The output of this process can be constructed as a table where each patient is listed along with it's corresponding predicted class - a \textit{Patient Class Table}.
+
+\landscapeFigure{1cm}{C2: Classifier - Classify Using Model Set}{../modelDevelopmentFlowcharts/C2-Classifier_Classify_Using_Model_Set.png}{fig:C2}
+
+\landscapeFigure{1cm}{C0\&C1 Classifier - Generalized System}{../modelDevelopmentFlowcharts/C0&C1-Classifier_Overview.png}{fig:C0C1}
 
 
-\subsubsection{Model Performance Assessment}
+\paragraph{Training: Preparing \& Preprocessing of Data}
+
+Having outlined how the proposed NYHA classifer is supposed to work we turn to the task of training a system, that is, determining the ideal Hidden Markov Model set for a provided set of input patients. As a first step to this training however it is important that we first preprocess and clean the \textit{raw data} that we will use as input. The preprocessing procedure is outlined in Figure \ref{fig:P0}. First the raw data is passed through an \textit{automated cleaner} which is an script that 'cleans' and standardizes the data before use, including removing or filling in missing variables as required, standardizing keywords so that they all follow the same format (e.g. NYHA Class II is cleaned and converted so that it is always internally represented as 'II' instead of 'ii','2','two' or any other variants) or removing characters, data elements or otherwise that are not needed or might even cause problems with any other downstream processing elements. This automated cleaner is updated as required on each pass (by the author) to include any common items that have been detected during manual cleaning and verification of the data so that the system can more easily be transferred to a live clinical environment and to improve the ability of the \textit{automated cleaner} to completely clean the data. After passing through the \textit{automated cleaner} and before \textit{Manual Cleaning and Verification} the data is passed through a preprocessing and formatting step where the data is converted from the raw input data type (for example tab-deliminated string) into a format more amenable for the processing environment (for example an R dataframe, vector or matrix). As previous mentioned, after this step the data is manually verified to catch any obvious errors. The output of this last verification process is the 'Processed Data'.
+
+Due to the particular circumstances of our study, namely that the data set collected is too small to perform practical machine learning which requires a large amount of data this \textit{processed data} undergoes another transformation before it is used to train our machine classifier. This is the microsimulation step. Microsimulation is useful in the case where a particular machine learning algorithm needs to see a minimum 'critical mass' of data in order to be able to begin to successfully classify inputs. Specifically microsimulation allows us to generate an arbitrary amount of simulated 'fake' data from an original dataset based on pre-identified statistical properties of the original dataset (with a little added noise for variance). The idea is that since this simulated data is (statistically) representative of the original data the machine learning algorithm will pick up on the same traits as it would have from an original larger dataset but without requiring that larger dataset in the first place. There are of course limitations to the inferences we can make on the classification accuracy of a machine learning model trained using microsimulated data, but it is a useful tool for demonstrating proof of concept. In Figure \ref{fig:P0} microsimulation is shown as being performed in two parts, first the statistical properties of the \textit{processed data} analysed and the results of this analysis are then used to \textit{microsimulate} (i.e. generate) the \textit{$\mu$Simulated Data For Training}. This \textit{$\mu$Simulated Data For Training} forms the dataset used for the rest of the development of the models. Although for the purposes of this explanation we do not stratify the patients, the process of stratification, if required, would be performed after generating the processed data and before performing the microsimulation (including both the analysis of statistical properties and the \textit{microsimluate} steps). Stratifying patients at this point allows us to generate a corresponding dataset of \textit{$\mu$Simulated Data For Training} for each patient strata which we can separately feed as the input for the rest of the training process until we have generated the corresponding Hidden Markov Model set for each of the strata.
+
+\landscapeFigure{1cm}{P0: Preprocessing Data}{../modelDevelopmentFlowcharts/P0-Preprocessing_Data.png}{fig:P0}
+
+\paragraph{Training: Model Selection}
+
+After converting the raw data into clean and usable format we can proceed to the actually generation, training and selection of our candidate Hidden Markov Models. Overall the general process, which is shown in Figure \ref{fig:T0} is as follows:
+\begin{enumerate}
+	\item Generate potential models, which we store as a \textit{Potential Model List}. 
+	\item Apply each generated candidate model to each patient in the \textit{$\mu$Simulated Data For Training} provided as input. We do this to evaluate the probability that each candidate model generated the corresponding patient data stream. We keep these probabilities in a table which links each model to the probability it generates for each patient; this is the \textit{Model-\textgreater Patient Probability Table}.
+	\item Based on the generated \textit{Model-\textgreater Patient Probability Table} and the true class which we can extract from the \textit{$\mu$Simulated Data For Training} provided as input we can evaluate determine the best model set of the candidate sets generated. 
+	\item Lastly we return the best model identified in the previous step.
+\end{enumerate}
+
+\paragraph{Training: Model Generation}
+
+The process of generating multiple models can be divided, at least logically, into two seperate parts. The first is that of generating a models for each of the classes. The second involves generating different models within each class group using different initial HMM parameters with the goal of trying to find a parametrization that is closest to the representing the true underlying 'model' for that class group (i.e. the globally optimal parametrization as opposed to simply a locally optimal parametrization). Both of these are faily simple and the combined process is detailed in Figure \ref{fig:T1}. 
+
+The first part, generation for each class can be accomplished by simply selecting all the patients that belong to given class from the input \textit{$\mu$Simulated Data For Training} and using these as the training data for the model training function \textit{hmm.fit} of our HMM library for R: 'mhsmm'. This training function outputs a potential model which we can add to our \textit{Potential Model List} which we will return at the end of the generation process. 
+
+The second part, generating different parametrizations, is combined as part of the class by class generation and simply involves updating the initial parameters that form the second half of the required input for the \textit{hmm.fit} training function until we have swept through all the desired parameter variations.
+
+\paragraph{Training: Extracting the Ideal Model Set}
+
+The process of extracting the ideal, or single best model set from the generated \textit{Potential Model List} is also fairly simple and is detailed in Figure \ref{fig:T2}. We can simply iterate through every possible model set, i.e. each possible combination of NYHA class II, III and IV models (for the 3 class multi-class classifier) and evaluate the performance score of each model set by comparing the \textit{True Classes for Patients} against the \textit{Predicted Classes for Patients} generated by the classifier resulting from that set of HMMs (recall Figure \ref{fig:C2}). We can store these scores as a \textit{Model Set-\textgreater Score Table} for future review or as detailed in Figure \ref{fig:T0} simply return the single best model combination. The process in Figure \ref{fig:T2} outlines the storage method since it is most useful for a researcher, who may wish to review the score results to perform additional analyses on the performance scores.
+
+\paragraph{Training: Model Evaluation}
+
+The process by which the performance scores of each model can be evaluated is visually detailed in Figure \ref{fig:T3}. This particular process however is described in detail in section \ref{sec:classperformance} of this document.
+
+\landscapeFigure{1cm}{T0: Training - Model Selection}{../modelDevelopmentFlowcharts/T0-Training_Model_Selection.png}{fig:T0}
+
+\landscapeFigure{1cm}{T1: Training - Potential Model Generation}{../modelDevelopmentFlowcharts/T1-Training_Potential_Model_Generation.png}{fig:T1}
+
+\landscapeFigure{1cm}{T2: Training - Extraction/Selection of Ideal Model Set}{../modelDevelopmentFlowcharts/T2-Training_Extract_Ideal_Model_Set.png}{fig:T2}
+
+\landscapeFigure{1cm}{T3: Training - Model Evaluation}{../modelDevelopmentFlowcharts/T3-Training_Model_Evaluation.png}{fig:T3}
+
+------------
+
+\paragraph{Summary}
+
+In summary, we reviewed the basics of Markov Models including variations on the such models where the underlying assumptions are relaxed. We also outlined the method by which we develop a binary or 3 class multi-class classifier that uses sets of multivariate Hidden Markov Models to classify patients into their corresponding NYHA class within the subset of classes supported by the classifier. We do this by generating several possible sets of Hidden Markov Models for each corresponding class and selecting the combination of models amongst those generated that produce the most performant classifier according to the performance metrics outlined in the next section (section \ref{sec:classperformance}) although we provide a brief visual summary of the evaluation procedure.
+
+\subsubsection{Classifier (Model) Performance Assessment} \label{sec:classperformance}
+
+\paragraph{Confusion Matrix}
 
 After development of an classification algorithm it will be important to assess how well the classifier is able to correctly assess patient NYHA class. Since performance evaluation measures differ for binary and multi-class classifiers this section discuss both. Measures of classification accuracy for a classification test or algorithm (regardless of the number of supported classes) can be reported in a confusion matrix, an example of which is shown below \cite{Sayad,MedCalc2017,Davis2006,Flach2004}.
 
@@ -481,6 +551,8 @@ After development of an classification algorithm it will be important to assess 
 %\end{tabular}
 %\linebreak
 
+\paragraph{Standard Performance Measures}
+
 From the cells of a confusion matrix we can, amongst other measures, determine the:
 \begin{enumerate}[label=\alph*)]
 	\item \textit{sensitivity}, \textit{recall}, or \textit{true positive rate} of a test: the proportion of patients correctly identified as belonging to the particular test class e.g. class II \cite{Flach2004,MedCalc2017,Gung2013,Sokolova2009,Forman2010,VanAsch2013}. Phrased mathematically, letting $x_c$ represent those patients belonging to a particular class $c$ (e.g. class II) from the set of all classes $C$ and $\hat{x_c}$ represent those patients predicted by the test as belonging to this particular class then the sensitivity is $P(\hat{x_c}|x_c)$. In other, words sensitivity measures how reliably the test identifies patients belonging to a particular class by labelling them with that class. 
@@ -491,13 +563,21 @@ From the cells of a confusion matrix we can, amongst other measures, determine t
 	\item \textit{F score}, \textit{$F_1$ score}, or \textit{F-measure} of a test: an alternative to accuracy that is less sensitive to the underlying base rate of occurrence for each of the classes. It is the harmonic mean of \textit{precision} and \textit{recall} for that class \cite{Flach2004,MedCalc2017,Sokolova2009,Forman2010,VanAsch2013}. Phrased mathematically using the same definitions as for the previous measures the F score of the test is: \newline$F_1 = 2*(\frac{1}{\textit{recall}} + \frac{1}{\textit{precision}})^{-1}$
 \end{enumerate}
 
+\paragraph{Receiver Operating Characteristic \& Area Under Curve}
+
 To aid in comparing performance, many of the above test measures can be visualized in various ways. One of the most useful is the Receiver Operating Characteristic (ROC) curve which shows the trade off between the \textit{sensitivity} and \textit{fall-out} of a test \cite{Davis2006,Sayad,Fieldsend2005,Flach2004,MedCalc2017,Gung2013}. We can generate the ROC curve for each risk group by plotting the corresponding risk group \textit{false positive rate} vs \textit{true positive rate}. Alternatively, we can also generate a precision-recall (PR) plot to better understand the trade-off relationship between the precision vs recall for each group \cite{Davis2006,Flach2004,MedCalc2017,Gung2013}. While both of these plots are very useful for visual comparison of the performance trade-offs between different algorithms (or even different formulations or parametrizations of the same algorithm) it is often very useful to be able to distil these visual plots into a single performance metric to make a final determination on algorithm performance. This is especially true in the case where an algorithm designer would like to automate the search for the optimal algorithm (parametrization or formulation).
 
 Both the ROC and precision-recall plots are easily interpretable and can be summarized by measuring the areas under each of the ROC and precision-recall curves (ROC AUC and precision-recall AUC respectively) \cite{Davis2006,Flach2004,MedCalc2017,Sayad}. Plots with an AUC value closer to 1 represent better overall classifiers (AUC values lower than 0.5 indicate performance that is worse than random classification). AUC values are convenient for comparing multiple ROC or precision-recall plots but are generally not recommended as the sole decision criteria \cite{Davis2006,Flach2004,MedCalc2017,Sayad}. This is simply because a unidimensional metric inevitably obfuscates the underlying curve (recall the moral of Anscombe's quartet) \cite{Anscombe1973}.
 
+\paragraph{Binary Classifier Performance Evaluation}
+
 In the case of a binary (mutually exclusive two-class) classifier (e.g. where the decision must be made to classify a patient into NYHA class II or III only), which can be summarized using a single ROC or precision-recall (PR) curve (since, by symmetry, improving the classification of one class reduces the misclassification of the second and vice versa), selecting either the ROC AUC or precision-recall AUC is natural, expedient and generally very effective \cite{Davis2006,Flach2004,MedCalc2017,Sayad}. However the selection of ROC AUC over precision-recall (PR) AUC depends on the underlying class balance of the dataset. David et al.\@ proved a 'surprising theorem that a curve dominates in ROC space if and only if it dominates in PR space' but 'that an algorithm that optimizes the area under the ROC curve is not guaranteed to optimize the area under the PR curve' \cite{Davis2006}. Precision-recall curves, and by extension the PR AUC, are more appropriate for use in datasets with highly skewed class distributions (e.g. a prevalent negative class with few positive class - very common in the field of information retrieval) \cite{Davis2006,Flach2004,Sokolova2009}. Precision-recall curves however are more computationally complicated to solve although several packages exist for the R programming language (amongst others) to calculate PR AUC, ROC AUC and all the various metrics discussed thus far \cite{Robin2017,Yan2016}.
 
+\paragraph{Multi-class Classifier Performance Evaluation}
+
 In the case of multi-class classifiers (e.g. where the decision presented is to classify a patient into any of the four classes, or even just three of the four classes: e.g. II-IV) the situation is more complicated. Multi-class classifiers cannot be summarized using a single ROC or precision-recall curve in the same way as binary classifiers \cite{Sokolova2009,Flach2004,Fieldsend2005,Hand2001a,Hyndman2010,Kautz2017}. There have been attempts by researchers to develop an equivalent AUC metric by expressing it in an 'equivalent probabilistic form' \cite{Hand2001a}, or by plotting multi-dimensional ROC or precision-recall surfaces - although this metric is more accurately termed the volume-under-the-curve (VUC) for the 3 class case, hyper-volume-under-the-curve (hVUC) for the 4 class case, and so on \cite{Fieldsend2005}. None of these metrics however has gained widespread acceptance. The most accepted approach however appears to be to completely forgo calculation of the AUC in the first place and instead perform a micro- or macro-average of an underlying performance measure (such specificity) \cite{Flach2004,Sokolova2009,Hyndman2010}. 
+
+\paragraph{Macro- and Micro-Averaging}
 
 The macro-average of a measure, is calculated in the same way as one might compute the 'classical' mean of a the measure by simply taking the mean of the measure output values. The micro-average however involves instead first taking the mean of the inputs to the measure computation function and using those input mean values to calculate a single measure output value \cite{VanAsch2013}. The difference is sometimes clearer and more obvious when expressed mathematically.
 
@@ -511,6 +591,8 @@ B_{macro} = \frac{1}{k}\sum\limits_{j=1}^{k}B(m_{1,j},m_{2,j},...,m_{n,j})
 \begin{equation}
 B_{micro} = B(\sum\limits_{j=1}^{k}m_{1,j},\sum\limits_{j=1}^{k}m_{2,j},...,\sum\limits_{j=1}^{k}m_{n,j})
 \end{equation}
+
+\paragraph{Effects of Class Imbalance}
 
 Unfortunately, it is still an open question as to whether micro-averaging or macro-averaging produces more reliable results. Van Asch quoting a paper by Sebastiani outlines the state of the debate in the early 2000's \cite{VanAsch2013}:
 \blockquote{There is no complete agreement among authors on which is  better. Some believe that  “micro-averaged performance is somewhat  misleading (...) because more frequent topics are weighted heavier in the average” [Wiener et	al. 1995, page 327] and thus favour macro-averaging.  Others (actually, the majority of researchers) believe that topics should indeed count proportionally to their frequence, and thus lean towards micro-averaging.\cite{Sebastiani2002}} The choice is sometimes performance measure dependent; Forman et al.\@, based on series of simulations they performed, advanced the majority position that micro-averaging should be the preferred method for calculating the F score (a common alternative to accuracy in the information retrieval domain) since it is more unbiased in the common case where class imbalance exist in those datasets, especially where that class imbalance is large or the classifier is inaccurate in the first place \cite{Forman2010}. A decade and a half later, the issue, at least in practice, appears to still not be settled. A quick review of recent literature shows that researchers appear to prefer to simply use and report both the micro- and macro-averaged results for their metrics (usually precision, recall, accuracy and F score) \cite{Rehman2017,Du2017,Kayaalp2017,Wang2014}. Some have even eschewed micro- and macro-averaging in favor of developing new metrics, such as the Multiclass Performance Score (MPS), designed specifically for use with multi class classifiers \cite{Kautz2017}. In keeping with common practice we plan to report on the micro- and macro-averaged precision, recall, accuracy and F score of our algorithm. But, in our case, given our intent to integrate our classification algorithm into a larger clinical decision support application at the Heart Failure Clinic we do not have the freedom of waffling between all of these measures but rather must make a determination of which single measure is most appropriate for the evaluation of our candidate algorithms for optimization. To do this we return to the basics.
@@ -526,9 +608,13 @@ In our case we also expect to have an imbalance of persons in each class for var
 
 Of course we will need to examine the final recruitment cohort to confirm that our expectations do indeed turn out. Have established that "microaveraged results are ... really a measure of effectiveness on large classes in a test collection. To get a sense of effectiveness on small classes, [one] should compute macroaveraged results" \cite{Manning2009}. This would indicate that the use of macro-averaging will provide the most suitable bias for our particular situation since, as discussed, NYHA class IV is likely to be under represented in our population. Since macro-averaging will treat every class considered with equal weighting optimizing our algorithm using a macro-averaged metric is more likely to ensure that classification performance of a smaller NYHA class IV will be treated with the same priority as any other class. Optimizing using micro-averaging would instead preferentially weigh improvements (or decreases) in algorithm performance that largely affect those classes whose patients are more represented in the dataset (NYHA class II or III) which we suggest is undesirable.
 
-Of course we do note that the use of microsimulation (detailed later) will allow us to compensate for any significant imbalances in our development dataset should we so choose.  The issue of micro- vs macro-simulation therefore is perhaps less critical for this particular study as it may be for future (external) validation studies.
+Of course we do note that the use of microsimulation allows us to compensate for any significant imbalances in our development dataset by allowing us to simulate (i.e. generate) a balanced dataset should we so choose.  The issue of micro- vs macro-simulation therefore is perhaps less critical for this particular study as it may be for future (external) validation studies.
+
+\paragraph{Misclassification Costs}
 
 So putting aside the issue of micro- and macro-averaging for a moment. Thus far we have entirely avoided the issue of misclassification cost. For binary classification problems misclassification cost is generally glossed over since there is only a single cost for incorrect classification. This cost can be taken into account after computation of performance measures. However, in certain multi class classification problems (such as this one) certain types of misclassification can been deemed to be more costly than others and so there is not necessarily a single cost for misclassification. In our case: misclassification of a class II patient into class IV is a more severe error, and thereby most costly error, than misclassification of a class II patient into class III. It is a relatively easy task to design an algorithm to account for this and so the difficulty here mostly revolves around how to quantify the exact costs of different degrees of misclassification (costs which also could very well change over time) \cite{Kautz2017}. This challenge is rendered even more difficult since classification of patients into NYHA class, as already mentioned, is already an unreliable art \cite{Carroll2014,Goldman1981a,Raphael2007a,Kubo2004}. And where there is already a relative paucity of published research regarding the reliability of NYHA classification by physicians there is complete drought when it comes to attempts to quantify the real costs of misclassification. Fortunately selecting an incorrect misclassification cost in this context will not actually reduce the accuracy of a selected output algorithm. Instead it would direct the optimization algorithm to search for a suboptimal algorithm, not that any optimization algorithm even guarantees that it has found the single most (i.e. globally) optimal algorithm in the first place \cite{Segaran2007}. Given the aforementioned consideration and the lack of readily available data documenting concrete misclassification costs we propose the following as a reasonable selection of costs to use as a starting point in this study. Of course, we invite the interested reader to improve on our approach.
+
+\paragraph{Derivation of a Performance Metric that accounts for misclassification costs and class imbalance}
 
 Recall that \textit{true positive rate} (\textit{sensitivity}/\textit{recall}) measures the proportion of patients correctly identified as belonging to a particular test class. Given a confusion matrix of $n_c$ classes which can be encoded as a $n_c\times n_c$ mathematical matrix $M_c$ as follows, demonstrated, without loss of generality, using a $n_c=3$ class confusion matrix:
 
@@ -600,6 +686,8 @@ W_r = \begin{bmatrix}
 
 \noindent It may be clearer to see why this is the case given an example. The above implies the following weighting for our 3 class example (displayed in a confusion matrix grid). Moving forward we will use this confusion matrix inspired grid format to display the weights since it makes explicit the corresponding classes and classification source for each weight value.
 
+\paragraph{Weight Matrix for Classically Defined Recall}
+
 % Weight Matrix
 \begin{center}
 	\begin{tabular}{l|l|c|c|c|c}
@@ -616,6 +704,8 @@ W_r = \begin{bmatrix}
 		\cline{2-5}
 	\end{tabular}
 \end{center}
+
+\paragraph{Demonstration of Derivation of Classically Defined Recall}
 
 Each true positive (along the diagonal of the table) for the class are each counted as 1 correct classification and each false negatives is counted as contributing 0 correct classifications to the overall \textit{true positive rate} 'score'. So for our example 3 class $M_c$ matrix the recall is calculated as follow. We use micro-averaging for the sake of clarity, the technique is equivalent for macro-averaging but more clumsy as a result of the different weightings for each column. Recall the formula for recall is:
 
@@ -705,6 +795,8 @@ g & h & i \\
 \textit{recall}\rvert_{classic} = P(\hat{x_c}|x_c) = \frac{{TP}}{{TP} + {FN}}
 \end{equation}
 
+\paragraph{Weight Matrix for Modified Recall}
+
 But, we have gained added flexibility because we now have weight parameters ($w_{a,1}$, $w_{b,2}$, $w_{c,3}$ and so on) that we can now manipulate to alter how the recall function scores each individual type of classification or misclassification instead of a blanket $w_{tp} = 1$ for each correct classification (which is not inherently problematic in our situation) and $w_{fn} = 0$ for each incorrect classification (which is the problem we are attempting to resolve). 
 
 In order to penalize more egregious misclassifications we propose the use of the following adjusted weight matrix (for a 3 class classifier. A 4 class classifier would require a different weight matrix):
@@ -725,6 +817,8 @@ In order to penalize more egregious misclassifications we propose the use of the
 		\cline{2-5}
 	\end{tabular}
 \end{center}
+
+\paragraph{Demonstration of the effects of the use of Modified Recall on algorithm evaluation}
 
 The above weight matrix is derived from the following rules, which we simultaneous demonstrate using an example sub-set of the a confusion matrix sub-set (shown immediately below) and it's corresponding \textit{True Positive Rate} score - we let the default score equal $x$:
 
@@ -938,9 +1032,9 @@ The above weight matrix is derived from the following rules, which we simultaneo
 
 And so using the adjusted weight matrix instead of an identify matrix (i.e. the weight matrix for the classic definition of \textit{recall}) we can instead guide to optimization algorithm to not only to prefer algorithms that are strictly better at classifying patients into their corresponding class but when patients are misclassified to prefer algorithms that misclassify them less incorrectly.
 
+\paragraph{Summary}
+
 To summarize: how specifically we report and assess the performance of our classifier will depend primarily on how many classes it supports. Either way though the selection a final candidate algorithm we will use machine optimization (although the exact method is not yet determined \footnote{Possible candidates include: simulated annealing, genetic algorithms, amongst others\cite{Segaran2007}}) to iterate though various parametrizations of the classification algorithm to identify more performant versions. For the purpose of optimization the performance of the algorithm will be evaluated based on a relevant performance metric depending on how many classes it supports. For a binary classifier we will use the area under the receiver operating characteristic curve (AUC ROC). For a multi-class classifier we will use a modification to the \textit{recall} performance metric where more extreme misclassification of patients will be more heavily penalized instead of penalized identically to less extreme misclassifications (correct classifications will be treated identically to the classical interpretation of the performance measure). This modification will allow us to select for algorithms that are not just more correct, but also 'less wrong'. We will report standard measures of predictive accuracy for the final classification algorithm developed whether binary (class II or III), or multi-class (II, III and IV) - dependant on our ability to capture class IV patients for analysis. These measures will include the (classically defined) \textit{sensitivity/recall}, \textit{specificity}, \textit{fall-out}, \textit{precision} and \textit{F-score}. These standard measures will be reported as raw measures for a binary classifier and as macro- and micro-averaged measures for a multi-class classifier. We note that the assessment of the final classification algorithm will be performed by running the classifier against the (internal) validation dataset (which is the same as the development dataset) and as a result we expect that evaluation of algorithm performance to be optimistic. 
-
-
 
 \subsection{Development vs. Validation} % Item 12
 
