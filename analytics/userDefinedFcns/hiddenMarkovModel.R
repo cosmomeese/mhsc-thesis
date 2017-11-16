@@ -2,7 +2,7 @@
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("ggplot2","ggthemes","dplyr","mhsmm","dglm")
+pkg <- c("ggplot2","ggthemes","dplyr","mhsmm","dglm","caret","e1071")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -16,12 +16,17 @@ library(dplyr)
 #library(depmixS4) #default, only works for single subjects
 #library(seqHMM) #useful for TraMineR formatted sequence data
 library(mhsmm)
+library(dglm)
+library(caret)
+library(e1071) #required for caret package
 
 
 sourceDir <- "userDefinedFcns"
 source(paste(sourceDir,"/","unnestStepDataFrame.R",
              sep=""))
 source(paste(sourceDir,"/","improvedGammaDist.R",
+             sep=""))
+source(paste(sourceDir,"/","confuseMat.R",
              sep=""))
 rm(sourceDir)
 
@@ -60,7 +65,7 @@ mhsmm_global.env <- new.env()
 ####1#### Parameters & Starting Values -----------------------------------------
 
 ## DEBUG LEVELS
-DEBUG_LEVEL <- 4
+DEBUG_LEVEL <- 0
 #DEBUGLVL.ERR <- 1
 #DEBUGLVL.WARN <- 2
 #DEBUGLVL.INFO <- 3
@@ -73,24 +78,26 @@ SKIP_HMM_COMPUTE <- FALSE
 
 ## Starting values for model (define some reasonable ones)
 
-# set random seed
-#set.seed(111111)
+# set constants
+#set.seed(111111) # set random seed
+MIN_FINITE_VALUE <- .Machine$double.xmin #https://stat.ethz.ch/R-manual/R-devel/library/base/html/zMachine.html
+MAX_FINITE_VALUE <- .Machine$double.xmax #https://stat.ethz.ch/R-manual/R-devel/library/base/html/zMachine.html
 
 # rescale parameters
+
 UNSCALEDMIN.STEPS <- 0
 UNSCALEDMAX.STEPS <- 300  # assume max value is 255 per minute
-RESCALEDMIN.STEPS <- 1/(UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS) #1 OR + 1/(-1 + UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS)
+RESCALEDMIN.STEPS <- MIN_FINITE_VALUE #1 OR + 1/(-1 + UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS)
 RESCALEDMAX.STEPS <- 1 #301
 RESCALEFACTOR.STEPS <- (RESCALEDMAX.STEPS - RESCALEDMIN.STEPS) / (UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS)
 
 # hmm parameters
-MAX_FINITE_VALUE <- 1.7976931348*10^(308)
 DIST_LOG_PROB <- FALSE # use log probabilities to deal with small values
 STATES <- 3
 MAX_ITER <- 1000
-TRAINSET_PERCENTAGE <- 1  # fraction of data set to use as trainingSet
-NYHA_CLASS_VEC <- c("II","III")
-INIT.P <- c(1,0,0) #pi
+TRAINSET_PERCENTAGE <- 1.0  # fraction of data set to use as trainingSet
+NYHA_CLASS_VEC <- as.factor(c("II","III"))
+INIT.P <- c(0.99,0.005,0.005) #pi
 INIT.TRANS <- matrix(c(0.9, 0.3, 0.33,
                        0.05, 0.5, 0.33,
                        0.05, 0.2, 0.33), nrow = STATES)
@@ -104,8 +111,8 @@ INIT.TRANS <- matrix(c(0.9, 0.3, 0.33,
 
 # Set initial emission distribution parameters below (will vary depending on distribution used)
 
-initialStepGuess.means <- c(1,40,140) * RESCALEFACTOR.STEPS
-initialStepGuess.variances <- c(10,10,10) * RESCALEFACTOR.STEPS
+initialStepGuess.means <- c(1,40,100) * RESCALEFACTOR.STEPS
+initialStepGuess.variances <- c(10,80,1000) * (RESCALEFACTOR.STEPS^2)
 initialStepGuess.stdevs <- sqrt(initialStepGuess.variances)
 
 ### NORMAL ### (pg. 2)
@@ -131,11 +138,11 @@ LOWER_APPROX_THRESHOLD <- 0.02 # one order of magnitude less than code from: htt
 
 # recall that you can define your own functions
 INIT.EMIS <- list(shape = (initialStepGuess.means^2)/(initialStepGuess.variances),  # for large k, k = (mu/sigma)^2
-                  scale = (initialStepGuess.means^2)/(initialStepGuess.stdevs),  # for large k, theta = (mu^2)/sigma
-                  type = "gamma")  # for poisson distribution
+                  scale = (initialStepGuess.variances)/(initialStepGuess.means),  # for large k, theta = (sigma^2)/mu
+                  type = "gamma")  # for gamma distribution
 
 DDIST.HSMM <- function (x, j, model){
-  
+
     shape <- model$parms.emission$shape[j]
     scale <- model$parms.emission$scale[j]
 
@@ -149,10 +156,10 @@ DDIST.HSMM <- function (x, j, model){
     {
       cat("\n\tattempted parameters (shape=", shape, " & scale=", scale,")", sep="")
     }
-    
+
     # estimate gamma distribution (approximate with normal if shape (k) is high)
     result <- dgammaPlus(x, shape=shape, scale=scale, log=DIST_LOG_PROB)
-  
+
     return(result)
 }
 
@@ -160,19 +167,19 @@ DDIST.HSMM <- function (x, j, model){
 gammafit2 <- function(x,wt=NULL) {
   # based on hmsmm but improved to handle convergence towards shape->inf
   tol = 1e-08
-  
+
   if(is.null(wt)) wt = rep(1,length(x))
-  
+
   tmp = cov.wt(data.frame(x),wt=wt)
   xhat = tmp$center
   xs = sqrt(tmp$cov)
-  s = log(xhat) - mean(weighted.mean(log(x),wt))    
+  s = log(xhat) - mean(weighted.mean(log(x),wt))
   aold = (xhat/xs)^2
   a = Inf
   if(Inf != aold) # added to gammafit2 (if cov too close to 0, then xs -> 0 & aold -> Inf), in which case shape = Inf, scale = 0)
   {
     while(abs(a-aold)>tol) {
-      a = aold - (log(aold) - digamma(aold) - s)/((1/aold) - trigamma(aold))        
+      a = aold - (log(aold) - digamma(aold) - s)/((1/aold) - trigamma(aold))
       aold=a
     }
   }
@@ -186,10 +193,10 @@ gammafit2 <- function(x,wt=NULL) {
     warning(paste('Shape Parameter (=',scale,') is < 0 (unsupported by Gamma distribution): using absolute value. Possibly for iteration ', iteration ,'.',sep=""))
     scale <- abs(scale)
   }
-  
+
   # B. Shape
   shape = xhat/scale
-  
+
   # B.2: is shape within gamma distribution limits?
   if(shape < 0)
   {
@@ -207,7 +214,7 @@ MSTEP.DIST <- function (x, wt) {
     currentIttr <- currentIttr + 1
     cat("\n\t-fit iteration ", currentIttr," (above)")
     assign('currentIttr', currentIttr, envir=mhsmm_global.env)
-    
+
     # wt is a T x K matrix (T length, K states), do each one at a time
     k <- ncol(wt)
     shape <- numeric(k)
@@ -231,17 +238,17 @@ MSTEP.DIST <- function (x, wt) {
 
 
 RDIST.HSMM <- function (x, j, model){
-  
+
   shape=model$parms.emission$shape[j]
   scale=model$parms.emission$scale[j]
-  
+
   if(0 == shape)
   {
     browser()
   }
-  
+
   result <- rgammaPlus(x, shape=shape, scale=scale)
-  
+
   return(result)
 }
 
@@ -260,8 +267,17 @@ createHSMMDataSet <- function(dataSubSet)  # NOTE WE REUSE THIS IN TESTING (to h
   dataSubSet.table <- table(dataSubSet.unnest$StudyIdentifier)  # get table of each patient sequence in set
   dataSubSet.N <- as.numeric(dataSubSet.table)  # get length of each patient sequence in set
   dataSubSet.N <- dataSubSet.N[dataSubSet.N != 0]  # drop zero length vectors of each patient sequence in set (i.e. patients not in set)
-  dataSubSet.seqM <- max(dataSubSet.N)  # max sequence length (important for fitting sojourn gamma distribution)
-  cat("\n   - Converting training set to hsmm.data data type...")
+  dataSubSet.seqM <- max(dataSubSet.N)  # max sequence length (important for fitting sojourn gamma distribution
+  
+  printDebug = FALSE
+  if(DEBUG_LEVEL >= DEBUGLVL.DEBUG)
+  {
+    printDebug = TRUE
+  }
+  if(printDebug)
+  {
+    cat("\n   - Converting training set to hsmm.data data type...")
+  }
   
   dataSubSet.class <- list(x = (dataSubSet.unnest$Steps - UNSCALEDMIN.STEPS)*RESCALEFACTOR.STEPS + RESCALEDMIN.STEPS,  # rescale
                            N = dataSubSet.N,
@@ -316,20 +332,20 @@ if(!SKIP_DATA_FETCH)
     trainData.class[[class]] <- createHSMMDataSet(trainSet)
     rm(trainSet)
     
-#    cat("\n   - Unnesting test set...")
-#    if(nrow(testSet) <= 0)
-#    {
-#      cat("\n   WRN - no patients in test set, using entire training set to test...")
-#      #testData.class <- NULL
-#      testDataEmpty <- TRUE
-#      #testSet <- TRUE
-#    }
-#    else
-#    {
-#      warning(paste("Testing with less than full dataset is deprecated and method is non-functional/not-tested. \nTRAINSET_PERCENTAGE is", TRAINSET_PERCENTAGE, "should be 1.0"))
-#      #testData.class[[class]] <- createHSMMDataSet(testSet[[class]])
-#      testDataEmpty <- NULL
-#    }
+   cat("\n   - Unnesting test set...")
+   if(nrow(testSet) <= 0)
+   {
+     cat("\n   WRN - no patients in test set, using entire training set to test...")
+     #testData.class <- NULL
+     testDataEmpty <- TRUE
+     #testSet <- TRUE
+   }
+   else
+   {
+     warning(paste("Testing with less than full dataset is deprecated and method is non-functional/not-tested. \nTRAINSET_PERCENTAGE is", TRAINSET_PERCENTAGE, "should be 1.0"))
+     #testData.class[[class]] <- createHSMMDataSet(testSet[[class]])
+     testDataEmpty <- NULL
+   }
     rm(testSet)
   
     cat("\n   Finished separating out training & test set...")
@@ -441,12 +457,17 @@ getClassForModelDFTestColName <- function(colName){
     return(result)
 }
 
-# function that finds a model prediction for a given HMM model & patient ID
-predictPatient <- function(model, id){
-    singlePatientData <- DATA_SET_RAW %>% filter(StudyIdentifier == id)
+# function that finds a model prediction for a given HMM model & patient IDs
+predictPatient <- function(model, ids){
+  prob <- numeric(length(ids))
+  for(i in 1:length(ids))
+  {
+    singlePatientData <- DATA_SET_RAW %>% filter(StudyIdentifier == ids[i])
     singlePatientData.hsmmtype <- createHSMMDataSet(singlePatientData)
-    p <- predict(model, singlePatientData.hsmmtype)
-    return(p)
+    prediction <- predict(model, singlePatientData.hsmmtype)
+    prob[i] <- prediction$loglik
+  }
+  return(prob)
 }
 ## END Helper Functions
 
@@ -472,23 +493,40 @@ for(modelNYHAClass in NYHA_CLASS_VEC)
   cat("\n   - Testing HSMM Model for class ",modelNYHAClass,"...")
   colName <- getModelDFTestColForClass(modelNYHAClass)
   
-  for(patientGroupClass in names(trainData.class))  # get patient set by class (because that's how our data is structured)
-  {
+  #for(patientGroupClass in names(trainData.class))  # get patient set by class (because that's how our data is structured)
+  #{
     if(testDataEmpty)
     {
       cat("\n   WRN - testing with complete training data")
-      hmm.test <- mutate(hmm.test, !!colName := predictPatient(hmm.activity[[patientGroupClass]],StudyIdentifier))
+      model <- hmm.activity[[modelNYHAClass]]
+      hmm.test <- mutate(hmm.test, !!colName := predictPatient(model,StudyIdentifier))
+      
+      #cat("\n   - Group Class", modelNYHAClass)
+      #cat("\n Shape:",model$model$parms.emission$shape)
+      #cat("\n Scale:",model$model$parms.emission$scale)
+      #cat("\n II Prob:\n")
+      #cat(hmm.test$classIIModelProb)
+      #cat("\n III Prob:\n")
+      #cat(hmm.test$classIIIModelProb)
     }
     else
     {
       stop(paste("Script does not yet support testing with test set. \nSet TRAINSET_PERCENTAGE to 1.0 to test with full train set instead (is", TRAINSET_PERCENTAGE, ")", sep=""))
       #predictions = predictFun(//dataframe with subset of data//, hmm.activity[[modelNYHAClass]])
     }
-    
-    
-  }
+  #}
 
 }
+
+# get greatest class
+
+hmm.test.subset <-hmm.test[modelProbColumns]
+hmm.test.maxColumns <- max.col(hmm.test.subset,ties.method="first")
+hmm.test.predictedClass <- getClassForModelDFTestColName(colnames(hmm.test.subset)[hmm.test.maxColumns])
+hmm.test['predictedClass'] <- factor(hmm.test.predictedClass, levels=levels(NYHA_CLASS_VEC)) 
+rm(hmm.test.subset, hmm.test.maxColumns, hmm.test.predictedClass)
+#confuseMat(predictedC=hmm.test['predictedClass'],trueC=hmm.test['NYHAClass'])
+confusionMatrix(data=hmm.test$predictedClass, reference=hmm.test$NYHAClass)
 
 #COWS EXAMPLE FOR REFERENCE
 #last.heat.hour <- cumsum(rle(yhat)$lengths)[rle(yhat)$values == 2]

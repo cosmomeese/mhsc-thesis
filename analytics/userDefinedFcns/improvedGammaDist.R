@@ -19,18 +19,33 @@ dgammaPlus <- function(x, shape, rate = 1, scale = 1/rate, log = FALSE)
       stdev <- sqrt(shape)*scale
       result <- dnorm(x, mean=mean, sd=stdev, log=log)
     }
-    else if (shape < LOWER_APPROX_THRESHOLD)
-    {
-      # https://arxiv.org/pdf/1302.1884.pdf
-      lambda <- shape^(-1) - 1
-      omega <- shape/(exp(1)*(1-shape))
-      fac <- 1/(1+omega)
-      result <- fac*dexp(x, rate=1) - omega*fac*dexp(x,rate=lambda)
-      if(log)
-      {
-        result <- log(result)
-      }
-    }
+    # else if (shape < LOWER_APPROX_THRESHOLD)
+    # {
+    #   # constants
+    #   const <- gamma(shape + 1)
+    #   omega <- shape/(exp(1)*(1-shape))
+    #   lambda <- shape^(-1) - 1
+    #   
+    #   # compute envelope function (scaled to 1)
+    #   posX <- x[x>=0]
+    #   negX <- x[x<0]
+    #   envelopeFcn = numeric(length(x))
+    #   envelopeFcn[x>=0] <- const*exp(-posX)
+    #   envelopeFcn[x<0] <- const*omega*lambda*exp(lambda*negX)
+    # 
+    #   # scale envelope function (to scale)
+    #   result <- (1/(scale^shape))*envelopeFcn^(1/scale)
+    #   
+    #   # https://arxiv.org/pdf/1302.1884.pdf
+    #   #lambda <- shape^(-1) - 1
+    #   #omega <- shape/(exp(1)*(1-shape))
+    #   #fac <- 1/(1+omega)
+    #   #result <- fac*dexp(x, rate=1) - omega*fac*dexp(x,rate=lambda)
+    #   if(log)
+    #   {
+    #     result <- log(result)
+    #   }
+    # }
     else
     {
       result <- dgamma(x, shape=shape,scale=scale, log=log)
@@ -70,10 +85,10 @@ dgammaPlus <- function(x, shape, rate = 1, scale = 1/rate, log = FALSE)
     printDebug = TRUE
     cat(" = INVALID")  #N.B. will be appended after last line
   }
-  else
-  {
-    cat(" = V")
-  }
+  #else
+  #{
+  #  cat(" = V")
+  #}
   result[is.na(result)] = 0  #if it returns an na then it's an invalid result
   
   return(result)
