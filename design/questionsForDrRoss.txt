@@ -1,0 +1,25 @@
+Questions for Dr. H. Ross:
+
+High Priority Questions:
+
+Which patients are getting a Fitbit:
+1. Are all patients that get prescribed Medly also to be 'prescribed' a Fitbit? 
+2. Does this include existing program patients (not RCT)?
+
+We have some scientific concerns regarding changes in patient NYHA FC after their clinic visit and with algorithm requiring two-week time chunks to generate an NYHA FC prediction:
+1. Do you have an objection to us instead using single day time chunks? (if yes what would be the lowest acceptable time chunk to maintain clinical relevance)
+2. Do you have an objection to us instead monitoring study participants for a shorter period of 2-4 weeks using these lower time chunks? 
+3. Would it be reasonable to get a reassessment of patient NYHA class after each of these time chunks (e.g. each day) to ensure it hasn't changed? Data collection need not necessarily be done by a physician if it's too time consuming - e.g. we can collect using using the questionnaire developed by Kubo et al. for multi-center studies (attached): http://www.sciencedirect.com/science/article/pii/S1071916403007450?via%3Dihub
+
+
+
+Low Priority Clarification on thesis proposal comments:
+
+Just so I understand why these changes were made, I have a few follow-up questions regarding some of the comments you made on the thesis proposal.
+Your changes in brackets: () for removed content, [] for added
+
+1. Section 1.1 regarding the description of the 6MWT "...the total distance walked is then used as an indicator of the (aerobic) [exercise] capacity of the individual...". Why exercise instead of aerobic? Because in a strictly medical context aerobic refers to exercise as measured by oxygen consumption (whereas we're interested in physical exertion ability - as limited by symptoms rather than O2)?
+
+2. Section 1.1 regarding formal tests run in the clinic to assess patient response to exertion: "(These tests are)[Formal cardiopulmonary testing is], almost without exception, run in a controlled clinical environment...": Along the same lines - are tests like the 6MWT still categorized as 'cardiopulmonary tests' despite not recording O2 consumption or other direct measures of 'pulmonary response'?
+
+3. Section 2.3.2 regarding NYHA class assessment "The assessment is performed by the (physician) [healthcare professional] seeing the patient." Why the change? Is it because 'residents' are not technically (licensed) physicians? Or because nursing staff, etc. and non-Doctors might assess NYHA class? If so who else does the assessment?
