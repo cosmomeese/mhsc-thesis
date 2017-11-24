@@ -1,8 +1,8 @@
-### Hidden Markov Model
+### Generate HMM Models for Hidden Markov Model Script
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("ggplot2","ggthemes","dplyr","mhsmm","dglm","caret","e1071")
+pkg <- c("dplyr","tidyr","depmixS4")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -10,122 +10,185 @@ if (length(new.pkg)) {
 }
 rm(pkg,new.pkg)
 # load the library
-library(ggplot2)
-library(ggthemes)
-library(dplyr)
-#library(depmixS4) #default, only works for single subjects
+library(depmixS4) #default
 #library(seqHMM) #useful for TraMineR formatted sequence data
-library(mhsmm)
-library(dglm)
-library(caret)
-library(e1071) #required for caret package
+#library(mhsmm)
+#library(aphid)
+library(dplyr)
+library(tidyr)
 
-
+## Import Required Functions
 sourceDir <- "userDefinedFcns"
-source(paste(sourceDir,"/","unnestStepDataFrame.R",
-             sep=""))
-source(paste(sourceDir,"/","improvedGammaDist.R",
-             sep=""))
-source(paste(sourceDir,"/","confuseMat.R",
-             sep=""))
-rm(sourceDir)
+fcns <- list("hmm_common")
 
-#######################################################################
-# VERIFY ALL THE REQUIRED PIECES ARE IN PLACE FIRST (BELOW)
-
-if(!exists("m_cData"))
+# Perform actual import
+srcCreateFcn <- function(sfcn,sourceDir) #helper function to import
 {
-  stop("\nE: Could not find Data frame 'm_cData'. Make sure Data is loaded")
+  source(paste(sourceDir,"/",sfcn,".R",
+               sep=""))
 }
+invisible(lapply(fcns,srcCreateFcn,
+                 sourceDir=sourceDir)) #use function
+rm(srcCreateFcn) #remove the extra unneeded variables
 
-if(!exists("simonData.Importer.CodeVersion"))
+# -------------------------------------------------------
+
+# global parameters
+
+# local functions
+hmm_generateModels <- function(trainingData)
 {
-  warning("\nW: Could not verify data version number. Please make sure Data was properly loaded. \nThere should be a variable 'simonData.Importer.CodeVersion' that exists to specify the data version.")
+  # help available at: http://files.meetup.com/1704326/Ingmar_Visser_depmixS4_Markov_models_22_Sept_2014.pdf
   
-}else
-{
-  if(suppressWarnings(is.na(as.numeric(simonData.Importer.CodeVersion)))) #suppressWarnings because otherwise it gives an annoying warning message whenever data is not a numeric
+  ### return variable
+  potentialModelList <- list() #NOTE: should probably not use list since one for each class?
+  
+  ### hmm parameters
+  
+  # for multi-variate testing
+  #formulae <- list(Steps~1,HeartRate~1)
+  #families <- list(gamma(),gaussian())
+  formulae <- list(Steps~1)
+  families <- list(Gamma())
+  
+  for(class in NYHA_CLASS_VEC)
   {
-    warning(paste("\nW: Could not verify data version number since version is non-numeric."))
     
-  } else if(as.numeric(simonData.Importer.CodeVersion) < 1.2)
-  {
-    stop(paste("\nE: Script does not support loaded m_cData (version v",simonData.Importer.CodeVersion,"). Script requires at least v1.2", sep=""))
+    nstates <- 3
+    init.p <- c(1,0,0)
+    init.trans <- matrix(c(0.9, 0.3, 0.33,
+                           0.05, 0.5, 0.33,
+                           0.05, 0.2, 0.33), nrow = length(nstates))
     
-  }else if(as.numeric(simonData.Importer.CodeVersion) > 1.2)
-  {
-    warning(paste("\nW: You are using an unverified m_cData version (v",simonData.Importer.CodeVersion,"). Code only tested on v1.2", sep=""))
+    ## initial emission probabilities
+    initialStepGuess.means <- c(1,40,100) * RESCALEFACTOR.STEPS
+    initialStepGuess.variances <- c(10,80,1000) * (RESCALEFACTOR.STEPS^2)
+    initialStepGuess.stdevs <- sqrt(initialStepGuess.variances)
+    
+    # for gamma distribution - assume it's shape
+    init.emisGamma <- (initialStepGuess.means^2)/(initialStepGuess.variances)  # shape: for large k, k = (mu/sigma)^2
+                      #(initialStepGuess.variances)/(initialStepGuess.means)  #scale: for large k, theta = (sigma^2)/mu
+    
+    # for normal distribution: mu, sigma (for each state
+    init.emisNorm <- t(matrix(c(initialStepGuess.means,
+                            initialStepGuess.stdevs), nrow = length(nstates)))
+    
+    # arrange in depmixS4 compatible format (see pg 12 of: http://ftp.cs.pu.edu.tw/network/CRAN/web/packages/depmixS4/vignettes/depmixS4.pdf)
+    init.params = c(init.p,init.trans,init.emisGamma) #to check param order fit model then run: setpars(HMM, value = 1:npar(HMM))
+                   
+    cat("\nM: Generating model for class ",class, sep="")
+    
+    # get class specific data
+    classTrainingData <- trainingData %>% filter(NYHAClass == class)
+    
+    set.seed(1) # to control randomness between runs (mostly for debugging)
+    
+    cat("\n   - Creating depmix (HMM) definition...")
+    
+    #just try one patient
+    #classTrainingData <-  classTrainingData %>% filter(StudyIdentifier == 'HF001')
+    
+    ntimes <- getSequenceLengths(classTrainingData,'StudyIdentifier')
+    
+    #We're setting the formula list as our response variables, classTrainingData dataframe we just extract, want to set 3 different regimes/states, and setting the response distributions to be the families list.
+    HMM<-depmix(formulae,
+                data=classTrainingData,
+                nstates=3,
+                family=families,
+                ntimes=ntimes)
+    setpars(HMM,init.params)
+    
+    cat("\n   - Fitting HMM...\n")
+    HMMfit<-fit(HMM, verbose = TRUE, emcontrol=em.control(random.start=FALSE)) #fit our model to the data set
+    cat("\n   - Finished Fitting HMM ----")
+    
+    cat("\n   - Model Summary -----------")
+    summary(HMMfit) #model summary
+    print(HMMfit) #model AIC & BIC we can compare the log Likelihood as well as the AIC and BIC values to help choose our model
+    cat("\n   - Model Summary END -------")
+    
   }
+  
+
+  
+  cat('\nCreating depmix...')
+  set.seed(1)
+  HMM<-depmix(form,data=trainingData,nstates=3,family=fam,ntimes=ntimes) #We’re setting the LogReturns and ATR as our response variables, using the data frame we just built, want to set 3 different regimes, and setting the response distributions to be gaussian.
+  
+  cat('\nFitting HMM:')
+  HMMfit<-fit(HMM, verbose = FALSE) #fit our model to the data set
+  
+  cat('\nPrinting HMM:\n')
+  print(HMMfit) #we can compare the log Likelihood as well as the AIC and BIC values to help choose our model
+  
+  cat('\nSummarizing HMM:\n')
+  summary(HMMfit)
+  
+  
+  
+  # states ####
+  STATES <- c("Begin","Fair","Loaded")
+  #STATES <- c(1,2,3) ###
+  ### initial state probabilities
+  INIT.P <- c(0.99,0.005,0.005) #pi
+  ### initial transition probabilities ###
+  #INIT.TRANS <- matrix(c(0.9, 0.3, 0.33,
+  #                       0.05, 0.5, 0.33,
+  #                       0.05, 0.2, 0.33), nrow = length(STATES))
+  INIT.TRANS <- matrix(c(0, 0, 0,
+                         0.99, 0.95, 0.1,
+                         0.01, 0.5, 0.9), nrow = length(STATES))
+  dimnames(INIT.TRANS) <- list(from = STATES, to = STATES)
+  
+  
+  return(potentialModelList)
 }
 
-mhsmm_global.env <- new.env()
+# for depmixS4 if you want to use multiple sequences you must specify length of each sequence. This extracts that from the dataframe using assuming they are each uniquely labelled in the column col
+getSequenceLengths <- function(df,col)
+{
+  ## Extract the series lengths
+  ntimes <- as.numeric(table(df[col]))  # get table (and length of that table) of each patient sequence in set
+  ntimes <- ntimes[ntimes != 0]  # drop zero length vectors of each patient sequence in set (i.e. patients not in set)
+  return(ntimes)
+}
 
-#######################################################################
 
-####1#### Parameters & Starting Values -----------------------------------------
-
-## DEBUG LEVELS
-DEBUG_LEVEL <- 0
-#DEBUGLVL.ERR <- 1
-#DEBUGLVL.WARN <- 2
-#DEBUGLVL.INFO <- 3
-DEBUGLVL.DEBUG <- 4
-DEBUGLVL.ALL <- DEBUGLVL.DEBUG + 1
-
-## SKIP SECTIONS OF SCRIPT
-SKIP_DATA_FETCH <- FALSE
-SKIP_HMM_COMPUTE <- FALSE
-
-## Starting values for model (define some reasonable ones)
-
-# set constants
-#set.seed(111111) # set random seed
-MIN_FINITE_VALUE <- .Machine$double.xmin #https://stat.ethz.ch/R-manual/R-devel/library/base/html/zMachine.html
-MAX_FINITE_VALUE <- .Machine$double.xmax #https://stat.ethz.ch/R-manual/R-devel/library/base/html/zMachine.html
-
-# rescale parameters
-
-UNSCALEDMIN.STEPS <- 0
-UNSCALEDMAX.STEPS <- 300  # assume max value is 255 per minute
-RESCALEDMIN.STEPS <- MIN_FINITE_VALUE #1 OR + 1/(-1 + UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS)
-RESCALEDMAX.STEPS <- 1 #301
-RESCALEFACTOR.STEPS <- (RESCALEDMAX.STEPS - RESCALEDMIN.STEPS) / (UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS)
+#####################################################################################################################
+while(FALSE)
+{
+  
 
 # hmm parameters
-DIST_LOG_PROB <- FALSE # use log probabilities to deal with small values
-STATES <- 3
-MAX_ITER <- 1000
-TRAINSET_PERCENTAGE <- 1.0  # fraction of data set to use as trainingSet
-NYHA_CLASS_VEC <- as.factor(c("II","III"))
+  # states ####
+STATES <- c("Begin","Fair","Loaded")
+#STATES <- c(1,2,3) ###
+  ### initial state probabilities
 INIT.P <- c(0.99,0.005,0.005) #pi
-INIT.TRANS <- matrix(c(0.9, 0.3, 0.33,
-                       0.05, 0.5, 0.33,
-                       0.05, 0.2, 0.33), nrow = STATES)
+  ### initial transition probabilities ###
+#INIT.TRANS <- matrix(c(0.9, 0.3, 0.33,
+#                       0.05, 0.5, 0.33,
+#                       0.05, 0.2, 0.33), nrow = length(STATES))
+INIT.TRANS <- matrix(c(0, 0, 0,
+                       0.99, 0.95, 0.1,
+                       0.01, 0.5, 0.9), nrow = length(STATES))
+dimnames(INIT.TRANS) <- list(from = STATES, to = STATES)
+  # emission probabilities
+
 # !! N.B. init emission distributions should be set in Pure-Model Distribution Setup (follows) !!
 
 ####1#### Parameters & Starting Values ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ####2#### Pure-Model Distribution Setup ---------------------------------------------
-# more info from "Hidden Semi Markov Models for Multiple Observation Sequences: The mhsmm Package for R"
-# download @ https://www.jstatsoft.org/article/view/v039i04/v39i04.pdf
+# more info from "Analysis with Profile Hidden Markov Models"
+# package info @ https://cran.r-project.org/web/packages/aphid/aphid.pdf
+# vignette @ https://cran.r-project.org/web/packages/aphid/vignettes/aphid-vignette.html
 
 # Set initial emission distribution parameters below (will vary depending on distribution used)
 
 initialStepGuess.means <- c(1,40,100) * RESCALEFACTOR.STEPS
 initialStepGuess.variances <- c(10,80,1000) * (RESCALEFACTOR.STEPS^2)
 initialStepGuess.stdevs <- sqrt(initialStepGuess.variances)
-
-### NORMAL ### (pg. 2)
-#INIT.EMIS <- list(mu = initialStepGuess.means, sigma = initialStepGuess.stdevs) # for normal distribution
-#DDIST.HSMM = dnorm.hsmm
-#MSTEP.DIST = mstep.norm
-#RDIST.HSMM = rnorm.hsmm 
-
-### POISSON ### (pg. 17)
-#INIT.EMIS <- list(lambda = (initialStepGuess.means, type = "poisson")  # for poisson distribution
-#DDIST.HSMM = dpois.hsmm
-#MSTEP.DIST = mstep.pois
-#RDIST.HSMM = rpois.hsmm
 
 ### GAMMA (custom) ### (pg. 17)
 # At large k/shape/a value the gamma distribution begins to converge to the normal dist (central limit theorem) w/
@@ -140,117 +203,6 @@ LOWER_APPROX_THRESHOLD <- 0.02 # one order of magnitude less than code from: htt
 INIT.EMIS <- list(shape = (initialStepGuess.means^2)/(initialStepGuess.variances),  # for large k, k = (mu/sigma)^2
                   scale = (initialStepGuess.variances)/(initialStepGuess.means),  # for large k, theta = (sigma^2)/mu
                   type = "gamma")  # for gamma distribution
-
-DDIST.HSMM <- function (x, j, model){
-
-    shape <- model$parms.emission$shape[j]
-    scale <- model$parms.emission$scale[j]
-
-    # if debugging print out parameters to help (debugging)
-    printDebug = FALSE
-    if(DEBUG_LEVEL >= DEBUGLVL.DEBUG)
-    {
-      printDebug = TRUE
-    }
-    if(printDebug)
-    {
-      cat("\n\tattempted parameters (shape=", shape, " & scale=", scale,")", sep="")
-    }
-
-    # estimate gamma distribution (approximate with normal if shape (k) is high)
-    result <- dgammaPlus(x, shape=shape, scale=scale, log=DIST_LOG_PROB)
-
-    return(result)
-}
-
-# estimates gamma distribution parameters using method of moments
-gammafit2 <- function(x,wt=NULL) {
-  # based on hmsmm but improved to handle convergence towards shape->inf
-  tol = 1e-08
-
-  if(is.null(wt)) wt = rep(1,length(x))
-
-  tmp = cov.wt(data.frame(x),wt=wt)
-  xhat = tmp$center
-  xs = sqrt(tmp$cov)
-  s = log(xhat) - mean(weighted.mean(log(x),wt))
-  aold = (xhat/xs)^2
-  a = Inf
-  if(Inf != aold) # added to gammafit2 (if cov too close to 0, then xs -> 0 & aold -> Inf), in which case shape = Inf, scale = 0)
-  {
-    while(abs(a-aold)>tol) {
-      a = aold - (log(aold) - digamma(aold) - s)/((1/aold) - trigamma(aold))
-      aold=a
-    }
-  }
-  # determined parameters ->
-  # A. Scale
-  scale = a
-  # A.2: is scale within gamma distribution limits?
-  if(scale < 0)
-  {
-    iteration = get('currentIttr', envir=mhsmm_global.env)
-    warning(paste('Shape Parameter (=',scale,') is < 0 (unsupported by Gamma distribution): using absolute value. Possibly for iteration ', iteration ,'.',sep=""))
-    scale <- abs(scale)
-  }
-
-  # B. Shape
-  shape = xhat/scale
-
-  # B.2: is shape within gamma distribution limits?
-  if(shape < 0)
-  {
-    iteration = get('currentIttr', envir=mhsmm_global.env)
-    warning(paste('Scale Parameter (=',shape,') is <= 0 (unsupported by Gamma distribution): if <0 then forcing to 0. Possibly for iteration ', iteration ,'.',sep=""))
-    shape <- 0
-  }
-  # return
-  return(list(shape=shape,scale=scale))
-}
-
-MSTEP.DIST <- function (x, wt) {
-    # this is our hack to get some feedback on our progress
-    currentIttr <- get('currentIttr', envir=mhsmm_global.env)
-    currentIttr <- currentIttr + 1
-    cat("\n\t-fit iteration ", currentIttr," (above)")
-    assign('currentIttr', currentIttr, envir=mhsmm_global.env)
-
-    # wt is a T x K matrix (T length, K states), do each one at a time
-    k <- ncol(wt)
-    shape <- numeric(k)
-    scale <- numeric(k)
-    for (i in 1:k){
-      gammaPars <- gammafit2(x,wt[,i])
-      shape[i] <- gammaPars$shape
-      scale[i] <- gammaPars$scale
-      #if(is.infinite(scale[i]))
-      #{
-      #  # then we must make it finite because the mhsmm library does not handle Inf values well
-      #  scale[i] = MAX_FINITE_VALUE
-      #}
-      #if(is.infinite(scale[i]))
-      #{
-      #  shape[i] = MAX_FINITE_VALUE
-      #}
-    }
-    return(list(shape=shape,scale=scale))
-}
-
-
-RDIST.HSMM <- function (x, j, model){
-
-  shape=model$parms.emission$shape[j]
-  scale=model$parms.emission$scale[j]
-
-  if(0 == shape)
-  {
-    browser()
-  }
-
-  result <- rgammaPlus(x, shape=shape, scale=scale)
-
-  return(result)
-}
 
 ####2#### Pure-Model Distribution Setup ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -568,3 +520,4 @@ confusionMatrix(data=hmm.test$predictedClass, reference=hmm.test$NYHAClass)
 #COWS EXAMPLE FOR REFERENCE
 
 ####7#### Plot & Generate Outputs ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+}
