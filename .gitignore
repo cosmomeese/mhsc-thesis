@@ -263,3 +263,5 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+analytics/plots/Patient DayByDay/
+analytics/plots/Patient DayByDay Stacked/
