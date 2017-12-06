@@ -2,7 +2,7 @@
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("ggplot2","ggthemes","dplyr","tidyr")
+pkg <- c("ggplot2","ggthemes","lubridate","plyr","dplyr","tidyr")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -30,7 +30,7 @@ rm(sourceDir)
 plotX <- function(data.clean,CONSTANTS)
 {
   # Constants ####
- 
+  
   LABEL <- list(DATETIME=list(), STEPS=list())
   FORMAT <- list(DATETIME=list(), STEPS=list())
   
@@ -47,44 +47,133 @@ plotX <- function(data.clean,CONSTANTS)
   LABEL$DATETIME$day <- "(start of) Normalized Study Day [Day]"
   FORMAT$DATETIME$day <- "%j" # day of year (000-366)
   
+  TIME_COL_LABEL <- 'Time'
   DAYS_TO_KEEP <- 16
   data.orig <- data.clean
-
+  
   
   ######################################## PLOTS
-
+  
+  # Frequency Spectrum Day by Day by Patient Plot ####
+  # prep
+  id <- "Freq-DayByDayByPatient"
+  title <- "Step Time Series"
+  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
+  
+  # plot
+  for(pat in levels(plotData$StudyIdentifier))
+  {
+    data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
+    if(nrow(data.plotSubset) > 0)
+    {
+      cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
+      title.patient <- paste(title," | ",pat," | Class ",cls,sep="")
+      
+      del <- 0.1
+      x.spec <- spectrum(data.plotSubset$Steps,log="no",span=10,plot=FALSE)
+      spx <- x.spec$freq/del
+      spy <- 2*x.spec$spec
+      graphics::plot(spy~spx,xlab="frequency",ylab="spectral density",type="l")
+      graphics::title(main=title.patient,
+                      xlab="Frequency",
+                      ylabel="Spectral Density")
+      #### WARN HERE!!! THIS PLOT IS NOT YET WORKING ####
+    }
+    else
+    {
+      cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
+    }
+  }
+  
+  
+  # Stacked Day by Day by Patient Plot ####
+  # prep
+  id <- "DayByDayByPatient(Stacked)"
+  title <- "Step Time Series"
+  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
+  
+  # plot
+  for(pat in levels(plotData$StudyIdentifier))
+  {
+    data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
+    if(nrow(data.plotSubset) > 0)
+    {
+      cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
+      title.patient <- paste(title," | Pt",pat,sep="")
+      
+      mapping = aes(x=TIME_PLACEHOLDER,
+                    y=Steps/CONSTANT_CONSTS$RESCALEFACTOR.STEPS,
+                    colour=as.factor(yday(DateTime)))
+      
+      plt <- generateTimeStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
+                                  plotData=data.plotSubset,
+                                  id=id,
+                                  mapping=mapping,
+                                  title=title.patient,
+                                  LABEL_CONSTS=LABEL,
+                                  FORMAT_CONSTS=FORMAT,
+                                  CONSTANT_CONSTS=CONSTANTS,
+                                  nyhaClass=cls)
+      
+      # modify it to scale time axis by hours
+      plt <- plt + 
+        scale_x_datetime(LABEL$DATETIME$hour,
+                         date_labels=FORMAT$DATETIME$hour,
+                         date_breaks="6 hour")
+      
+      # show the plot
+      print(plt)
+      # save plot
+      savePNGPlot(plt)
+    }
+    else
+    {
+      cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
+    }
+  }
+  
+  
+  
+  
   # Day by Day by Patient Plot ####
   # prep
   id <- "DayByDayByPatient"
   title <- "Step Time Series"
-  plotData <- data.orig %>% filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-  # extract time only
-  timeColLabel <- 'Time'  # !!! N.B. fix below in aes if this changes
-  newTimeCol <- plotData$DateTime
-  year(newTimeCol) <- year(CONSTANTS$NORMALIZED_STUDY_DAY_START)
-  yday(newTimeCol) <- yday(CONSTANTS$NORMALIZED_STUDY_DAY_START)
-  plotData[timeColLabel] <- newTimeCol
+  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
+  
   # plot
-  for(cls in CONSTANTS$NYHA_CLASS_VEC)
+  for(pat in levels(plotData$StudyIdentifier))
   {
-    fullTitle <- paste(id,":",title," | FC",cls,sep="")
-    data.plotSubset <- plotData %>% filter(NYHAClass %in% c(cls)) # keep only this NYHA class for plot
-    plt <- ggplot(data=data.plotSubset,
-                  aes(x=Time, y=Steps/CONSTANTS$RESCALEFACTOR.STEPS, colour=StudyIdentifier)) +
-      geom_line(alpha=0.8) +
-      ggtitle(fullTitle) +
-      scale_y_continuous(LABEL$STEPS$perMinute, 
-                         limits=FORMAT$STEPS$perMinute.limits) +
-      scale_x_datetime(LABEL$DATETIME$hour,
-                       date_labels=FORMAT$DATETIME$hour,
-                       date_breaks="6 hour") +
-      facet_wrap(~yday(DateTime)) +
-      theme_tufte() +
-      theme(legend.position = "none")
-    # show the plot
-    print(plt)
-    # save plot
-    savePNGPlot(plt,fullTitle)
+    data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
+    if(nrow(data.plotSubset) > 0)
+    {
+      cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
+      title.patient <- paste(title," | Pt",pat,sep="")
+      plt <- generateTimeStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
+                                  plotData=data.plotSubset,
+                                  id=id,
+                                  title=title.patient,
+                                  LABEL_CONSTS=LABEL,
+                                  FORMAT_CONSTS=FORMAT,
+                                  CONSTANT_CONSTS=CONSTANTS,
+                                  nyhaClass=cls)
+      
+      # modify it to scale time axis by hours
+      plt <- plt + 
+        scale_x_datetime(LABEL$DATETIME$hour,
+                         date_labels=FORMAT$DATETIME$hour,
+                         date_breaks="6 hour") +
+        facet_wrap(~yday(DateTime))
+      
+      # show the plot
+      print(plt)
+      # save plot
+      savePNGPlot(plt)
+    }
+    else
+    {
+      cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
+    }
   }
   
   
@@ -92,87 +181,81 @@ plotX <- function(data.clean,CONSTANTS)
   # prep
   id <- "DayByDay"
   title <- "Step Time Series"
-  plotData <- data.orig %>% filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-  # extract time only
-  timeColLabel <- 'Time'  # !!! N.B. fix below in aes if this changes
-  newTimeCol <- plotData$DateTime
-  year(newTimeCol) <- year(CONSTANTS$NORMALIZED_STUDY_DAY_START)
-  yday(newTimeCol) <- yday(CONSTANTS$NORMALIZED_STUDY_DAY_START)
-  plotData[timeColLabel] <- newTimeCol
+  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
+  
   # plot
   for(cls in CONSTANTS$NYHA_CLASS_VEC)
   {
-    fullTitle <- paste(id,":",title," | FC",cls,sep="")
-    data.plotSubset <- plotData %>% filter(NYHAClass %in% c(cls)) # keep only this NYHA class for plot
-    plt <- ggplot(data=data.plotSubset,
-                  aes(x=Time, y=Steps/CONSTANTS$RESCALEFACTOR.STEPS, colour=StudyIdentifier)) +
-      geom_line(alpha=0.8) +
-      ggtitle(fullTitle) +
-      scale_y_continuous(LABEL$STEPS$perMinute, 
-                         limits=FORMAT$STEPS$perMinute.limits) +
+    plt <- generateTimeStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
+                                plotData=plotData,
+                                id=id,
+                                title=title,
+                                LABEL_CONSTS=LABEL,
+                                FORMAT_CONSTS=FORMAT,
+                                CONSTANT_CONSTS=CONSTANTS,
+                                nyhaClass=cls)
+    # modify it to scale time axis by hours
+    plt <- plt + 
       scale_x_datetime(LABEL$DATETIME$hour,
                        date_labels=FORMAT$DATETIME$hour,
                        date_breaks="6 hour") +
-      facet_wrap(~yday(DateTime)) +
-      theme_tufte() +
-      theme(legend.position = "none")
+      facet_wrap(~yday(DateTime))
+    
     # show the plot
     print(plt)
     # save plot
-    savePNGPlot(plt,fullTitle)
+    savePNGPlot(plt)
   }
   
-    
+  
   # Hours Plot ####
-    # prep
+  # prep
   id <- "Hours"
   title <- "Step Time Series"
-  plotData <- data.orig %>% filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-    # plot
+  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
+  # plot
   for(cls in CONSTANTS$NYHA_CLASS_VEC)
   {
-    fullTitle <- paste(id,":",title," | FC",cls,sep="")
-    data.plotSubset <- plotData %>% filter(NYHAClass %in% c(cls)) # keep only this NYHA class for plot
     # generate basic plot
-    plt <- generateBasicTimeStepPlot(plotData=plotData,
-                                     id=id,
-                                     title=title,
-                                     LABEL_CONSTS=LABEL,
-                                     FORMAT_CONSTS=FORMAT,
-                                     CONSTANT_CONSTS=CONSTANTS,
-                                     nyhaClass=cls)
+    plt <- generateDateTimeStepPlot(plotData=plotData,
+                                    id=id,
+                                    title=title,
+                                    LABEL_CONSTS=LABEL,
+                                    FORMAT_CONSTS=FORMAT,
+                                    CONSTANT_CONSTS=CONSTANTS,
+                                    nyhaClass=cls)
     # modify it to scale time axis by hours
-    plt <- plt +  scale_x_datetime(LABEL$DATETIME$hour,
-                                date_labels=FORMAT$DATETIME$hour,
-                                date_breaks="6 hour")
+    plt <- plt + scale_x_datetime(LABEL$DATETIME$hour,
+                                  date_labels=FORMAT$DATETIME$hour,
+                                  date_breaks="6 hour")
     
     # show the plot
     print(plt)
     # save plot
-    savePNGPlot(plt,fullTitle)
+    savePNGPlot(plt)
   }
   
   # Days Plot ####
-    # prep
+  # prep
   id <- "AllDays"
   title <- "Step Time Series"
   plotData <- data.orig
-    # plot
+  # plot
   for(cls in CONSTANTS$NYHA_CLASS_VEC)
   {
     # generate basic plot
-    plt <- generateBasicTimeStepPlot(plotData=plotData,
-                                     id=id,
-                                     title=title,
-                                     LABEL_CONSTS=LABEL,
-                                     FORMAT_CONSTS=FORMAT,
-                                     CONSTANT_CONSTS=CONSTANTS,
-                                     nyhaClass=cls)
+    plt <- generateDateTimeStepPlot(plotData=plotData,
+                                    id=id,
+                                    title=title,
+                                    LABEL_CONSTS=LABEL,
+                                    FORMAT_CONSTS=LABEL,
+                                    CONSTANT_CONSTS=CONSTANTS,
+                                    nyhaClass=cls)
     # modify it to scale time axis by days
-    plt <- plt +  scale_x_datetime(LABEL_CONSTS$DATETIME$day,
-                                   date_labels=FORMAT_CONSTS$DATETIME$day,
+    plt <- plt +  scale_x_datetime(LABEL$DATETIME$day,
+                                   date_labels=FORMAT$DATETIME$day,
                                    date_breaks="1 day")
-
+    
     # show the plot
     print(plt)
     # save plot
@@ -180,30 +263,126 @@ plotX <- function(data.clean,CONSTANTS)
   }
 }
 
-# plots basic time step plot. if no nyhaClass is specified then will plot all classes
-generateBasicTimeStepPlot <- function(plotData, 
-                                      id=Sys.time(),
-                                      title="Plot", 
-                                      LABEL_CONSTS, 
-                                      FORMAT_CONSTS, 
-                                      CONSTANT_CONSTS,
-                                      nyhaClass)
+# adds a column with label TIME_COL_LABEL to the DATA that contains only the time component of the column with sourceColumnlabel.
+# the time column will have a date corresponding to the NORMALIZED_STUDY_DAY_START in CONSTANTS_CONSTS
+addTimeColumn <- function(data,sourceColumnLabel,TIME_COL_LABEL,CONSTANT_CONSTS)
 {
-  # since cls is considered optional, 
-  if(!missing(nyhaClass))
+  # extract time only
+  newTimeCol <- data[[sourceColumnLabel]]
+  year(newTimeCol) <- lubridate::year(CONSTANT_CONSTS$NORMALIZED_STUDY_DAY_START)
+  yday(newTimeCol) <- lubridate::yday(CONSTANT_CONSTS$NORMALIZED_STUDY_DAY_START)
+  data[TIME_COL_LABEL] <- newTimeCol
+  return(data)
+}
+
+# plots basic time step plot using mapping (i.e. as with generateDateTimeStepPlot but replaces datetime w/ time variable).
+# N.B. will replace instances of TIME_PLACEHOLDER in mapping (i.e. specify as TIME_PLACEHOLDER with quotation marks) with the TIME_COL_LABEL specified
+# i.e. if you specify in mapping that x=TIME_PLACEHOLDER it will plot time as the x value (so you can still use datetime if desired).
+# N.B. generateDateTimeStepPlot performs faster if you don't need to plot actual time
+# if no mapping is specified it will simply plot DateTime vs Steps according colored by StudyID
+# if no nyhaClass is specified it will plot the no nyhaClass setting of generateDateTimeStepPlot
+generateTimeStepPlot <- function(TIME_COL_LABEL,
+                                 plotData,
+                                 mapping,
+                                 id=Sys.time(),
+                                 title="Plot", 
+                                 LABEL_CONSTS, 
+                                 FORMAT_CONSTS, 
+                                 CONSTANT_CONSTS,
+                                 nyhaClass=NULL)
+{
+  KEY_WORD = "TIME_PLACEHOLDER"
+  plotData.withTimeCol <- addTimeColumn(data = plotData,
+                                        sourceColumnLabel = "DateTime",
+                                        TIME_COL_LABEL = TIME_COL_LABEL,
+                                        CONSTANT_CONSTS = CONSTANT_CONSTS)
+  
+  if(missing(mapping))
   {
-    plotData <- plotData %>% filter(NYHAClass %in% c(nyhaClass))  # keep only this NYHA class for plot
+    mapping = aes(x=TIME_PLACEHOLDER,
+                  y=Steps/CONSTANT_CONSTS$RESCALEFACTOR.STEPS,
+                  colour=StudyIdentifier)
+  }
+  for(i in 1:length(mapping))
+  {
+    mapping[[i]] <- recurseChangingKeywords(mapping[[i]],
+                                            REPLACE_WORD = KEY_WORD,
+                                            NEW_WORD = TIME_COL_LABEL)
+  }
+  
+  plt <- generateDateTimeStepPlot(plotData=plotData.withTimeCol,
+                                  mapping=mapping,
+                                  id=id,
+                                  title=title, 
+                                  LABEL_CONSTS=LABEL_CONSTS, 
+                                  FORMAT_CONSTS=FORMAT_CONSTS, 
+                                  CONSTANT_CONSTS=CONSTANT_CONSTS,
+                                  nyhaClass=nyhaClass)
+  return(plt)
+}
+
+# recursively change the keywords in mappedObject ('name' or 'call' object) changing the REPLACE_WORDs to NEW_WORDs
+recurseChangingKeywords <- function(mappedObject,REPLACE_WORD,NEW_WORD)
+{
+  mappingClass = class(mappedObject)
+  if("name" == mappingClass) # termination condition
+  {
+    mappedObject <- as.name(gsub(REPLACE_WORD, NEW_WORD, mappedObject))
+  }
+  else if("call" == mappingClass)
+  {
+    callList <- as.list(mappedObject)
+    for(call_index in 1:length(callList))
+    {
+      callList[[call_index]] <- recurseChangingKeywords(mappedObject= callList[[call_index]],
+                                                        REPLACE_WORD = REPLACE_WORD,
+                                                        NEW_WORD = NEW_WORD)
+    }
+    mappedObject <- as.call(callList)
+  }
+  return(mappedObject)
+}
+
+# plots basic datetime step plot using mapping.
+# if no mapping is specified it will simply plot DateTime vs Steps according colored by StudyID
+# if no nyhaClass (NULL or missing or '') is specified then will plot all classes
+#     - if no nyhaClass = '' then will also not add a label to plot regarding NYHA class
+generateDateTimeStepPlot <- function(plotData,
+                                     mapping,
+                                     id=Sys.time(),
+                                     title="Plot", 
+                                     LABEL_CONSTS, 
+                                     FORMAT_CONSTS, 
+                                     CONSTANT_CONSTS,
+                                     nyhaClass=NULL)
+{
+  # since cls is considered optional,
+  fullTitle <- paste(id,":",title,sep="")
+  TITLE_SEP = " | "
+  if(!((missing(nyhaClass) || is.null(nyhaClass)) || nyhaClass == ''))
+  {
+    plotData <- plotData %>% dplyr::filter(NYHAClass %in% c(nyhaClass))  # keep only this NYHA class for plot
+    fullTitle <- paste(fullTitle,TITLE_SEP,"FC",nyhaClass,sep="")
+  }
+  else if(!is.null(nyhaClass) && nyhaClass == '')
+  {
+    # do nothing
   }
   else
   {
-    nyhaClass = "-all"
+    fullTitle <- paste(fullTitle,"FC-all",sep=TITLE_SEP)
   }
-  fullTitle <- paste(id,":",title," | FC",nyhaClass,sep="")
+  # if missing mapping, using default
+  if(missing(mapping))
+  {
+    mapping = aes(x=DateTime,
+                  y=Steps/CONSTANT_CONSTS$RESCALEFACTOR.STEPS,
+                  colour=StudyIdentifier)
+  }
+  
   lineTransparency = 0.8
   plt <- ggplot(data=plotData,
-                aes(x=DateTime,
-                    y=Steps/CONSTANT_CONSTS$RESCALEFACTOR.STEPS,
-                    colour=StudyIdentifier)) +
+                mapping) +
     geom_line(alpha=lineTransparency) +
     ggtitle(fullTitle) +
     scale_y_continuous(LABEL_CONSTS$STEPS$perMinute, 
@@ -217,7 +396,7 @@ generateBasicTimeStepPlot <- function(plotData,
 savePNGPlot <- function(plt,width=1920,height=1080,saveDir="plots/")
 {
   ext <- ".png"
-  cleanPlotTitle <- gsub('[^a-zA-Z\\(\\)\\,\\-\\_\\+\\=[:space:]]', '-', plt$labels$title)
+  cleanPlotTitle <- gsub('[^a-zA-Z0-9\\(\\)\\,\\-\\_\\+\\=[:space:]]', '-', plt$labels$title)
   success <- createDirectoryIfNotExists(saveDir)
   if(!success)
   {
@@ -243,6 +422,29 @@ createDirectoryIfNotExists <- function(subDir)
   }
   return(dir.exists(fp))
   
+}
+
+# for a vector containing a single factor level returns the value of that factor
+# for a vector containing more than a single factor levels returns NULL value
+# for a vector containing < 0 factor levels returns empty string ('') & a warning
+getSingleFactorFromVector <- function(vec,asCharacter=FALSE)
+{
+  cls <- NULL
+  numClassesInVector <- dplyr::n_distinct(vec)
+  if(1 == numClassesInVector)
+  {
+    cls <- dplyr::first(vec)
+    if(asCharacter)
+    {
+      cls <- as.character(cls)
+    }
+  }
+  else if(0 >= numClassesInVector)
+  {
+    cls <- ''
+    warning('detected 0 or less distinct factors in provided vector')
+  }
+  return(cls)
 }
 
 
