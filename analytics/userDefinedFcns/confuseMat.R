@@ -1,3 +1,13 @@
+pkg <- c("ggplot2")
+new.pkg <- pkg[!(pkg %in% installed.packages())]
+
+if (length(new.pkg)) {
+  install.packages(new.pkg)
+}
+rm(pkg,new.pkg)
+# load the library
+library(ggplot2)
+
 confuseMat <- function(predictedC, trueC)
 {
   #generate random data 
@@ -32,5 +42,7 @@ confuseMat <- function(predictedC, trueC)
     geom_tile(aes(x=Actual,y=Predicted),data=subset(confusion, as.character(Actual)==as.character(Predicted)), color="black",size=0.3, fill="black", alpha=0) 
   
   #render
-  tile
+  print(tile)
+  
+  return(confusion)
 }

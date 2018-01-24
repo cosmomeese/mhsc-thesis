@@ -1,7 +1,9 @@
 ### Determine Data Distribution Script
 
 ## NOTE!!! MAKE SURE TO LOAD DISTRIBUTION BEFORE RUNNING SCRIPT (MODIFY BELOW):
-dataVector <- testSet[[1]]$StepData[[1]]$Intraday[[3]]$Steps
+#dataVector <- testSet[[1]]$StepData[[1]]$Intraday[[3]]$Steps
+dataVector <- data.train$Steps
+#dataVector <- data.train$HeartRate
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer

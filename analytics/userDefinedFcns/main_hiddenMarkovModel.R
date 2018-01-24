@@ -104,7 +104,7 @@ stop("Function not developed past this point")
 if(!SKIP_HMM_TRAIN)
 {
   # Generate Potential Models
-  potentialModelList <- hmm_generateModels(data.train)
+  potentialModelsDF <- hmm_generateModels(data.train)
 }
 
 if(!SKIP_MICROSIMULATION)
@@ -119,31 +119,17 @@ if(!SKIP_MICROSIMULATION)
 }
 
 # Apply Models to Each Patient
-patientProbability.df <- hmm_applyModels(potentialModelList,data.test)
+modelProbabilitysForPatients.df <- hmm_applyModels(potentialModelsDF,data.test)
 
 # Extract Ideal Model
-trueClasses <-
-modelScores.df <- hmm_scoreModels(patientProbability.df,trueClasses)
+trueClasses.df <- data.test %>% dplyr::select(StudyIdentifier,NYHAClass) %>% group_by(StudyIdentifier) %>% summarise_all(first)
+modelScores.df <- hmm_scoreModels(modelProbabilitysForPatients.df,trueClasses.df)
 
 # Print out some Info
 hmm_viewScores(modelScores.df)
 
 # Clean-up functions & variables (since this is a script)
-
-# compress & save important variables in list of constants used
-CONSTANTS <- sapply(c( 'NYHA_CLASS_VEC',
-                      'MAX_FINITE_VALUE',
-                      'MIN_FINITE_VALUE',
-                      'UNSCALEDMAX.STEPS',
-                      'UNSCALEDMIN.STEPS',
-                      'RESCALEDMAX.STEPS',
-                      'RESCALEDMIN.STEPS',
-                      'RESCALEFACTOR.STEPS',
-                      'NORMALIZED_STUDY_DAY_START'),
-                    FUN=get)
-
-rm(list=names(CONSTANTS))  # remove individual variables
-rm(DEBUG_LEVEL,DEBUGLVL.ALL,DEBUGLVL.DEBUG)  # remove now irrelevant debug variables
+rm(DEBUG_LEVEL,DEBUGLVL.ALL,DEBUGLVL.DEBUG,DEBUGLVL.INFO)  # remove now irrelevant debug variables
 rm(SKIP_DATA_FETCH,SKIP_HMM_TRAIN,SKIP_MICROSIMULATION)  # remove (also) now irrelevant skip variables
 
 rm(list=unlist(fcns)) #remove functions

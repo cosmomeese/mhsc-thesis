@@ -101,7 +101,7 @@ createDepMixS4DataSet <- function(dataSubSet)  # NOTE WE POTENTIALLY REUSE THIS 
 {
   
   printDebug = FALSE
-  if(DEBUG_LEVEL >= DEBUGLVL.DEBUG)
+  if(debugGivenThreshold(DEBUGLVL.INFO))
   {
     printDebug = TRUE
   }
@@ -137,7 +137,7 @@ createDepMixS4DataSet <- function(dataSubSet)  # NOTE WE POTENTIALLY REUSE THIS 
 {
   
   printDebug = FALSE
-  if(DEBUG_LEVEL >= DEBUGLVL.DEBUG)
+  if(debugGivenThreshold(DEBUGLVL.INFO))
   {
     printDebug = TRUE
   }
@@ -189,7 +189,7 @@ createHSMMDataSet <- function(dataSubSet)  # NOTE WE POTENTIALLY REUSE THIS IN T
   dataSubSet.seqM <- max(dataSubSet.N)  # max sequence length (important for fitting sojourn gamma distribution
   
   printDebug = FALSE
-  if(DEBUG_LEVEL >= DEBUGLVL.DEBUG)
+  if(debugGivenThreshold(DEBUGLVL.INFO))
   {
     printDebug = TRUE
   }
