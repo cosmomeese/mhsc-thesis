@@ -265,3 +265,4 @@ TSWLatexianTemp*
 *-tags.tex
 analytics/plots/Patient DayByDay/
 analytics/plots/Patient DayByDay Stacked/
+*.RDataTmp
