@@ -1,0 +1,243 @@
+VAR: Handedness-------------------------------
+
+VAR: WristbandPreference-------------------------------
+
+VAR: NYHAClassMixed & Others----------------------
+
+Yes it will be, but need to extend console history to view this
+
+VAR: EjectionFraction-------------------------------
+ 
+VAR: HFDiagnosisYear-------------------------------
+
+VAR: HFTreatmentsToDate-------------------------------
+
+VAR: RegularPhysicalActivities-------------------------------
+
+VAR: Exercises-------------------------------
+
+VAR: DeviceID-------------------------------
+
+VAR: ID-------------------------------
+
+VAR: CPSDate-------------------------------
+
+VAR: Sex-------------------------------
+
+VAR: Age-------------------------------
+
+VAR: Height-------------------------------
+
+VAR: Weight-------------------------------
+
+VAR: SBP.Resting-------------------------------
+
+ . SBP.Resting by NYHAClass . p-value = 0.08406
+
+ * SBP.Resting by PureNYHAClass * p-value = 0.02456
+
+VAR: DBP.Resting-------------------------------
+
+VAR: HR.Resting-------------------------------
+
+VAR: O2Sat.Resting-------------------------------
+
+VAR: FEV.Resting-------------------------------
+
+VAR: FEV.Resting.Percentage-------------------------------
+
+VAR: FVC.Resting-------------------------------
+
+VAR: FVC.Resting.Percentage-------------------------------
+
+VAR: SBP-------------------------------
+
+ * SBP by NYHAClass * p-value = 0.04557
+
+ * SBP by PureNYHAClass * p-value = 0.01874
+
+
+VAR: DBP-------------------------------
+
+VAR: HR-------------------------------
+
+ * HR by NYHAClass * p-value = 0.04949
+
+ . HR by PureNYHAClass . p-value = 0.05811
+
+
+VAR: HR.1min-------------------------------
+
+ . HR.1min by NYHAClass . p-value = 0.06949
+
+
+VAR: HR.1minDrop-------------------------------
+
+ * HR.1minDrop by NYHAClass * p-value = 0.01593
+
+ * HR.1minDrop by PureNYHAClass * p-value = 0.02902
+
+ . HR.1minDrop by ExplicitNYHAClass . p-value = 0.07341
+   df = 3
+
+VAR: O2Sat-------------------------------
+
+VAR: Duration-------------------------------
+
+ * Duration by NYHAClass * p-value = 0.01674
+
+ * Duration by PureNYHAClass * p-value = 0.02712
+
+
+VAR: Watts-------------------------------
+
+ * Watts by NYHAClass * p-value = 0.02835
+
+ * Watts by PureNYHAClass * p-value = 0.04308
+
+
+VAR: Watts.Predicted.Percentage-------------------------------
+
+ * Watts.Predicted.Percentage by NYHAClass * p-value = 0.01507
+
+ . Watts.Predicted.Percentage by PureNYHAClass . p-value = 0.07393
+
+ * Watts.Predicted.Percentage by ExplicitNYHAClass *p-value = 0.04408
+   df = 3
+
+VAR: TestEnd.Reason-------------------------------
+
+VAR: TestEnd.Symptom-------------------------------
+
+VAR: VO2.perBodyWeight-------------------------------
+
+ . VO2.perBodyWeight by NYHAClass . p-value = 0.05268
+
+VAR: VO2.Predicted.Relative-------------------------------
+
+VAR: VO2.Predicted.Relative.Percentage-------------------------------
+
+ . VO2.Predicted.Relative.Percentage by NYHAClass . p-value = 0.07154
+
+VAR: VO2-------------------------------
+
+VAR: VO2.Predicted.Absolute-------------------------------
+
+VAR: VO2.Predicted.Absolute.Percentage-------------------------------
+
+VAR: VE.Peak-------------------------------
+
+VAR: VCO2.Peak-------------------------------
+
+ . VCO2.Peak by NYHAClass . p-value = 0.05352
+
+ . VCO2.Peak by PureNYHAClass . p-value = 0.07276
+
+VAR: VEperVCO2.Peak-------------------------------
+
+ * VEperVCO2.Peak by NYHAClass * p-value = 0.02513
+
+ * VEperVCO2.Peak by PureNYHAClass * p-value = 0.03445
+
+VAR: VEperVCO2.atAT-------------------------------
+
+ ** VEperVCO2.atAT by NYHAClass ** p-value = 0.006915
+
+ ** VEperVCO2.atAT by PureNYHAClass ** p-value = 0.00227
+
+ * VEperVCO2.atAT by ExplicitNYHAClass * p-value = 0.01403
+   df = 3
+
+VAR: AT-------------------------------
+
+ . AT by NYHAClass . p-value = 0.0592
+
+VAR: VO2.Peak.Measured.Percentage-------------------------------
+
+VAR: VO2.Peak.Predicted.Percentage-------------------------------
+
+ * VO2.Peak.Predicted.Percentage by NYHAClass * p-value = 0.03128
+
+ . VO2.Peak.Predicted.Percentage by PureNYHAClass . p-value = 0.08271
+
+ . VO2.Peak.Predicted.Percentage by ExplicitNYHAClass . p-value = 0.09387
+   df = 3
+
+VAR: RER.Peak (espiratory Exchange Ratio)---
+
+ ** RER.Peak by NYHAClass ** p-value = 0.001705
+
+ ** RER.Peak by PureNYHAClass ** p-value = 0.00118
+
+ ** RER.Peak by ExplicitNYHAClass ** p-value = 0.008718
+    df = 3
+
+VAR: RPEper20.Peak-------------------------------
+
+VAR: PETCO2.Peak-------------------------------
+
+VAR: OUES-------------------------------
+
+VAR: TotalRiskScore-------------------------------
+
+VAR: StepData.MeanDailyTotalSteps-------------------------------
+
+ * StepData.MeanDailyTotalSteps by NYHAClass * p-value = 0.04106
+
+ * StepData.MeanDailyTotalSteps by PureNYHAClass * p-value = 0.04994
+
+VAR: StepData.StdDevDailyTotalSteps-------------------------------
+
+ * StepData.StdDevDailyTotalSteps by NYHAClass * p-value = 0.03704
+
+ ** StepData.StdDevDailyTotalSteps by PureNYHAClass ** p-value = 0.009546
+
+ . StepData.StdDevDailyTotalSteps by ExplicitNYHAClass . p-value = 0.05366
+   df = 3
+
+
+VAR: StepData.MeanDailyMeanSteps-------------------------------
+
+ * StepData.MeanDailyMeanSteps by NYHAClass * p-value = 0.04106
+
+ * StepData.MeanDailyMeanSteps by PureNYHAClass * p-value = 0.04994
+
+
+VAR: StepData.StdDevDailyMeanSteps-------------------------------
+
+ * StepData.StdDevDailyMeanSteps by NYHAClass * p-value = 0.03704
+
+ ** StepData.StdDevDailyMeanSteps by PureNYHAClass ** p-value = 0.009546
+
+ . StepData.StdDevDailyMeanSteps by ExplicitNYHAClass . p-value = 0.05366
+   df = 3
+
+VAR: StepData.ModeDailyModeSteps-------------------------------
+
+VAR: StepData.MeanDailyMinSteps-------------------------------
+
+VAR: StepData.MeanDailyMaxSteps-------------------------------
+
+ * StepData.MeanDailyMaxSteps by NYHAClass * p-value = 0.01627
+
+ * StepData.MeanDailyMaxSteps by PureNYHAClass * p-value = 0.04267
+
+VAR: StepData.ModeDailyMinSteps-------------------------------
+
+VAR: StepData.ModeDailyMaxSteps-------------------------------
+
+ ** StepData.ModeDailyMaxSteps by NYHAClass ** p-value = 0.00252
+
+ ** StepData.ModeDailyMaxSteps by PureNYHAClass ** p-value = 0.00898
+
+ * StepData.ModeDailyMaxSteps by ExplicitNYHAClass * p-value = 0.022
+   df = 3
+
+VAR: StepData.MaxDailyMaxSteps-------------------------------
+
+ ** StepData.MaxDailyMaxSteps by NYHAClass ** p-value = 0.003692
+
+ * StepData.MaxDailyMaxSteps by PureNYHAClass * p-value = 0.01044
+
+ * StepData.MaxDailyMaxSteps by ExplicitNYHAClass * p-value = 0.03736
+   df = 3

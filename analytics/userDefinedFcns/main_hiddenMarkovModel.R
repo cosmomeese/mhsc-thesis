@@ -26,13 +26,13 @@ sourceDir <- "userDefinedFcns"
 fcns <- list("unnestStepDataFrame",
              #"confuseMat",
              #"improvedGammaDist",
-             #"hmm_applyModels",
+             "hmm_applyModels",
              "hmm_cleanData",
              "hmm_convertRawData",
              "hmm_extractMicroSimProperties",
-             #"hmm_generateModels",
+             "hmm_generateModels",
              "hmm_microSimulate",
-             #"hmm_scoreModels",
+             "hmm_scoreModels",
              "hmm_viewScores",
              "hmm_common"
              )
@@ -84,6 +84,7 @@ if(!exists("simonData.Importer.CodeVersion"))
 # SOME TIME SAVING PARAMETERS
 SKIP_DATA_FETCH = FALSE
 SKIP_MICROSIMULATION = TRUE
+SKIP_TEST_DATA_FETCH = !SKIP_MICROSIMULATION || FALSE
 SKIP_HMM_TRAIN = FALSE
 
 ## Do Science!
@@ -97,9 +98,8 @@ if(!SKIP_DATA_FETCH)
   data.clean <- hmm_cleanData(data.form); rm(data.form)
   
   data.train <- data.clean; rm(data.clean)
-} else { cat("\nM: Skipped loading dataset...") }
+} else { cat("\nM: Skipped loading training dataset...") }
 
-stop("Function not developed past this point")
 
 if(!SKIP_HMM_TRAIN)
 {
@@ -109,11 +109,25 @@ if(!SKIP_HMM_TRAIN)
 
 if(!SKIP_MICROSIMULATION)
 {
+  stop("Function not developed past this point (hmm_extractMicroSimProperties")
+  cat("\nM: Performing microsimluation...")
   # Microsimulate test data
   stat_properties <- hmm_extractMicroSimProperties(data.train)
   data.test <- hmm_microSimulate(data.clean, stat_properties); rm(stat_properties); #rm(data.train)
-}else
-{
+}else if(!SKIP_TEST_DATA_FETCH) {
+
+  cat("\nM: Fetching Test Dataset...")
+  
+  # Import/Format
+  data.form <- hmm_convertRawData(rawData=raghadParticipantData.df,
+                                  fitbitDownload=TRUE)
+  
+  # Pre-Process
+  data.clean <- hmm_cleanData(data.form); rm(data.form)
+  
+  data.test <- data.clean; rm(data.clean); #rm(data.train)
+
+} else {
   cat("\nM: Skipped microsimluation...")
   data.test <- data.train; rm(data.train)
 }
@@ -126,6 +140,7 @@ trueClasses.df <- data.test %>% dplyr::select(StudyIdentifier,NYHAClass) %>% gro
 modelScores.df <- hmm_scoreModels(modelProbabilitysForPatients.df,trueClasses.df)
 
 # Print out some Info
+stop("Function not developed past this point (hmm_viewScores)")
 hmm_viewScores(modelScores.df)
 
 # Clean-up functions & variables (since this is a script)

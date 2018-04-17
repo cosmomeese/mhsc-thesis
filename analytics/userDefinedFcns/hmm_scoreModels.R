@@ -61,9 +61,9 @@ hmm_scoreModels <- function(modelProbabilitysForPatients.df,trueClasses.df)
   colnames(modelCombinations.classified)[colnames(modelCombinations.classified)==classColName] <- newColName # rename old class col to newColName
   
   # Evaluate Overall Performance for Model Combos
-  score <- hmm_scoreModels.Evaluate(modelCombinations.classified)
+  score.df <- hmm_scoreModels.Evaluate(modelCombinations.classified)
   
-  return(result.df)
+  return(score.df)
   
 }
 

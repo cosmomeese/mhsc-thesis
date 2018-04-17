@@ -7,8 +7,10 @@
 
 calculateSimonDataMetrics <- function(processedData)
 {
+  #N.B. returns the most frequent element or the first one for multi-modals unique
   Statistical.Mode <- function(x) { #http://stackoverflow.com/a/8189441
-    ux <- unique(x)
+    
+        ux <- unique(x)
     ux[which.max(tabulate(match(x, ux)))]
   }
   

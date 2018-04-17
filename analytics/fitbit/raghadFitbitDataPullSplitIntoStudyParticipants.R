@@ -10,6 +10,8 @@
 
 warning("Import fitbitData.df from RaghadDataRawPull.Rdata (or use fitbitPullScriptForStudy to pull raw Fitbit data from the 6 study emails)")
 
+library('readr')
+
 reprocessfilePath <- "fitbit/RaghadData-Clean.csv"
 reprocessCSV <- read_csv(reprocessfilePath)
 
@@ -25,13 +27,15 @@ attr(reprocessCSV, "spec") <- NULL
 
 workingCopy <- fitbitData.df
 workingCopy$temp <- factor(NA,levels=levels(reprocessCSV$StudyIdentifier))
+dateFormat <- "%Y-%m-%d %H:%M:%S"
 #iterate below for each StudyIdentifier
 for(pIndex in 1:nrow(reprocessCSV))
 {
   thisKitID <- workingCopy$StudyIdentifier==reprocessCSV$Kit[[pIndex]]
-  startDate <- reprocessCSV$StartDate[[pIndex]]
+  startDate <- as.POSIXct(paste(reprocessCSV$StartDate[[pIndex]], "00:00:00"),
+                          format = dateFormat)
   endDate <- as.POSIXct(paste(reprocessCSV$EndDate[[pIndex]],"23:59:00"),
-                        format = "%Y-%m-%d %H:%M:%S")
+                        format = dateFormat)
   if(!(is.na(startDate) || is.na(endDate)))
   {
     dateRange <- ((startDate<=workingCopy$DateTime) & (workingCopy$DateTime<=endDate))
@@ -49,4 +53,4 @@ workingCopy$temp <- NULL
 raghadParticipantData.df <- workingCopy
 
 # clean up
-rm(workingCopy,reprocessfilePath,reprocessCSV,pIndex,thisKitID,startDate,endDate,dateRange)
+rm(workingCopy,reprocessfilePath,reprocessCSV,pIndex,thisKitID,startDate,endDate,dateRange,dateFormat)

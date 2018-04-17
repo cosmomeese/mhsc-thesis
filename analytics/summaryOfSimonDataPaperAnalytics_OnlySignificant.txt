@@ -1,0 +1,179 @@
+VAR: NYHAClassMixed & Others----------------------
+
+Yes it will be, but need to extend console history to view this
+
+VAR: SBP.Resting-------------------------------
+data:  . SBP.Resting by NYHAClass .
+Kruskal-Wallis chi-squared = 2.9847, df = 1, p-value = 0.08406
+
+data:  * SBP.Resting by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.0548, df = 1, p-value = 0.02456
+
+VAR: SBP-------------------------------
+data:  * SBP by NYHAClass *
+Kruskal-Wallis chi-squared = 3.9976, df = 1, p-value = 0.04557
+
+data:  * SBP by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.5257, df = 1, p-value = 0.01874
+
+VAR: HR-------------------------------
+data:  * HR by NYHAClass *
+Kruskal-Wallis chi-squared = 3.8588, df = 1, p-value = 0.04949
+
+data:  . HR by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.5904, df = 1, p-value = 0.05811
+
+VAR: HR.1min-------------------------------
+data:  . HR.1min by NYHAClass .
+Kruskal-Wallis chi-squared = 3.295, df = 1, p-value = 0.06949
+
+VAR: HR.1minDrop-------------------------------
+data:  * HR.1minDrop by NYHAClass *
+Kruskal-Wallis chi-squared = 5.8101, df = 1, p-value = 0.01593
+
+data:  * HR.1minDrop by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.7665, df = 1, p-value = 0.02902
+
+data:  . HR.1minDrop by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 6.9529, df = 3, p-value = 0.07341
+
+VAR: Duration-------------------------------
+data:  * Duration by NYHAClass *
+Kruskal-Wallis chi-squared = 5.7234, df = 1, p-value = 0.01674
+
+data:  * Duration by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.8834, df = 1, p-value = 0.02712
+
+VAR: Watts-------------------------------
+data:  * Watts by NYHAClass *
+Kruskal-Wallis chi-squared = 4.8065, df = 1, p-value = 0.02835
+
+data:  * Watts by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.0924, df = 1, p-value = 0.04308
+
+VAR: Watts.Predicted.Percentage-------------------------------
+data:  * Watts.Predicted.Percentage by NYHAClass *
+Kruskal-Wallis chi-squared = 5.9079, df = 1, p-value = 0.01507
+
+data:  . Watts.Predicted.Percentage by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.1935, df = 1, p-value = 0.07393
+
+data:  * Watts.Predicted.Percentage by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 8.0952, df = 3, p-value = 0.04408
+
+VAR: VO2.perBodyWeight-------------------------------
+data:  . VO2.perBodyWeight by NYHAClass .
+Kruskal-Wallis chi-squared = 3.7539, df = 1, p-value = 0.05268
+
+VAR: VO2.Predicted.Relative.Percentage-------------------------------
+data:  . VO2.Predicted.Relative.Percentage by NYHAClass .
+Kruskal-Wallis chi-squared = 3.2473, df = 1, p-value = 0.07154
+
+VAR: VCO2.Peak-------------------------------
+data:  . VCO2.Peak by NYHAClass .
+Kruskal-Wallis chi-squared = 3.7275, df = 1, p-value = 0.05352
+
+data:  . VCO2.Peak by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.2197, df = 1, p-value = 0.07276
+
+VAR: VEperVCO2.Peak-------------------------------
+data:  * VEperVCO2.Peak by NYHAClass *
+Kruskal-Wallis chi-squared = 5.0152, df = 1, p-value = 0.02513
+
+data:  * VEperVCO2.Peak by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.4724, df = 1, p-value = 0.03445
+
+VAR: VEperVCO2.atAT-------------------------------
+data:  ** VEperVCO2.atAT by NYHAClass **
+Kruskal-Wallis chi-squared = 7.295, df = 1, p-value = 0.006915
+
+data:  ** VEperVCO2.atAT by PureNYHAClass **
+Kruskal-Wallis chi-squared = 9.3172, df = 1, p-value = 0.00227
+
+data:  * VEperVCO2.atAT by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 10.611, df = 3, p-value = 0.01403
+
+VAR: AT-------------------------------
+data:  . AT by NYHAClass .
+Kruskal-Wallis chi-squared = 3.5597, df = 1, p-value = 0.0592
+
+VAR: VO2.Peak.Predicted.Percentage-------------------------------
+data:  * VO2.Peak.Predicted.Percentage by NYHAClass *
+Kruskal-Wallis chi-squared = 4.6374, df = 1, p-value = 0.03128
+
+data:  . VO2.Peak.Predicted.Percentage by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.0109, df = 1, p-value = 0.08271
+
+data:  . VO2.Peak.Predicted.Percentage by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 6.3957, df = 3, p-value = 0.09387
+
+VAR: RER.Peak-------------------------------
+data:  ** RER.Peak by NYHAClass **
+Kruskal-Wallis chi-squared = 9.8431, df = 1, p-value = 0.001705
+
+data:  ** RER.Peak by PureNYHAClass **
+Kruskal-Wallis chi-squared = 10.521, df = 1, p-value = 0.00118
+
+data:  ** RER.Peak by ExplicitNYHAClass **
+Kruskal-Wallis chi-squared = 11.641, df = 3, p-value = 0.008718
+
+VAR: StepData.MeanDailyTotalSteps-------------------------------
+data:  * StepData.MeanDailyTotalSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.1736, df = 1, p-value = 0.04106
+
+data:  * StepData.MeanDailyTotalSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 3.8436, df = 1, p-value = 0.04994
+
+VAR: StepData.StdDevDailyTotalSteps-------------------------------
+data:  * StepData.StdDevDailyTotalSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.3483, df = 1, p-value = 0.03704
+
+data:  ** StepData.StdDevDailyTotalSteps by PureNYHAClass **
+Kruskal-Wallis chi-squared = 6.7177, df = 1, p-value = 0.009546
+
+data:  . StepData.StdDevDailyTotalSteps by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.657, df = 3, p-value = 0.05366
+
+VAR: StepData.MeanDailyMeanSteps-------------------------------
+data:  * StepData.MeanDailyMeanSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.1736, df = 1, p-value = 0.04106
+
+data:  * StepData.MeanDailyMeanSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 3.8436, df = 1, p-value = 0.04994
+
+VAR: StepData.StdDevDailyMeanSteps-------------------------------
+data:  * StepData.StdDevDailyMeanSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.3483, df = 1, p-value = 0.03704
+
+data:  ** StepData.StdDevDailyMeanSteps by PureNYHAClass **
+Kruskal-Wallis chi-squared = 6.7177, df = 1, p-value = 0.009546
+
+data:  . StepData.StdDevDailyMeanSteps by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.657, df = 3, p-value = 0.05366
+
+VAR: StepData.MeanDailyMaxSteps-------------------------------
+data:  * StepData.MeanDailyMaxSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 5.7736, df = 1, p-value = 0.01627
+
+data:  * StepData.MeanDailyMaxSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.1086, df = 1, p-value = 0.04267
+
+VAR: StepData.ModeDailyMaxSteps-------------------------------
+data:  ** StepData.ModeDailyMaxSteps by NYHAClass **
+Kruskal-Wallis chi-squared = 9.1263, df = 1, p-value = 0.00252
+
+data:  ** StepData.ModeDailyMaxSteps by PureNYHAClass **
+Kruskal-Wallis chi-squared = 6.8268, df = 1, p-value = 0.00898
+
+data:  * StepData.ModeDailyMaxSteps by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 9.6291, df = 3, p-value = 0.022
+
+VAR: StepData.MaxDailyMaxSteps-------------------------------
+data:  ** StepData.MaxDailyMaxSteps by NYHAClass **
+Kruskal-Wallis chi-squared = 8.4293, df = 1, p-value = 0.003692
+
+data:  * StepData.MaxDailyMaxSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 6.5574, df = 1, p-value = 0.01044
+
+data:  * StepData.MaxDailyMaxSteps by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 8.4624, df = 3, p-value = 0.03736

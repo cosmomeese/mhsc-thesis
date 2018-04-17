@@ -72,7 +72,9 @@ binData <- function(dataToBin, interval)
   NCLASS_COLNAME <- 'NYHAClass'
   STEPS_COLNAME <- 'Steps'
   HR_COLNAME <- 'HeartRate'
-  uniqueColList <- list(first,sum,mean)  # N.B. ORDER MATTERS! (match to below)
+  uniqueColList <- list(dplyr::first,
+                        base::sum,
+                        base::mean)  # N.B. ORDER MATTERS! (match to below)
   names(uniqueColList) <- c(NCLASS_COLNAME,STEPS_COLNAME,HR_COLNAME) # N.B. ORDER MATTERS! (match to above)
   
   dataToBin.cut <- dataToBin
