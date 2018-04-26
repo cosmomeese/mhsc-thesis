@@ -2,7 +2,7 @@
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("ggplot2","ggthemes","ggforce","car","rgl","hms","bigmemory")
+pkg <- c("ggplot2","ggthemes","ggforce","car","rgl","hms","bigmemory","glue","tidyverse","seewave")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -10,6 +10,8 @@ if (length(new.pkg)) {
 }
 rm(pkg,new.pkg)
 # load the library
+library(tidyverse)
+library(glue)
 library(ggplot2)
 library(ggthemes)
 library(ggforce)
@@ -17,17 +19,30 @@ library(car)
 library(rgl)
 library(hms)
 library(bigmemory)
+library(seewave)
+
 
 sourceDir <- "userDefinedFcns"
 source(paste(sourceDir,"/","unnestStepDataFrame.R",
              sep=""))
 rm(sourceDir)
 
-displaySimonData <- function(processedData,analyzedData,printHeatMap=FALSE)
+displaySimonData <- function(processedData,analyzedData,
+                             printHeatMap=FALSE,
+                             printMinByMin=FALSE,
+                             printSpectral=FALSE)
 {
   if(!printHeatMap)
   {
     warning("Reminder that function is set to not print patient activity heat maps. Set printHeatMap = TRUE to print these.")
+  }
+  if(!printMinByMin)
+  {
+    warning("Reminder that function is set to not print patient activity heat maps. Set printMinByMin = TRUE to print these.")
+  }
+  if(!printSpectral)
+  {
+    warning("Reminder that function is set to not print patient spectral analysis graphs. Set printSpectral = TRUE to print these.")
   }
   #http://motioninsocial.com/tufte/#minimal-boxplot
   
@@ -290,6 +305,192 @@ displaySimonData <- function(processedData,analyzedData,printHeatMap=FALSE)
     }
      
   }
+  
+  #Plot of Minute by Minute Step Count #---------------------------------------------------------------------------------------------------------------------
+  
+  if(printMinByMin)
+  {
+    
+    #Minute by Minute Activity for each Patient
+    #unnestedDF <- unnestStepDataFrame(processedData)
+    #unnestedDF
+
+    maxSteps <- max(unnestedDF$Steps, na.rm = TRUE)
+    maxDays <- max(unnestedDF$Day, na.rm = TRUE)
+    
+    #for(class in c("II","III"))
+    for(studyID in unique(unnestedDF %>% 
+                          dplyr::filter(!is.na(NYHAClass)) 
+                          %>% .$StudyIdentifier))
+    {
+      ssForStudyID <- subset(unnestedDF,
+                             StudyIdentifier==studyID)
+      class <- processedData$NYHAClass[processedData$StudyIdentifier == studyID]
+      color <- if("III"==class) "PURPLE" else "ORANGE"
+      for(day in unique(ssForStudyID$Day))
+      {
+        
+        plot <- ggplot(data = subset(ssForStudyID,
+                                     Day==day),
+                              aes(Time,Steps)) +
+          theme_tufte(base_family = "serif",
+                      ticks = TRUE) +
+          geom_line(colour = color, size=0.05) +
+          scale_y_continuous(limits = c(0, maxSteps)) +
+          ggtitle(glue("{studyID} (Class {class}) - Day {day}")) +
+          xlab("Time") + ylab("Steps Count [number of steps]") +
+          scale_x_datetime(date_breaks = "2 hour", 
+                           date_minor_breaks = "1 hour",
+                           date_labels = "%H")
+          #scale_fill_gradientn(colors=c("#92c5de","#f7f7f7","#f4a582","#ca0020"),values=c(0,1/maxSteps,1/2*maxSteps,1)) #modified from diverging red & blue color color scheme from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=5
+        #scale_fill_distiller()
+        #print(plot)
+        
+        #save plot (verbosely)
+        fileName <- glue("plots/MinByMin/Class{class}/{studyID}/minByMinPlot{studyID}_day{day}.png") 
+        
+        #create directory
+        tryCatch({
+          dir.create(file.path(getwd(), dirname(fileName)),
+                     recursive = TRUE)
+        }, warning = function (war) {
+          
+          if(!endsWith(war$message,"already exists"))
+          {
+            warning(war)
+          }
+          
+        }, error = function(err) {
+          stop(err)
+        }, finally = {
+        }) # END tryCatch
+        
+        ggsave(fileName,
+               path = getwd(),
+               height = 8,
+               width = 11,
+               units = "in")
+        cat("Printed ",fileName,"\n",sep="")
+      }
+    }
+    
+  }
+  #Plot of Spectrogram #-------------------------------------------------------------------------------------------------------------------------------------
+  
+  if(printSpectral)
+  {
+    #Minute by Minute Activity for each Patient
+    #unnestedDF <- unnestStepDataFrame(processedData)
+    #unnestedDF
+    
+    maxSteps <- max(unnestedDF$Steps, na.rm = TRUE)
+    maxDays <- max(unnestedDF$Day, na.rm = TRUE)
+    
+    for(studyID in unique(unnestedDF %>% 
+                          dplyr::filter(!is.na(NYHAClass)) 
+                          %>% .$StudyIdentifier))
+    {
+      studyID <- "HF020"
+      ssForStudyID <- subset(unnestedDF,
+                             StudyIdentifier==studyID)
+      class <- processedData$NYHAClass[processedData$StudyIdentifier == studyID]
+      
+      for(day in unique(ssForStudyID$Day))
+      {
+        day <- 2
+        ssForStudyIDDay <- subset(ssForStudyID,
+                                  Day==day)
+                
+        #window_n = 15*Fs*60 w/ zPadFactor = 10
+        
+        # Spectrogram
+        Fs <- 1/60 # i.e. 1 per minute
+        F_max <- Fs/2 # if fx = 1/60 then fs/x = per 2 minute
+        window_n <- trunc(12*60*Fs*60)          # 30 min data window
+        fftn <- 2^ceiling(log2(abs(window_n))) # next highest power of 2
+        zPadFactor <- 5
+        winType <- "flattop"
+        #overlap = ceiling(length(window_n)/8)
+        
+        dynspectro()
+        seewave::spectro(wave=ssForStudyID$Steps, 
+                         f = Fs,
+                         wl = fftn, 
+                         wn = winType, 
+                         zp = fftn*zPadFactor,
+                         ovlp = 0.90, 
+                         complex = FALSE, 
+                         norm = TRUE, 
+                         correction="none",
+                         fftw = FALSE,
+                         dB = "max0",
+                         dBref = NULL,
+                         plot = TRUE, flog = FALSE, grid = TRUE,
+                         osc = TRUE, scale = TRUE, cont = FALSE,
+                         collevels = NULL,
+                         palette = spectro.colors,
+                         contlevels = NULL, colcont = "black",
+                         colbg = "white", colgrid = "black",
+                         colaxis = "black", collab="black",
+                         cexlab = 1, cexaxis = 1,
+                         tlab = "Time (s)",
+                         flab = "Frequency (kHz)",
+                         alab = "Amplitude",
+                         scalelab = "Amplitude\n(dB)",
+                         main = glue("{studyID} (Class {class}) - Day {day}"),
+                         scalefontlab = 1, scalecexlab =0.75,
+                         axisX = TRUE, axisY = TRUE, tlim = NULL, trel = TRUE,
+                         flim = NULL, flimd = NULL,
+                         widths = c(6,1), heights = c(3,1),
+                         oma = rep(0,4),
+                         listen=FALSE)
+      }
+    }
+      
+
+      # # Spectrogram
+      # Fs <- 1/60 # i.e. 1 per minute
+      # F_max <- Fs/2 # if fx = 1/60 then fs/x = per 2 minute
+      # step <- trunc(30*Fs*60)             # one spectral slice every 15 min
+      # window_n <- trunc(4*60*Fs*60)          # 30 min data window
+      # fftn <- 2^ceiling(log2(abs(window_n))) # next highest power of 2
+      # 
+      # win <- signal::flattopwin(window_n) # sym = c('symmetric', 'periodic'))
+      # #overlap = ceiling(length(window_n)/8)
+      # spg <- signal::specgram(x=ssforStudyID$Steps,
+      #                         n=fftn,
+      #                         Fs=Fs,
+      #                         window=win,
+      #                         overlap= window_n - step
+      #                         )
+      # 
+      # S <- abs(spg$S[2:(fftn*F_max*(1/Fs)),])   # magnitude in range 0<f<=4000 Hz.
+      # S <- S/max(S)         # normalize magnitude so that max is 0 dB.
+      # S[S < 10^(-80/10)] <- 10^(-80/10)    # clip below -40 dB.
+      # #S[S > 10^(-3/10)] <- 10^(-3/10)      # clip above -3 dB.
+      # par(mfrow=c(2,1))
+      # #1
+      # image(t(20*log10(S)), axes = TRUE, col = gray(0:255 /255))  #, col = gray(0:255 / 255))
+      # #2
+      # plot(ssforStudyID$Steps)
+      # 
+      # plot <- ggplot(data = subset(ssforStudyID),
+      #                aes(Time,Steps)) +
+      #   theme_tufte(base_family = "serif",
+      #               ticks = TRUE) +
+      #   geom_line( size=0.05) +
+      #   scale_y_continuous(limits = c(0, maxSteps)) +
+      #   #ggtitle(glue("{studyID} (Class {class}) - Day {day}")) +
+      #   xlab("Time") + ylab("Steps Count [number of steps]") +
+      #   scale_x_datetime(date_breaks = "2 hour", 
+      #                    date_minor_breaks = "1 hour",
+      #                    date_labels = "%H")
+                             
+        
+    }
+  }
+  
+  
   
   
   #Plot of Signal Match Image #------------------------------------------------------------------------------------------------------------------------------

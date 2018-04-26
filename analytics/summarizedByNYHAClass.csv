@@ -1,0 +1,18 @@
+,,,,,,P-Value
+Resting SBP [mmHG],110.6,103.4,,,,0.0841
+SBP [mmHG],133.4,121.6,,,,0.0456
+HR [bpm],110.1,95.7,,,,0.0495
+HR Drop in 60 sec. [bpm],22.1,12.2,,,,0.0159
+CPET Duration [frac. Min.],10.1,8.1,,,,0.0167
+CPET Max Watts [W],96.2,77.3,,,,0.0284
+Predicted CPET Watts [%],63.3,48,,,,0.0151
+VE/VCO2 Peak,33,37.9,,,,0.0251
+VE/VCO2 @ AT,32.7,37.5,,,,0.0069
+RER Peak,1.12,1.015,,,,0.0017
+Mean of Daily Total Step Counts [steps],5484,4012,,,,0.0411
+SD of Daily Total Step Counts [steps],2640,1933,,,,0.0370
+Mean of Daily Mean Step Counts [steps],3.808,2.786,,,,0.0411
+SD of Daily Mean Step Counts [steps],1.834,1.343,,,,0.0370
+Mean of Daily per Minute Step Count Maxes [steps],95.6,80.5,,,,0.0163
+Mode of Daily per Minute Step Count Maxes [steps],95.1,68.4,,,,0.0025
+Max of Daily of per Minute Step Count Maxes [steps],125.7,112.9,,,,0.0037
