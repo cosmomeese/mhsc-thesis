@@ -135,12 +135,14 @@ if(!exists("m_cData"))
   # Meta Parameters ===============================
   K_FOLDS <- length(studyIDs.NoNas)
   N_REPEATS <- 1
-  N_FEATURES_MAX <- 5
-  N_BEST_FEATURES <- 5
+  N_FEATURES_MAX <- 10
+  N_BEST_FEATURES <- 10
+  LEAPS_SEARCH_METHOD <- "seqrep" #N.B. do not do exhaustive w/ N_FEATURES_MAX > 5 it takes too long
   FOLD_SEED <- 123
   TRAIN_SEED <- 11111111
   RAND_INT_MAX <- 10000
   isIMPUTEMISSING_nDROP <- TRUE
+  isPRESELECT_FEATURES <- FALSE
   
   # Generate & train some models
   METHODS <- c("rf", # kappa
@@ -271,31 +273,37 @@ if(!exists("m_cData"))
                             StudyIdentifier %in% studyIDs.NoNas[fold])
     
       print(glue("        preprocessing..."))
-      dataForFold.NoMiss <- preProcessHelper(dataForFold, ignoreColumns, isIMPUTEMISSING_nDROP)
+      # N.B. do this first since all functions that follow are sensitive to missing values
+      dataForFold.NoMiss <- preProcessHelper(dataForFold, ignoreColumns, isIMPUTEMISSING_nDROP) 
       
       
       # get the column IDs
       responseColNum.NoMiss <- which(names(dataForFold.NoMiss) %in% c(responseVar))
       studyIDColNum.NoMiss <- which(names(dataForFold.NoMiss) %in% c(studyIDColName))
       
-      # # find best models
-            # 
-      # ### REVISIT THIS -> I THINK I NEED TO USE A SUBSET OF DATA FOR FEATURE SEARCH AGAIN
-      # modelSearch <- leaps::regsubsets(as.matrix(dataForFold.NoMiss[,-c(responseColNum.NoMiss,studyIDColNum.NoMiss)]),
-      #                                  dataForFold.NoMiss[,responseColNum.NoMiss],
-      #                                  nbest = N_BEST_FEATURES,
-      #                                  nvmax = N_FEATURES_MAX,
-      #                                  really.big = TRUE)
-      # # which model is best?
-      # modelSearch.summary <- summary(modelSearch)
-      # bestModelIdx <- which.min(modelSearch.summary$bic) # BIC which is like AIC but penalizes complexity differently
-      # #bestModelIdx <- which.min(modelSearch.summary$cp) # Mallow's CP -> AIC
-      # bestModelCols <- modelSearch.summary$which[bestModelIdx,]
-      # bestModelVars <- names(bestModelCols[bestModelCols == TRUE][-1]) # get names of all true, dropping first item which is (Intercept)
-      # 
-      # form <- as.formula(glue("{responseVar} ~ {paste(bestModelVars,collapse=' + ')}"))
-      
-      form <- as.formula(glue("{responseVar} ~."))
+      ### Find the Best Features ############################################################
+      if(isPRESELECT_FEATURES)
+      {
+        ### REVISIT THIS -> I THINK I NEED TO USE A SUBSET OF DATA FOR FEATURE SEARCH AGAIN
+        modelSearch <- leaps::regsubsets(as.matrix(dataForFold.NoMiss[,-c(responseColNum.NoMiss,studyIDColNum.NoMiss)]),
+                                         dataForFold.NoMiss[,responseColNum.NoMiss],
+                                         nbest = N_BEST_FEATURES,
+                                         nvmax = N_FEATURES_MAX,
+                                         really.big = TRUE,
+                                         method = LEAPS_SEARCH_METHOD)
+        # which model is best?
+        modelSearch.summary <- summary(modelSearch)
+        bestModelIdx <- which.min(modelSearch.summary$bic) # BIC which is like AIC but penalizes complexity differently
+        #bestModelIdx <- which.min(modelSearch.summary$cp) # Mallow's CP -> AIC
+        bestModelCols <- modelSearch.summary$which[bestModelIdx,]
+        bestModelVars <- names(bestModelCols[bestModelCols == TRUE][-1]) # get names of all true, dropping first item which is (Intercept)
+
+        form <- as.formula(glue("{responseVar} ~ {paste(bestModelVars,collapse=' + ')}"))
+      }
+      else
+      {
+        form <- as.formula(glue("{responseVar} ~."))
+      }
       
       # create trainingControl seeds (from example)
       # w/ help from: https://stackoverflow.com/a/21988897
