@@ -444,8 +444,8 @@ displaySimonData <- function(processedData,analyzedData,
                          widths = c(6,1), heights = c(3,1),
                          oma = rep(0,4),
                          listen=FALSE)
-      }
-    }
+      } # END for day
+    } # END for StudyID
       
 
       # # Spectrogram
@@ -487,8 +487,7 @@ displaySimonData <- function(processedData,analyzedData,
       #                    date_labels = "%H")
                              
         
-    }
-  }
+  } # END if(printSpectral)
   
   
   
@@ -505,6 +504,5 @@ displaySimonData <- function(processedData,analyzedData,
   
   #Clean up
   rm(pD_removedNYHA.NAs)
-  
-}
 
+} # END displaySimonData

@@ -1,0 +1,144 @@
+rf test results: ----------------------------
+
+
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   4   5
+  III 11  30
+                                         
+               Accuracy : 0.68           
+                 95% CI : (0.533, 0.8048)
+    No Information Rate : 0.7            
+    P-Value [Acc > NIR] : 0.6839         
+                                         
+                  Kappa : 0.1398         
+ Mcnemar's Test P-Value : 0.2113         
+                                         
+            Sensitivity : 0.2667         
+            Specificity : 0.8571         
+         Pos Pred Value : 0.4444         
+         Neg Pred Value : 0.7317         
+             Prevalence : 0.3000         
+         Detection Rate : 0.0800         
+   Detection Prevalence : 0.1800         
+      Balanced Accuracy : 0.5619         
+                                         
+       'Positive' Class : II             
+                                         
+nnet test results: ----------------------------
+
+
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   9   6
+  III  6  29
+                                          
+               Accuracy : 0.76            
+                 95% CI : (0.6183, 0.8694)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.2229          
+                                          
+                  Kappa : 0.4286          
+ Mcnemar's Test P-Value : 1.0000          
+                                          
+            Sensitivity : 0.6000          
+            Specificity : 0.8286          
+         Pos Pred Value : 0.6000          
+         Neg Pred Value : 0.8286          
+             Prevalence : 0.3000          
+         Detection Rate : 0.1800          
+   Detection Prevalence : 0.3000          
+      Balanced Accuracy : 0.7143          
+                                          
+       'Positive' Class : II              
+                                          
+pcaNNet test results: ----------------------------
+
+
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   9   4
+  III  6  31
+                                          
+               Accuracy : 0.8             
+                 95% CI : (0.6628, 0.8997)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.07885         
+                                          
+                  Kappa : 0.505           
+ Mcnemar's Test P-Value : 0.75183         
+                                          
+            Sensitivity : 0.6000          
+            Specificity : 0.8857          
+         Pos Pred Value : 0.6923          
+         Neg Pred Value : 0.8378          
+             Prevalence : 0.3000          
+         Detection Rate : 0.1800          
+   Detection Prevalence : 0.2600          
+      Balanced Accuracy : 0.7429          
+                                          
+       'Positive' Class : II              
+                                          
+glm test results: ----------------------------
+
+
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   5  15
+  III 10  20
+                                          
+               Accuracy : 0.5             
+                 95% CI : (0.3553, 0.6447)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.9991          
+                                          
+                  Kappa : -0.087          
+ Mcnemar's Test P-Value : 0.4237          
+                                          
+            Sensitivity : 0.3333          
+            Specificity : 0.5714          
+         Pos Pred Value : 0.2500          
+         Neg Pred Value : 0.6667          
+             Prevalence : 0.3000          
+         Detection Rate : 0.1000          
+   Detection Prevalence : 0.4000          
+      Balanced Accuracy : 0.4524          
+                                          
+       'Positive' Class : II              
+                                          
+glmboost test results: ----------------------------
+
+
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   7   6
+  III  8  29
+                                          
+               Accuracy : 0.72            
+                 95% CI : (0.5751, 0.8377)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.4468          
+                                          
+                  Kappa : 0.3069          
+ Mcnemar's Test P-Value : 0.7893          
+                                          
+            Sensitivity : 0.4667          
+            Specificity : 0.8286          
+         Pos Pred Value : 0.5385          
+         Neg Pred Value : 0.7838          
+             Prevalence : 0.3000          
+         Detection Rate : 0.1400          
+   Detection Prevalence : 0.2600          
+      Balanced Accuracy : 0.6476          
+                                          
+       'Positive' Class : II      

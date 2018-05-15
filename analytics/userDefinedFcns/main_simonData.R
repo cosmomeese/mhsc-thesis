@@ -6,7 +6,7 @@
 
 #set these appropriate and optionally run them
 simonData.Importer.CodeVersion <- "1.2"
-simonExtraMetrics.CodeVersion <- "1.0"
+simonExtraMetrics.CodeVersion <- "1.1"
 
 
 #------------------------------------------------------
@@ -82,11 +82,15 @@ print.me <- "Combined Data from Simon Bromberg's Thesis; CPS, Step & Participant
 m_cData <- calculateSimonDataMetrics(p_combinedData)
 un_Data <- unnestStepDataFrame(m_cData)
 
-# Analyze
-a_Data <- analyzeSimonData(m_cData)
+if('1.0' == simonExtraMetrics.CodeVersion)
+{
+  # Analyze
+  a_Data <- analyzeSimonData(m_cData)
+  
+  # Display
+  displaySimonData(m_cData,a_Data)
+}
 
-# Display
-displaySimonData(m_cData,a_Data)
 
 # Remove functions
 
