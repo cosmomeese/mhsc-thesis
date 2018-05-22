@@ -266,3 +266,6 @@ TSWLatexianTemp*
 analytics/plots/Patient DayByDay/
 analytics/plots/Patient DayByDay Stacked/
 *.RDataTmp
+analytics/plots/MinByMin/
+analytics/plots/SimonPaper/
+analytics/plots/MLModels/
