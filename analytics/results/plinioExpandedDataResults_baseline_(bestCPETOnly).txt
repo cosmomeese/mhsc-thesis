@@ -1,0 +1,146 @@
+rf test results: ----------------------------
+
+CPETOnly (Vanilla) == CPET+10FeatureSearch
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   4   3
+  III  9  27
+                                          
+               Accuracy : 0.7209          
+                 95% CI : (0.5633, 0.8467)
+    No Information Rate : 0.6977          
+    P-Value [Acc > NIR] : 0.4427          
+                                          
+                  Kappa : 0.2389          
+ Mcnemar's Test P-Value : 0.1489          
+                                          
+            Sensitivity : 0.30769         
+            Specificity : 0.90000         
+         Pos Pred Value : 0.57143         
+         Neg Pred Value : 0.75000         
+             Prevalence : 0.30233         
+         Detection Rate : 0.09302         
+   Detection Prevalence : 0.16279         
+      Balanced Accuracy : 0.60385         
+                                          
+       'Positive' Class : II              
+                                                         
+                                         
+nnet test results: ----------------------------
+
+CPETOnly w/ Imputation == CPET+10FeatureSearch w/ Imputation
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   9   6
+  III  6  29
+                                          
+               Accuracy : 0.76            
+                 95% CI : (0.6183, 0.8694)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.2229          
+                                          
+                  Kappa : 0.4286          
+ Mcnemar's Test P-Value : 1.0000          
+                                          
+            Sensitivity : 0.6000          
+            Specificity : 0.8286          
+         Pos Pred Value : 0.6000          
+         Neg Pred Value : 0.8286          
+             Prevalence : 0.3000          
+         Detection Rate : 0.1800          
+   Detection Prevalence : 0.3000          
+      Balanced Accuracy : 0.7143          
+                                          
+       'Positive' Class : II             
+                                          
+pcaNNet test results: ----------------------------
+
+CPETOnly w/ Imputation == CPET+10FeatureSearch w/ Imputation
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II  11   6
+  III  4  29
+                                          
+               Accuracy : 0.8             
+                 95% CI : (0.6628, 0.8997)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.07885         
+                                          
+                  Kappa : 0.5413          
+ Mcnemar's Test P-Value : 0.75183         
+                                          
+            Sensitivity : 0.7333          
+            Specificity : 0.8286          
+         Pos Pred Value : 0.6471          
+         Neg Pred Value : 0.8788          
+             Prevalence : 0.3000          
+         Detection Rate : 0.2200          
+   Detection Prevalence : 0.3400          
+      Balanced Accuracy : 0.7810          
+                                          
+       'Positive' Class : II              
+                                          
+glm test results: ----------------------------
+
+CPETOnly w/ Imputation == CPET+10FeatureSearch w/ Imputation
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   8   6
+  III  7  29
+                                          
+               Accuracy : 0.74            
+                 95% CI : (0.5966, 0.8537)
+    No Information Rate : 0.7             
+    P-Value [Acc > NIR] : 0.3279          
+                                          
+                  Kappa : 0.3689          
+ Mcnemar's Test P-Value : 1.0000          
+                                          
+            Sensitivity : 0.5333          
+            Specificity : 0.8286          
+         Pos Pred Value : 0.5714          
+         Neg Pred Value : 0.8056          
+             Prevalence : 0.3000          
+         Detection Rate : 0.1600          
+   Detection Prevalence : 0.2800          
+      Balanced Accuracy : 0.6810          
+                                          
+       'Positive' Class : II                
+                                         
+glmboost test results: ----------------------------
+
+CPETOnly (Vanilla) == CPET+10FeatureSearch
+Confusion Matrix and Statistics
+
+     Physician
+AI    II III
+  II   7   3
+  III  6  27
+                                          
+               Accuracy : 0.7907          
+                 95% CI : (0.6396, 0.8996)
+    No Information Rate : 0.6977          
+    P-Value [Acc > NIR] : 0.1206          
+                                          
+                  Kappa : 0.4691          
+ Mcnemar's Test P-Value : 0.5050          
+                                          
+            Sensitivity : 0.5385          
+            Specificity : 0.9000          
+         Pos Pred Value : 0.7000          
+         Neg Pred Value : 0.8182          
+             Prevalence : 0.3023          
+         Detection Rate : 0.1628          
+   Detection Prevalence : 0.2326          
+      Balanced Accuracy : 0.7192          
+                                          
+       'Positive' Class : II  
+	         

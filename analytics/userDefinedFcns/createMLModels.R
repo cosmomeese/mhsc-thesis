@@ -90,11 +90,13 @@ preProcessHelper <- function(dataForModelSearch, ignoreColumns, isIMPUTEMISSING_
 # Use isIMPUTEMISSING_nDROP = TRUE to impute missing data (instead of dropping)
 # Use isPRESELECT_FEATURES = TRUE to try to preselect features instead of using all of them
 # Use isKEEP_ONLY_CPET = TRUE to only keep CPET data
+# Use kFolds to specify number of folds desired
 generateMLModels <- function(m_cData,
                              simonExtraMetrics.CodeVersion,
                              isIMPUTEMISSING_nDROP=FALSE,
                              isPRESELECT_FEATURES=FALSE,
-                             isKEEP_ONLY_CPET=TRUE
+                             isKEEP_ONLY_CPET=TRUE,
+                             kFolds=NULL
                              )
 {
   # Meta Parameters ===============================
@@ -153,7 +155,12 @@ generateMLModels <- function(m_cData,
     dplyr::filter(!is.na(NYHAClass)) %>%
     .$StudyIdentifier
   
-  K_FOLDS <- length(studyIDs.NoNas)
+  kFoldsMax <- length(studyIDs.NoNas)
+  if(is.null(kFolds) || !is.numeric(kFolds))
+  {
+    kFolds <- kFoldsMax
+  }
+  K_FOLDS <- max(min(kFolds, kFoldsMax), 1)
   
   #### Machine Learning #################################
   
@@ -438,6 +445,7 @@ confusionMatrixForMLTestResults <- function(testResults,
   
   testResults.Thresholded[-studyIDColNum] <- lapply(testResults.Thresholded[-studyIDColNum],
                                                     function(x) factor(x,
+                                                                       levels=0:(length(attr(testResults,'levels'))-1),
                                                                        labels=attr(testResults,'levels')))
   
   trueValues <- testResults.Thresholded[[outcomeVar]]
