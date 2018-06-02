@@ -28,14 +28,19 @@ removeInvalidFileNameChars <- function(x, isWindowsOS=TRUE)
   return(x)
 }
 
-parseVarName <- function(x)
+parseVarName <- function(x,addSpaces=FALSE)
 {
   # remove StepData. prefix
   x <- sub('StepData.', '', x)
   # replace all the .'s with spaces
   x <- str_replace_all(x, "[[.]]", " ")
   # split camel case
-  #x <- trimws(gsub("([[:upper:]])", " \\1", x))
+  if(addSpaces)
+  {
+    x <- trimws(gsub("(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])",
+                     " \\1",
+                     x,perl=TRUE))
+  }
   return(x)
 }
 

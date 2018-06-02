@@ -26,10 +26,10 @@ addMissingClassGroupings <- function(fullData) {
   FACTOR_LEVELS <- list()
   FACTOR_LEVELS$ALL <- levels(fullData$NYHAClassMixed)
   # Factors where the given class occurs in any of the dirty factor level names, including as a mixed class
-  FACTOR_LEVELS$ANY1 <- grep("(\\bI\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
-  FACTOR_LEVELS$ANY2 <- grep("(\\bII\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
-  FACTOR_LEVELS$ANY3 <- grep("(\\bIII\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
-  FACTOR_LEVELS$ANY4 <- grep("(\\bIV\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY1 <- grep("(\\b(1|I)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY2 <- grep("(\\b(2|II)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY3 <- grep("(\\b(3|III)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY4 <- grep("(\\b(4|IV)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
   # Factors where the given class occurs in any of the dirty factor level names, but not as a mixed class
   FACTOR_LEVELS$PURE1 <- setdiff(setdiff(setdiff(FACTOR_LEVELS$ANY1,FACTOR_LEVELS$ANY2),FACTOR_LEVELS$ANY3),FACTOR_LEVELS$ANY4)
   FACTOR_LEVELS$PURE2 <- setdiff(setdiff(setdiff(FACTOR_LEVELS$ANY2,FACTOR_LEVELS$ANY3),FACTOR_LEVELS$ANY4),FACTOR_LEVELS$ANY1)

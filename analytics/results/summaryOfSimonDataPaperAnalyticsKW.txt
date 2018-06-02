@@ -1,0 +1,2091 @@
+
+VAR: Handedness-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   Handedness by NYHAClass 
+Kruskal-Wallis chi-squared = 1.8261, df = 1, p-value = 0.1766
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Handedness by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.3439, df = 1, p-value = 0.2463
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Handedness by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.8277, df = 3, p-value = 0.6089
+
+
+VAR: WristbandPreference-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   WristbandPreference by NYHAClass 
+Kruskal-Wallis chi-squared = 1.5664, df = 1, p-value = 0.2107
+
+
+	Kruskal-Wallis rank sum test
+
+data:   WristbandPreference by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.37318, df = 1, p-value = 0.5413
+
+
+	Kruskal-Wallis rank sum test
+
+data:   WristbandPreference by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.5061, df = 3, p-value = 0.2117
+
+
+VAR: NYHAClassMixed-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  *** NYHAClassMixed by NYHAClass ***
+Kruskal-Wallis chi-squared = 33.805, df = 1, p-value = 6.091e-09
+
+
+	Kruskal-Wallis rank sum test
+
+data:  *** NYHAClassMixed by PureNYHAClass ***
+Kruskal-Wallis chi-squared = 30.278, df = 1, p-value = 3.744e-08
+
+
+	Kruskal-Wallis rank sum test
+
+data:  *** NYHAClassMixed by ExplicitNYHAClass ***
+Kruskal-Wallis chi-squared = 45.793, df = 3, p-value = 6.276e-10
+
+
+VAR: EjectionFraction-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   EjectionFraction by NYHAClass 
+Kruskal-Wallis chi-squared = 1.8, df = 1, p-value = 0.1797
+
+E:      Kruskal-Wallis rank sum test
+
+                     data: while trying EjectionFraction ~ PureNYHAClass
+Caught Error: Error in kruskal.test.default(c(35, 38, 20), structure(c(1L, 1L, 1L), .Label = c("II", : all observations are in the same group
+ 
+
+	Kruskal-Wallis rank sum test
+
+data:   EjectionFraction by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.8, df = 1, p-value = 0.1797
+
+
+VAR: HFDiagnosisYear-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   HFDiagnosisYear by NYHAClass 
+Kruskal-Wallis chi-squared = 1.9954, df = 1, p-value = 0.1578
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HFDiagnosisYear by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.54171, df = 1, p-value = 0.4617
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HFDiagnosisYear by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.9044, df = 3, p-value = 0.272
+
+
+VAR: HFTreatmentsToDate-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   HFTreatmentsToDate by NYHAClass 
+Kruskal-Wallis chi-squared = 0.075779, df = 1, p-value = 0.7831
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HFTreatmentsToDate by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.58431, df = 1, p-value = 0.4446
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HFTreatmentsToDate by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.3072, df = 3, p-value = 0.7274
+
+
+VAR: RegularPhysicalActivities-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   RegularPhysicalActivities by NYHAClass 
+Kruskal-Wallis chi-squared = 0.070852, df = 1, p-value = 0.7901
+
+
+	Kruskal-Wallis rank sum test
+
+data:   RegularPhysicalActivities by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.53985, df = 1, p-value = 0.4625
+
+
+	Kruskal-Wallis rank sum test
+
+data:   RegularPhysicalActivities by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.0903, df = 3, p-value = 0.7794
+
+
+VAR: Exercises-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   Exercises by NYHAClass 
+Kruskal-Wallis chi-squared = 2.1393, df = 1, p-value = 0.1436
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Exercises by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.1786, df = 1, p-value = 0.2776
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Exercises by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.2328, df = 3, p-value = 0.1555
+
+
+VAR: DeviceID-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   DeviceID by NYHAClass 
+Kruskal-Wallis chi-squared = 1.11, df = 1, p-value = 0.2921
+
+
+	Kruskal-Wallis rank sum test
+
+data:   DeviceID by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.3718, df = 1, p-value = 0.2415
+
+
+	Kruskal-Wallis rank sum test
+
+data:   DeviceID by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.3631, df = 3, p-value = 0.7142
+
+
+VAR: ID-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   ID by NYHAClass 
+Kruskal-Wallis chi-squared = 0.049412, df = 1, p-value = 0.8241
+
+
+	Kruskal-Wallis rank sum test
+
+data:   ID by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.089437, df = 1, p-value = 0.7649
+
+
+	Kruskal-Wallis rank sum test
+
+data:   ID by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.3538, df = 3, p-value = 0.7164
+
+
+VAR: CPSDate-------------------------------
+
+VAR: Sex-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   Sex by NYHAClass 
+Kruskal-Wallis chi-squared = 0.93798, df = 1, p-value = 0.3328
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Sex by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.046726, df = 1, p-value = 0.8289
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Sex by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.7203, df = 3, p-value = 0.2933
+
+
+VAR: Age-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   Age by NYHAClass 
+Kruskal-Wallis chi-squared = 0.13739, df = 1, p-value = 0.7109
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Age by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.35817, df = 1, p-value = 0.5495
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Age by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.6493, df = 3, p-value = 0.6483
+
+
+VAR: Height-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   Height by NYHAClass 
+Kruskal-Wallis chi-squared = 0.76022, df = 1, p-value = 0.3833
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Height by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.16075, df = 1, p-value = 0.6885
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Height by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.1576, df = 3, p-value = 0.7632
+
+
+VAR: Weight-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   Weight by NYHAClass 
+Kruskal-Wallis chi-squared = 1.8947, df = 1, p-value = 0.1687
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Weight by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.5965, df = 1, p-value = 0.2064
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Weight by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.2101, df = 3, p-value = 0.53
+
+
+VAR: SBP.Resting-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . SBP.Resting by NYHAClass .
+Kruskal-Wallis chi-squared = 2.9847, df = 1, p-value = 0.08406
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * SBP.Resting by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.0548, df = 1, p-value = 0.02456
+
+
+	Kruskal-Wallis rank sum test
+
+data:   SBP.Resting by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.0333, df = 3, p-value = 0.1694
+
+
+VAR: DBP.Resting-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   DBP.Resting by NYHAClass 
+Kruskal-Wallis chi-squared = 0.83292, df = 1, p-value = 0.3614
+
+
+	Kruskal-Wallis rank sum test
+
+data:   DBP.Resting by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.6876, df = 1, p-value = 0.1939
+
+
+	Kruskal-Wallis rank sum test
+
+data:   DBP.Resting by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.6928, df = 3, p-value = 0.6385
+
+
+VAR: HR.Resting-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   HR.Resting by NYHAClass 
+Kruskal-Wallis chi-squared = 0.088361, df = 1, p-value = 0.7663
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HR.Resting by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.46623, df = 1, p-value = 0.4947
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HR.Resting by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.6246, df = 3, p-value = 0.6538
+
+
+VAR: O2Sat.Resting-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   O2Sat.Resting by NYHAClass 
+Kruskal-Wallis chi-squared = 0.25636, df = 1, p-value = 0.6126
+
+
+	Kruskal-Wallis rank sum test
+
+data:   O2Sat.Resting by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.26328, df = 1, p-value = 0.6079
+
+
+	Kruskal-Wallis rank sum test
+
+data:   O2Sat.Resting by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.5184, df = 3, p-value = 0.678
+
+
+VAR: FEV.Resting-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   FEV.Resting by NYHAClass 
+Kruskal-Wallis chi-squared = 0.79189, df = 1, p-value = 0.3735
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FEV.Resting by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.035699, df = 1, p-value = 0.8501
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FEV.Resting by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.4019, df = 3, p-value = 0.1446
+
+
+VAR: FEV.Resting.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   FEV.Resting.Percentage by NYHAClass 
+Kruskal-Wallis chi-squared = 1.2138, df = 1, p-value = 0.2706
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FEV.Resting.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.59782, df = 1, p-value = 0.4394
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FEV.Resting.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.6402, df = 3, p-value = 0.2001
+
+
+VAR: FVC.Resting-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   FVC.Resting by NYHAClass 
+Kruskal-Wallis chi-squared = 0.81155, df = 1, p-value = 0.3677
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FVC.Resting by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.014447, df = 1, p-value = 0.9043
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FVC.Resting by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.6634, df = 3, p-value = 0.1982
+
+
+VAR: FVC.Resting.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   FVC.Resting.Percentage by NYHAClass 
+Kruskal-Wallis chi-squared = 0.47607, df = 1, p-value = 0.4902
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FVC.Resting.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.0047229, df = 1, p-value = 0.9452
+
+
+	Kruskal-Wallis rank sum test
+
+data:   FVC.Resting.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.65, df = 3, p-value = 0.3018
+
+
+VAR: SBP-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * SBP by NYHAClass *
+Kruskal-Wallis chi-squared = 3.9976, df = 1, p-value = 0.04557
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * SBP by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.5257, df = 1, p-value = 0.01874
+
+
+	Kruskal-Wallis rank sum test
+
+data:   SBP by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.6768, df = 3, p-value = 0.1284
+
+
+VAR: DBP-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   DBP by NYHAClass 
+Kruskal-Wallis chi-squared = 0.77724, df = 1, p-value = 0.378
+
+
+	Kruskal-Wallis rank sum test
+
+data:   DBP by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.7539, df = 1, p-value = 0.1854
+
+
+	Kruskal-Wallis rank sum test
+
+data:   DBP by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.9928, df = 3, p-value = 0.5739
+
+
+VAR: HR-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * HR by NYHAClass *
+Kruskal-Wallis chi-squared = 3.8588, df = 1, p-value = 0.04949
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . HR by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.5904, df = 1, p-value = 0.05811
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HR by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.9477, df = 3, p-value = 0.2672
+
+
+VAR: HR.1min-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . HR.1min by NYHAClass .
+Kruskal-Wallis chi-squared = 3.295, df = 1, p-value = 0.06949
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HR.1min by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.0871, df = 1, p-value = 0.1485
+
+
+	Kruskal-Wallis rank sum test
+
+data:   HR.1min by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.6941, df = 3, p-value = 0.2964
+
+
+VAR: HR.1minDrop-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * HR.1minDrop by NYHAClass *
+Kruskal-Wallis chi-squared = 5.8101, df = 1, p-value = 0.01593
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * HR.1minDrop by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.7665, df = 1, p-value = 0.02902
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . HR.1minDrop by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 6.9529, df = 3, p-value = 0.07341
+
+
+VAR: O2Sat-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   O2Sat by NYHAClass 
+Kruskal-Wallis chi-squared = 0.0065448, df = 1, p-value = 0.9355
+
+
+	Kruskal-Wallis rank sum test
+
+data:   O2Sat by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.12734, df = 1, p-value = 0.7212
+
+
+	Kruskal-Wallis rank sum test
+
+data:   O2Sat by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.8026, df = 3, p-value = 0.6144
+
+
+VAR: Duration-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * Duration by NYHAClass *
+Kruskal-Wallis chi-squared = 5.7234, df = 1, p-value = 0.01674
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * Duration by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.8834, df = 1, p-value = 0.02712
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Duration by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.9663, df = 3, p-value = 0.1133
+
+
+VAR: Watts-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * Watts by NYHAClass *
+Kruskal-Wallis chi-squared = 4.8065, df = 1, p-value = 0.02835
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * Watts by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.0924, df = 1, p-value = 0.04308
+
+
+	Kruskal-Wallis rank sum test
+
+data:   Watts by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.0411, df = 3, p-value = 0.1688
+
+
+VAR: Watts.Predicted.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * Watts.Predicted.Percentage by NYHAClass *
+Kruskal-Wallis chi-squared = 5.9079, df = 1, p-value = 0.01507
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . Watts.Predicted.Percentage by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.1935, df = 1, p-value = 0.07393
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * Watts.Predicted.Percentage by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 8.0952, df = 3, p-value = 0.04408
+
+
+VAR: TestEnd.Reason-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   TestEnd.Reason by NYHAClass 
+Kruskal-Wallis chi-squared = 0.1215, df = 1, p-value = 0.7274
+
+
+	Kruskal-Wallis rank sum test
+
+data:   TestEnd.Reason by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.21358, df = 1, p-value = 0.644
+
+
+	Kruskal-Wallis rank sum test
+
+data:   TestEnd.Reason by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.82458, df = 3, p-value = 0.8436
+
+
+VAR: TestEnd.Symptom-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   TestEnd.Symptom by NYHAClass 
+Kruskal-Wallis chi-squared = 0.89774, df = 1, p-value = 0.3434
+
+
+	Kruskal-Wallis rank sum test
+
+data:   TestEnd.Symptom by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.86205, df = 1, p-value = 0.3532
+
+
+	Kruskal-Wallis rank sum test
+
+data:   TestEnd.Symptom by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.0337, df = 3, p-value = 0.7931
+
+
+VAR: VO2.perBodyWeight-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . VO2.perBodyWeight by NYHAClass .
+Kruskal-Wallis chi-squared = 3.7539, df = 1, p-value = 0.05268
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.perBodyWeight by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.3381, df = 1, p-value = 0.1262
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . VO2.perBodyWeight by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 6.6599, df = 3, p-value = 0.08357
+
+
+VAR: VO2.Predicted.Relative-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Relative by NYHAClass 
+Kruskal-Wallis chi-squared = 0.025214, df = 1, p-value = 0.8738
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Relative by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.027607, df = 1, p-value = 0.868
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Relative by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.1262, df = 3, p-value = 0.7707
+
+
+VAR: VO2.Predicted.Relative.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . VO2.Predicted.Relative.Percentage by NYHAClass .
+Kruskal-Wallis chi-squared = 3.2473, df = 1, p-value = 0.07154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Relative.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.6602, df = 1, p-value = 0.1029
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Relative.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.684, df = 3, p-value = 0.2977
+
+
+VAR: VO2-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2 by NYHAClass 
+Kruskal-Wallis chi-squared = 0.92798, df = 1, p-value = 0.3354
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2 by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.99374, df = 1, p-value = 0.3188
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2 by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.1356, df = 3, p-value = 0.7685
+
+
+VAR: VO2.Predicted.Absolute-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Absolute by NYHAClass 
+Kruskal-Wallis chi-squared = 0.032383, df = 1, p-value = 0.8572
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Absolute by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.0011043, df = 1, p-value = 0.9735
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Absolute by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.08545, df = 3, p-value = 0.9935
+
+
+VAR: VO2.Predicted.Absolute.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Absolute.Percentage by NYHAClass 
+Kruskal-Wallis chi-squared = 2.3273, df = 1, p-value = 0.1271
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Absolute.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.4754, df = 1, p-value = 0.2245
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Predicted.Absolute.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.9213, df = 3, p-value = 0.2701
+
+
+VAR: VE.Peak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   VE.Peak by NYHAClass 
+Kruskal-Wallis chi-squared = 0.32172, df = 1, p-value = 0.5706
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VE.Peak by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.32108, df = 1, p-value = 0.571
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VE.Peak by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.98326, df = 3, p-value = 0.8053
+
+
+VAR: VCO2.Peak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . VCO2.Peak by NYHAClass .
+Kruskal-Wallis chi-squared = 3.7275, df = 1, p-value = 0.05352
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . VCO2.Peak by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.2197, df = 1, p-value = 0.07276
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VCO2.Peak by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.5061, df = 3, p-value = 0.2117
+
+
+VAR: VEperVCO2.Peak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * VEperVCO2.Peak by NYHAClass *
+Kruskal-Wallis chi-squared = 5.0152, df = 1, p-value = 0.02513
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * VEperVCO2.Peak by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.4724, df = 1, p-value = 0.03445
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VEperVCO2.Peak by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.4914, df = 3, p-value = 0.1392
+
+
+VAR: VEperVCO2.atAT-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** VEperVCO2.atAT by NYHAClass **
+Kruskal-Wallis chi-squared = 7.295, df = 1, p-value = 0.006915
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** VEperVCO2.atAT by PureNYHAClass **
+Kruskal-Wallis chi-squared = 9.3172, df = 1, p-value = 0.00227
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * VEperVCO2.atAT by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 10.611, df = 3, p-value = 0.01403
+
+
+VAR: AT-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . AT by NYHAClass .
+Kruskal-Wallis chi-squared = 3.5597, df = 1, p-value = 0.0592
+
+
+	Kruskal-Wallis rank sum test
+
+data:   AT by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.3625, df = 1, p-value = 0.1243
+
+
+	Kruskal-Wallis rank sum test
+
+data:   AT by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.9021, df = 3, p-value = 0.1165
+
+
+VAR: VO2.Peak.Measured.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Peak.Measured.Percentage by NYHAClass 
+Kruskal-Wallis chi-squared = 0.48104, df = 1, p-value = 0.4879
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Peak.Measured.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.0184, df = 1, p-value = 0.3129
+
+
+	Kruskal-Wallis rank sum test
+
+data:   VO2.Peak.Measured.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.4506, df = 3, p-value = 0.4843
+
+
+VAR: VO2.Peak.Predicted.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * VO2.Peak.Predicted.Percentage by NYHAClass *
+Kruskal-Wallis chi-squared = 4.6374, df = 1, p-value = 0.03128
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . VO2.Peak.Predicted.Percentage by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.0109, df = 1, p-value = 0.08271
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . VO2.Peak.Predicted.Percentage by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 6.3957, df = 3, p-value = 0.09387
+
+
+VAR: RER.Peak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** RER.Peak by NYHAClass **
+Kruskal-Wallis chi-squared = 9.8431, df = 1, p-value = 0.001705
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** RER.Peak by PureNYHAClass **
+Kruskal-Wallis chi-squared = 10.521, df = 1, p-value = 0.00118
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** RER.Peak by ExplicitNYHAClass **
+Kruskal-Wallis chi-squared = 11.641, df = 3, p-value = 0.008718
+
+
+VAR: RPEper20.Peak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   RPEper20.Peak by NYHAClass 
+Kruskal-Wallis chi-squared = 0.024259, df = 1, p-value = 0.8762
+
+
+	Kruskal-Wallis rank sum test
+
+data:   RPEper20.Peak by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.29167, df = 1, p-value = 0.5892
+
+
+	Kruskal-Wallis rank sum test
+
+data:   RPEper20.Peak by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.6667, df = 3, p-value = 0.2998
+
+
+VAR: PETCO2.Peak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   PETCO2.Peak by NYHAClass 
+Kruskal-Wallis chi-squared = 1.9853, df = 1, p-value = 0.1588
+
+
+	Kruskal-Wallis rank sum test
+
+data:   PETCO2.Peak by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.9853, df = 1, p-value = 0.1588
+
+
+	Kruskal-Wallis rank sum test
+
+data:   PETCO2.Peak by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.9853, df = 1, p-value = 0.1588
+
+
+VAR: OUES-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   OUES by NYHAClass 
+Kruskal-Wallis chi-squared = 0, df = 1, p-value = 1
+
+
+	Kruskal-Wallis rank sum test
+
+data:   OUES by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0, df = 1, p-value = 1
+
+
+	Kruskal-Wallis rank sum test
+
+data:   OUES by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0, df = 1, p-value = 1
+
+
+VAR: TotalRiskScore-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   TotalRiskScore by NYHAClass 
+Kruskal-Wallis chi-squared = 0.35088, df = 1, p-value = 0.5536
+
+
+	Kruskal-Wallis rank sum test
+
+data:   TotalRiskScore by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.35088, df = 1, p-value = 0.5536
+
+
+	Kruskal-Wallis rank sum test
+
+data:   TotalRiskScore by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.35088, df = 1, p-value = 0.5536
+
+
+VAR: StepData.LongestActiveStreak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.LongestActiveStreak by NYHAClass .
+Kruskal-Wallis chi-squared = 3.1286, df = 1, p-value = 0.07693
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.LongestActiveStreak by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.5137, df = 1, p-value = 0.2186
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.LongestActiveStreak by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.3524, df = 3, p-value = 0.3404
+
+
+VAR: StepData.HighestValuedStreak-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.HighestValuedStreak by NYHAClass **
+Kruskal-Wallis chi-squared = 6.8361, df = 1, p-value = 0.008934
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.HighestValuedStreak by PureNYHAClass *
+Kruskal-Wallis chi-squared = 3.8436, df = 1, p-value = 0.04994
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.HighestValuedStreak by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.2102, df = 3, p-value = 0.06549
+
+
+VAR: StepData.MeanDailyTotalSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanDailyTotalSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.1736, df = 1, p-value = 0.04106
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanDailyTotalSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 3.8436, df = 1, p-value = 0.04994
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanDailyTotalSteps by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.3738, df = 3, p-value = 0.2238
+
+
+VAR: StepData.StdDevDailyTotalSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevDailyTotalSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.3483, df = 1, p-value = 0.03704
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.StdDevDailyTotalSteps by PureNYHAClass **
+Kruskal-Wallis chi-squared = 6.7177, df = 1, p-value = 0.009546
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.StdDevDailyTotalSteps by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.657, df = 3, p-value = 0.05366
+
+
+VAR: StepData.MeanDailyMeanSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanDailyMeanSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.1736, df = 1, p-value = 0.04106
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanDailyMeanSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 3.8436, df = 1, p-value = 0.04994
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanDailyMeanSteps by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.3738, df = 3, p-value = 0.2238
+
+
+VAR: StepData.StdDevDailyMeanSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevDailyMeanSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 4.3483, df = 1, p-value = 0.03704
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.StdDevDailyMeanSteps by PureNYHAClass **
+Kruskal-Wallis chi-squared = 6.7177, df = 1, p-value = 0.009546
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.StdDevDailyMeanSteps by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.657, df = 3, p-value = 0.05366
+
+
+VAR: StepData.ModeDailyModeSteps-------------------------------
+
+VAR: StepData.MeanDailyMinSteps-------------------------------
+
+VAR: StepData.MeanDailyMaxSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanDailyMaxSteps by NYHAClass *
+Kruskal-Wallis chi-squared = 5.7736, df = 1, p-value = 0.01627
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanDailyMaxSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.1086, df = 1, p-value = 0.04267
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanDailyMaxSteps by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.8096, df = 3, p-value = 0.1213
+
+
+VAR: StepData.ModeDailyMinSteps-------------------------------
+
+VAR: StepData.ModeDailyMaxSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.ModeDailyMaxSteps by NYHAClass **
+Kruskal-Wallis chi-squared = 9.1263, df = 1, p-value = 0.00252
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.ModeDailyMaxSteps by PureNYHAClass **
+Kruskal-Wallis chi-squared = 6.8268, df = 1, p-value = 0.00898
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.ModeDailyMaxSteps by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 9.6291, df = 3, p-value = 0.022
+
+
+VAR: StepData.MaxDailyMaxSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.MaxDailyMaxSteps by NYHAClass **
+Kruskal-Wallis chi-squared = 8.4293, df = 1, p-value = 0.003692
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MaxDailyMaxSteps by PureNYHAClass *
+Kruskal-Wallis chi-squared = 6.5574, df = 1, p-value = 0.01044
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MaxDailyMaxSteps by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 8.4624, df = 3, p-value = 0.03736
+
+
+VAR: StepData.StdDevDailyMaxSteps-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevDailyMaxSteps by NYHAClass 
+Kruskal-Wallis chi-squared = 0.09423, df = 1, p-value = 0.7589
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevDailyMaxSteps by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.0611, df = 1, p-value = 0.303
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevDailyMaxSteps by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.5952, df = 3, p-value = 0.3086
+
+
+VAR: StepData.TotalActiveMinutes_Pure-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.TotalActiveMinutes_Pure by NYHAClass .
+Kruskal-Wallis chi-squared = 3.2001, df = 1, p-value = 0.07363
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.TotalActiveMinutes_Pure by PureNYHAClass .
+Kruskal-Wallis chi-squared = 2.8719, df = 1, p-value = 0.09014
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalActiveMinutes_Pure by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.3481, df = 3, p-value = 0.341
+
+
+VAR: StepData.MeanActiveMinutes_Pure-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanActiveMinutes_Pure by NYHAClass 
+Kruskal-Wallis chi-squared = 2.0725, df = 1, p-value = 0.15
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanActiveMinutes_Pure by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.723, df = 1, p-value = 0.1893
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanActiveMinutes_Pure by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.6204, df = 3, p-value = 0.4539
+
+
+VAR: StepData.StdDevActiveMinutes_Pure-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevActiveMinutes_Pure by NYHAClass 
+Kruskal-Wallis chi-squared = 0.47339, df = 1, p-value = 0.4914
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevActiveMinutes_Pure by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.4391, df = 1, p-value = 0.1183
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevActiveMinutes_Pure by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.2714, df = 3, p-value = 0.153
+
+
+VAR: StepData.ModeActiveMinutes_Pure-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeActiveMinutes_Pure by NYHAClass 
+Kruskal-Wallis chi-squared = 1.1016, df = 1, p-value = 0.2939
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeActiveMinutes_Pure by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.32055, df = 1, p-value = 0.5713
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeActiveMinutes_Pure by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.4314, df = 3, p-value = 0.4878
+
+
+VAR: StepData.MaxActiveMinutes_Pure-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxActiveMinutes_Pure by NYHAClass 
+Kruskal-Wallis chi-squared = 1.4308, df = 1, p-value = 0.2316
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.MaxActiveMinutes_Pure by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.2201, df = 1, p-value = 0.07274
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxActiveMinutes_Pure by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.5042, df = 3, p-value = 0.3202
+
+
+VAR: StepData.TotalActiveMinutes_PosMET-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.TotalActiveMinutes_PosMET by NYHAClass *
+Kruskal-Wallis chi-squared = 4.7087, df = 1, p-value = 0.03001
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.TotalActiveMinutes_PosMET by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.7144, df = 1, p-value = 0.05395
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalActiveMinutes_PosMET by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.7121, df = 3, p-value = 0.1941
+
+
+VAR: StepData.MeanActiveMinutes_PosMET-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanActiveMinutes_PosMET by NYHAClass *
+Kruskal-Wallis chi-squared = 4.0024, df = 1, p-value = 0.04544
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.MeanActiveMinutes_PosMET by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.4626, df = 1, p-value = 0.06277
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanActiveMinutes_PosMET by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.0671, df = 3, p-value = 0.2543
+
+
+VAR: StepData.StdDevActiveMinutes_PosMET-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevActiveMinutes_PosMET by NYHAClass *
+Kruskal-Wallis chi-squared = 5.1793, df = 1, p-value = 0.02286
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevActiveMinutes_PosMET by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.5661, df = 1, p-value = 0.01831
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevActiveMinutes_PosMET by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 6.2098, df = 3, p-value = 0.1018
+
+
+VAR: StepData.ModeActiveMinutes_PosMET-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeActiveMinutes_PosMET by NYHAClass 
+Kruskal-Wallis chi-squared = 1.2501, df = 1, p-value = 0.2635
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeActiveMinutes_PosMET by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.0069821, df = 1, p-value = 0.9334
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeActiveMinutes_PosMET by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.7819, df = 3, p-value = 0.1227
+
+
+VAR: StepData.MaxActiveMinutes_PosMET-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MaxActiveMinutes_PosMET by NYHAClass *
+Kruskal-Wallis chi-squared = 5.5746, df = 1, p-value = 0.01822
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MaxActiveMinutes_PosMET by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.8883, df = 1, p-value = 0.01524
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxActiveMinutes_PosMET by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 6.0286, df = 3, p-value = 0.1102
+
+
+VAR: StepData.TotalMETClass.BelowMin-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClass.BelowMin by NYHAClass 
+Kruskal-Wallis chi-squared = 0.92784, df = 1, p-value = 0.3354
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClass.BelowMin by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.3986, df = 1, p-value = 0.5278
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClass.BelowMin by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 1.5141, df = 3, p-value = 0.679
+
+
+VAR: StepData.MeanMETClass.BelowMin-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanMETClass.BelowMin by NYHAClass *
+Kruskal-Wallis chi-squared = 4.0024, df = 1, p-value = 0.04544
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.MeanMETClass.BelowMin by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.4626, df = 1, p-value = 0.06277
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClass.BelowMin by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.0671, df = 3, p-value = 0.2543
+
+
+VAR: StepData.StdDevMETClass.BelowMin-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevMETClass.BelowMin by NYHAClass *
+Kruskal-Wallis chi-squared = 5.1793, df = 1, p-value = 0.02286
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevMETClass.BelowMin by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.5661, df = 1, p-value = 0.01831
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClass.BelowMin by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 6.2098, df = 3, p-value = 0.1018
+
+
+VAR: StepData.ModeMETClass.BelowMin-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClass.BelowMin by NYHAClass 
+Kruskal-Wallis chi-squared = 1.2501, df = 1, p-value = 0.2635
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClass.BelowMin by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.0069821, df = 1, p-value = 0.9334
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClass.BelowMin by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.7819, df = 3, p-value = 0.1227
+
+
+VAR: StepData.MaxMETClass.BelowMin-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClass.BelowMin by NYHAClass 
+Kruskal-Wallis chi-squared = 0.1505, df = 1, p-value = 0.6981
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClass.BelowMin by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42057, df = 1, p-value = 0.5167
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClass.BelowMin by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 5.0009, df = 3, p-value = 0.1717
+
+
+VAR: StepData.OverallMETClass.BelowMin.PercentageAll-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.OverallMETClass.BelowMin.PercentageAll by NYHAClass *
+Kruskal-Wallis chi-squared = 4.0024, df = 1, p-value = 0.04544
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.OverallMETClass.BelowMin.PercentageAll by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.4626, df = 1, p-value = 0.06277
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClass.BelowMin.PercentageAll by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.0671, df = 3, p-value = 0.2543
+
+
+VAR: StepData.TotalMETClassIV-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.TotalMETClassIV by NYHAClass .
+Kruskal-Wallis chi-squared = 3.8351, df = 1, p-value = 0.05019
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.TotalMETClassIV by PureNYHAClass .
+Kruskal-Wallis chi-squared = 2.9856, df = 1, p-value = 0.08401
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassIV by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.4827, df = 3, p-value = 0.2138
+
+
+VAR: StepData.MeanMETClassIV-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassIV by NYHAClass 
+Kruskal-Wallis chi-squared = 2.4876, df = 1, p-value = 0.1147
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassIV by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.2359, df = 1, p-value = 0.1348
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassIV by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.8543, df = 3, p-value = 0.2776
+
+
+VAR: StepData.StdDevMETClassIV-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.StdDevMETClassIV by NYHAClass .
+Kruskal-Wallis chi-squared = 3.1248, df = 1, p-value = 0.07711
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevMETClassIV by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.1086, df = 1, p-value = 0.04267
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassIV by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.0499, df = 3, p-value = 0.2561
+
+
+VAR: StepData.ModeMETClassIV-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.ModeMETClassIV by NYHAClass *
+Kruskal-Wallis chi-squared = 4.4123, df = 1, p-value = 0.03568
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClassIV by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.2533, df = 1, p-value = 0.2629
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.ModeMETClassIV by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 6.4503, df = 3, p-value = 0.09164
+
+
+VAR: StepData.MaxMETClassIV-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.MaxMETClassIV by NYHAClass .
+Kruskal-Wallis chi-squared = 3.1269, df = 1, p-value = 0.07701
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.MaxMETClassIV by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.5273, df = 1, p-value = 0.06037
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassIV by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 4.0736, df = 3, p-value = 0.2536
+
+
+VAR: StepData.OverallMETClassIV.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.OverallMETClassIV.Percentage by NYHAClass *
+Kruskal-Wallis chi-squared = 4.4371, df = 1, p-value = 0.03517
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.OverallMETClassIV.Percentage by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.3401, df = 1, p-value = 0.06761
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassIV.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 6.2469, df = 3, p-value = 0.1002
+
+
+VAR: StepData.OverallMETClassIV.PercentageAll-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassIV.PercentageAll by NYHAClass 
+Kruskal-Wallis chi-squared = 2.4876, df = 1, p-value = 0.1147
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassIV.PercentageAll by PureNYHAClass 
+Kruskal-Wallis chi-squared = 2.2359, df = 1, p-value = 0.1348
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassIV.PercentageAll by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.8543, df = 3, p-value = 0.2776
+
+
+VAR: StepData.TotalMETClassIII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.TotalMETClassIII by NYHAClass **
+Kruskal-Wallis chi-squared = 8.5364, df = 1, p-value = 0.003481
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.TotalMETClassIII by PureNYHAClass *
+Kruskal-Wallis chi-squared = 5.6461, df = 1, p-value = 0.01749
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.TotalMETClassIII by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 9.0942, df = 3, p-value = 0.02806
+
+
+VAR: StepData.MeanMETClassIII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.MeanMETClassIII by NYHAClass **
+Kruskal-Wallis chi-squared = 7.2861, df = 1, p-value = 0.006949
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.MeanMETClassIII by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.6656, df = 1, p-value = 0.03077
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.MeanMETClassIII by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.5754, df = 3, p-value = 0.05565
+
+
+VAR: StepData.StdDevMETClassIII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.StdDevMETClassIII by NYHAClass **
+Kruskal-Wallis chi-squared = 9.3581, df = 1, p-value = 0.00222
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevMETClassIII by PureNYHAClass *
+Kruskal-Wallis chi-squared = 6.5466, df = 1, p-value = 0.01051
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.StdDevMETClassIII by ExplicitNYHAClass *
+Kruskal-Wallis chi-squared = 9.9859, df = 3, p-value = 0.01869
+
+
+VAR: StepData.ModeMETClassIII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClassIII by NYHAClass 
+Kruskal-Wallis chi-squared = 2.6106, df = 1, p-value = 0.1062
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClassIII by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.79539, df = 1, p-value = 0.3725
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.ModeMETClassIII by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 3.6203, df = 3, p-value = 0.3055
+
+
+VAR: StepData.MaxMETClassIII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.MaxMETClassIII by NYHAClass **
+Kruskal-Wallis chi-squared = 10.571, df = 1, p-value = 0.001149
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.MaxMETClassIII by PureNYHAClass **
+Kruskal-Wallis chi-squared = 7.2521, df = 1, p-value = 0.007082
+
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.MaxMETClassIII by ExplicitNYHAClass **
+Kruskal-Wallis chi-squared = 11.531, df = 3, p-value = 0.009176
+
+
+VAR: StepData.OverallMETClassIII.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.OverallMETClassIII.Percentage by NYHAClass *
+Kruskal-Wallis chi-squared = 4.4371, df = 1, p-value = 0.03517
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.OverallMETClassIII.Percentage by PureNYHAClass .
+Kruskal-Wallis chi-squared = 3.1016, df = 1, p-value = 0.07822
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassIII.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 6.0544, df = 3, p-value = 0.109
+
+
+VAR: StepData.OverallMETClassIII.PercentageAll-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:  ** StepData.OverallMETClassIII.PercentageAll by NYHAClass **
+Kruskal-Wallis chi-squared = 7.2861, df = 1, p-value = 0.006949
+
+
+	Kruskal-Wallis rank sum test
+
+data:  * StepData.OverallMETClassIII.PercentageAll by PureNYHAClass *
+Kruskal-Wallis chi-squared = 4.6656, df = 1, p-value = 0.03077
+
+
+	Kruskal-Wallis rank sum test
+
+data:  . StepData.OverallMETClassIII.PercentageAll by ExplicitNYHAClass .
+Kruskal-Wallis chi-squared = 7.5754, df = 3, p-value = 0.05565
+
+
+VAR: StepData.TotalMETClassII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassII by NYHAClass 
+Kruskal-Wallis chi-squared = 2.5333, df = 1, p-value = 0.1115
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassII by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.5278, df = 1, p-value = 0.2164
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassII by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.8516, df = 3, p-value = 0.4151
+
+
+VAR: StepData.MeanMETClassII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassII by NYHAClass 
+Kruskal-Wallis chi-squared = 2.5331, df = 1, p-value = 0.1115
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassII by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.5274, df = 1, p-value = 0.2165
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassII by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.8514, df = 3, p-value = 0.4151
+
+
+VAR: StepData.StdDevMETClassII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassII by NYHAClass 
+Kruskal-Wallis chi-squared = 2.6267, df = 1, p-value = 0.1051
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassII by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.6382, df = 1, p-value = 0.2006
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassII by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.9403, df = 3, p-value = 0.4009
+
+
+VAR: StepData.ModeMETClassII-------------------------------
+
+VAR: StepData.MaxMETClassII-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassII by NYHAClass 
+Kruskal-Wallis chi-squared = 2.6757, df = 1, p-value = 0.1019
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassII by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.6962, df = 1, p-value = 0.1928
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassII by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.9874, df = 3, p-value = 0.3936
+
+
+VAR: StepData.OverallMETClassII.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassII.Percentage by NYHAClass 
+Kruskal-Wallis chi-squared = 2.5329, df = 1, p-value = 0.1115
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassII.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.5271, df = 1, p-value = 0.2165
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassII.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.9128, df = 3, p-value = 0.4053
+
+
+VAR: StepData.OverallMETClassII.PercentageAll-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassII.PercentageAll by NYHAClass 
+Kruskal-Wallis chi-squared = 2.5331, df = 1, p-value = 0.1115
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassII.PercentageAll by PureNYHAClass 
+Kruskal-Wallis chi-squared = 1.5274, df = 1, p-value = 0.2165
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassII.PercentageAll by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.8514, df = 3, p-value = 0.4151
+
+
+VAR: StepData.TotalMETClassI-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassI by NYHAClass 
+Kruskal-Wallis chi-squared = 0.42857, df = 1, p-value = 0.5127
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassI by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42308, df = 1, p-value = 0.5154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.TotalMETClassI by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.92308, df = 3, p-value = 0.8199
+
+
+VAR: StepData.MeanMETClassI-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassI by NYHAClass 
+Kruskal-Wallis chi-squared = 0.42857, df = 1, p-value = 0.5127
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassI by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42308, df = 1, p-value = 0.5154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MeanMETClassI by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.92308, df = 3, p-value = 0.8199
+
+
+VAR: StepData.StdDevMETClassI-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassI by NYHAClass 
+Kruskal-Wallis chi-squared = 0.42857, df = 1, p-value = 0.5127
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassI by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42308, df = 1, p-value = 0.5154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.StdDevMETClassI by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.92308, df = 3, p-value = 0.8199
+
+
+VAR: StepData.ModeMETClassI-------------------------------
+
+VAR: StepData.MaxMETClassI-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassI by NYHAClass 
+Kruskal-Wallis chi-squared = 0.42857, df = 1, p-value = 0.5127
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassI by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42308, df = 1, p-value = 0.5154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.MaxMETClassI by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.92308, df = 3, p-value = 0.8199
+
+
+VAR: StepData.OverallMETClassI.Percentage-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassI.Percentage by NYHAClass 
+Kruskal-Wallis chi-squared = 0.42857, df = 1, p-value = 0.5127
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassI.Percentage by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42308, df = 1, p-value = 0.5154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassI.Percentage by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.92308, df = 3, p-value = 0.8199
+
+
+VAR: StepData.OverallMETClassI.PercentageAll-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassI.PercentageAll by NYHAClass 
+Kruskal-Wallis chi-squared = 0.42857, df = 1, p-value = 0.5127
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassI.PercentageAll by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.42308, df = 1, p-value = 0.5154
+
+
+	Kruskal-Wallis rank sum test
+
+data:   StepData.OverallMETClassI.PercentageAll by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 0.92308, df = 3, p-value = 0.8199
+
+
+VAR: BMI-------------------------------
+
+	Kruskal-Wallis rank sum test
+
+data:   BMI by NYHAClass 
+Kruskal-Wallis chi-squared = 1.1887, df = 1, p-value = 0.2756
+
+
+	Kruskal-Wallis rank sum test
+
+data:   BMI by PureNYHAClass 
+Kruskal-Wallis chi-squared = 0.7465, df = 1, p-value = 0.3876
+
+
+	Kruskal-Wallis rank sum test
+
+data:   BMI by ExplicitNYHAClass 
+Kruskal-Wallis chi-squared = 2.2186, df = 3, p-value = 0.5283
+

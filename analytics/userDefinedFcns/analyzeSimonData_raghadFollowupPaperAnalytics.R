@@ -3,6 +3,7 @@
 GENERATE_GRAPHS <- FALSE
 SAVE_GRAPHS <- FALSE  # N.B. GENERATE_GRAPHS must also be true
 SAVE_CSVS <- FALSE
+SAVE_STAT_TEST <- TRUE
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
@@ -134,6 +135,7 @@ if(!exists("m_cData"))
   
   cat('\nSTART Kruskal-Wallis rank sum tests ===============================', sep="")
   
+  kwFile <- paste(getwd(),"/results/summaryOfSimonDataPaperAnalyticsKW.txt",sep="")
   group <- group[1] # pick any one, it should be fine
   temp.noNAs <- summarizedBy[[group]] %>% tidyr::drop_na_(group)
   ktests.saved <- list()
@@ -143,6 +145,12 @@ if(!exists("m_cData"))
     ktests.saved[[group]] <- list()
   }
   
+  # print out for viewing!
+  if(SAVE_STAT_TEST)
+  {
+    #redirect to output file
+    sink(kwFile)
+  }
   for(var in as.vector(t(unique(temp.noNAs['variable']))))
   {
     cat('\nVAR: ', var, '-------------------------------\n', sep="")
@@ -171,7 +179,8 @@ if(!exists("m_cData"))
           
           # save for later
           ktests.saved[[group]][[var]] <- ktest
-          # print out for viewing!
+          
+          
           print(ktest)
           
           #}, warning = function (war) {
@@ -186,7 +195,12 @@ if(!exists("m_cData"))
       }
     }
   }
-  
+  if(SAVE_STAT_TEST)
+  {
+    #redirect back to console
+    sink(NULL)
+    print("done!")
+  }
   
   # Plotting All Results ================================
   
@@ -213,7 +227,7 @@ if(!exists("m_cData"))
             p.value <- NaN
           }
           roundDigits <- 4
-          ttl <- glue("{parseVarName(var)} per {group} [w/ Stat Summary] ",
+          ttl <- glue("{parseVarName(var,TRUE)} per {parseVarName(group,TRUE)} [w/ Stat Summary] ",
                       "(p={round(p.value,digits=roundDigits)}",
                       "){getSigCode(p.value)}")
           cat('    PLOTTED', sep="")
@@ -225,7 +239,8 @@ if(!exists("m_cData"))
             geom_jitter() + 
             labs(title = ttl,
                  caption = "Simon Bromberg's Thesis Data") +
-            xlab(group)
+            ylab(parseVarName(var,TRUE)) +
+            xlab(parseVarName(group,TRUE))
           print(plot)
           
           if(SAVE_GRAPHS)
@@ -266,10 +281,10 @@ if(!exists("m_cData"))
   
   if(SAVE_CSVS)
   {
-    write.csv(summarizedByExplicitNYHAClass.noNAs, file = "summarizedByExplicitNYHAClass.csv")
-    write.csv(summarizedByNYHAClass.noNAs, file = "summarizedByNYHAClass.csv")
-    write.csv(summarizedByPureNYHAClass.noNAs, file = "summarizedByPureNYHAClass.csv")
-    write.csv(summarizedOverall, file = "summarizedOverall.csv")
+    write.csv(summarizedByExplicitNYHAClass.noNAs, file = "results/summarizedByExplicitNYHAClass.csv")
+    write.csv(summarizedByNYHAClass.noNAs, file = "results/summarizedByNYHAClass.csv")
+    write.csv(summarizedByPureNYHAClass.noNAs, file = "results/summarizedByPureNYHAClass.csv")
+    write.csv(summarizedOverall, file = "results/summarizedOverall.csv")
     
   }
 }
