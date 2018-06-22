@@ -653,6 +653,7 @@ makePredictorHistogram <- function(finalModels,
   return(totalVarImp)
 }
 
+# N.B. print out plot before using savePlot
 savePlot <- function(fileName,
                      plot,
                      isGGPlot=FALSE)
