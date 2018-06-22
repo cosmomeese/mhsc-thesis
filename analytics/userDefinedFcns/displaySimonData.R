@@ -38,7 +38,7 @@ displaySimonData <- function(processedData,analyzedData,
   }
   if(!printMinByMin)
   {
-    warning("Reminder that function is set to not print patient activity heat maps. Set printMinByMin = TRUE to print these.")
+    warning("Reminder that function is set to not print minute by minute plots. Set printMinByMin = TRUE to print these.")
   }
   if(!printSpectral)
   {
@@ -335,7 +335,9 @@ displaySimonData <- function(processedData,analyzedData,
                               aes(Time,Steps)) +
           theme_tufte(base_family = "serif",
                       ticks = TRUE) +
-          geom_line(colour = color, size=0.05) +
+          #geom_line(colour = color, size=0.05) +
+          geom_area(fill=color) +
+          guides(fill=FALSE) +
           scale_y_continuous(limits = c(0, maxSteps)) +
           ggtitle(glue("{studyID} (Class {class}) - Day {day}")) +
           xlab("Time") + ylab("Steps Count [number of steps]") +

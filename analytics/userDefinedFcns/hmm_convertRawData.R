@@ -31,7 +31,7 @@ rm(srcCreateFcn) #remove the extra unneeded variables
 # -------------------------------------------------------
 
 # local functions
-hmm_convertRawData <- function(rawData, fitbitDownload=FALSE)
+hmm_convertRawData <- function(rawData, fitbitDownload=FALSE, CONSTANTS=CONSTANTS)
 {
   DATA_SET_RAW <- rawData[!is.na(rawData$NYHAClass),] #i.e. m_cData excluding patients w/o NYHAClass
   cat("\nM: Loaded Dataset...")
@@ -67,7 +67,7 @@ hmm_convertRawData <- function(rawData, fitbitDownload=FALSE)
   ## Normalize the predictors
   cat("\nM: Normalizing variables...")
   dataSet$Steps <- (dataSet$Steps - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale steps
-  dataSet$HeartRate <- (dataSet$HeartRate - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale heart rate
+  dataSet$HeartRate <- (dataSet$HeartRate - CONSTANTS$UNSCALEDMIN.HEARTRATE)*CONSTANTS$RESCALEFACTOR.HEARTRATE + CONSTANTS$RESCALEDMIN.HEARTRATE  # rescale heart rate
   
   cat("\nM: Finished importing DataSet...")
   
@@ -120,7 +120,7 @@ createDepMixS4DataSet <- function(dataSubSet)  # NOTE WE POTENTIALLY REUSE THIS 
   
   ## Normalize the predictors
   dataSubSet.class$Steps <- (dataSubSet.class$Steps - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale steps
-  dataSubSet.class$HeartRate <- (dataSubSet.class$HeartRate - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale heart rate
+  dataSubSet.class$HeartRate <- (dataSubSet.class$HeartRate - CONSTANTS$UNSCALEDMIN.HEARTRATE)*CONSTANTS$RESCALEFACTOR.HEARTRATE + CONSTANTS$RESCALEDMIN.HEARTRATE  # rescale heart rate
   
   ## Add the series lengths as an attribute to the return variable
   attr(dataSubSet.class,'ntimes') <- dataSubSet.N
@@ -156,7 +156,7 @@ createDepMixS4DataSet <- function(dataSubSet)  # NOTE WE POTENTIALLY REUSE THIS 
   
   ## Normalize the predictors
   dataSubSet.class$Steps <- (dataSubSet.class$Steps - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale steps
-  dataSubSet.class$HeartRate <- (dataSubSet.class$HeartRate - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale heart rate
+  dataSubSet.class$HeartRate <- (dataSubSet.class$HeartRate - CONSTANTS$UNSCALEDMIN.HEARTRATE)*CONSTANTS$RESCALEFACTOR.HEARTRATE + CONSTANTS$RESCALEDMIN.HEARTRATE  # rescale heart rate
   
   ## Extract the series lengths
   dataSubSet.table <- table(dataSubSet.class$StudyIdentifier)  # get table of each patient sequence in set

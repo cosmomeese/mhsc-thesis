@@ -20,7 +20,7 @@ analyzeSimonData <- function(processedData,suppressPrompt = FALSE)
                    sourceDir=sourceDir_a)) #use function
   rm(srcCreateFcn_a,fcns_generic) #remove the extra unneeded variables
   
-  
+  #N.B. THERE'S A BETTER FUNCTION FOR THIS IN analyzeData_common FCN=parseVarName
   #function to split camelcase strings from https://stackoverflow.com/a/8407047
   split_camelcase <- function(...){
     strings <- unlist(list(...))

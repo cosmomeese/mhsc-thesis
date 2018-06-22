@@ -17,11 +17,20 @@ DEBUGLVL.ALL <- DEBUGLVL.DEBUG + 1
 CONSTANTS$MIN_FINITE_VALUE <- .Machine$double.xmin #https://stat.ethz.ch/R-manual/R-devel/library/base/html/zMachine.html
 CONSTANTS$MAX_FINITE_VALUE <- .Machine$double.xmax #https://stat.ethz.ch/R-manual/R-devel/library/base/html/zMachine.html
 
+# steps
 CONSTANTS$UNSCALEDMIN.STEPS <- 0
-CONSTANTS$UNSCALEDMAX.STEPS <- 300  # assume max value is 255 per minute
+CONSTANTS$UNSCALEDMAX.STEPS <- 300  # assume max value is 255 steps per minute
 CONSTANTS$RESCALEDMIN.STEPS <- CONSTANTS$MIN_FINITE_VALUE #1 OR + 1/(-1 + UNSCALEDMAX.STEPS - UNSCALEDMIN.STEPS)
 CONSTANTS$RESCALEDMAX.STEPS <- 1 #301
 CONSTANTS$RESCALEFACTOR.STEPS <- (CONSTANTS$RESCALEDMAX.STEPS - CONSTANTS$RESCALEDMIN.STEPS) / (CONSTANTS$UNSCALEDMAX.STEPS - CONSTANTS$UNSCALEDMIN.STEPS)
+
+# heart rate
+CONSTANTS$UNSCALEDMIN.HEARTRATE <- 0
+CONSTANTS$UNSCALEDMAX.HEARTRATE <- 210  # assume max value is 210 beats per minute
+CONSTANTS$RESCALEDMIN.HEARTRATE <- CONSTANTS$MIN_FINITE_VALUE #1 OR + 1/(-1 + UNSCALEDMAX.HEARTRATE - UNSCALEDMIN.HEARTRATE)
+CONSTANTS$RESCALEDMAX.HEARTRATE <- 1 #211
+CONSTANTS$RESCALEFACTOR.HEARTRATE <- (CONSTANTS$RESCALEDMAX.HEARTRATE - CONSTANTS$RESCALEDMIN.HEARTRATE) / (CONSTANTS$UNSCALEDMAX.HEARTRATE - CONSTANTS$UNSCALEDMIN.HEARTRATE)
+
 
 CONSTANTS$NORMALIZED_STUDY_DAY_START <- as.POSIXct("9000-01-01 00:00:00", tz="UTC")
 # CONSTANTS <- sapply(c( 'NYHA_CLASS_VEC',
@@ -32,6 +41,11 @@ CONSTANTS$NORMALIZED_STUDY_DAY_START <- as.POSIXct("9000-01-01 00:00:00", tz="UT
 #                        'RESCALEDMAX.STEPS',
 #                        'RESCALEDMIN.STEPS',
 #                        'RESCALEFACTOR.STEPS',
+#                        'UNSCALEDMAX.HEARTRATE',
+#                        'UNSCALEDMIN.HEARTRATE',
+#                        'RESCALEDMAX.HEARTRATE',
+#                        'RESCALEDMIN.HEARTRATE',
+#                        'RESCALEFACTOR.HEARTRATE',
 #                        'NORMALIZED_STUDY_DAY_START'),
 #                     FUN=get)
 # 
@@ -82,7 +96,6 @@ binData <- function(dataToBin, interval)
   #stop("breaks if NA in dataToBin.cut[, which(....)]")
   dataToBin.cut$Steps[dataToBin.cut$Steps <= CONSTANTS$MIN_FINITE_VALUE] <- 1/CONSTANTS$UNSCALEDMAX.STEPS
   dataToBin.cut$DateTime <- dataToBin.cut %>% group_by(StudyIdentifier) %>% .$DateTime %>% cut(interval)
-  
   
   # find the column with NA's
   naRows <- dplyr::summarise_all(data.frame(is.na(dataToBin.cut)),

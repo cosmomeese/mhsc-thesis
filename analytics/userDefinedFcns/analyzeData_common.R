@@ -8,7 +8,8 @@
 
 ################################################################################
 # Common Helper Functions
-
+require(glue)
+require(stringr)
 
 minMeanSEMMax <- function(x) {
   v <- c(min(x), mean(x) - sd(x)/sqrt(length(x)), mean(x), mean(x) + sd(x)/sqrt(length(x)), max(x))
@@ -19,7 +20,7 @@ minMeanSEMMax <- function(x) {
 removeInvalidFileNameChars <- function(x, isWindowsOS=TRUE)
 {
   mask <- "/"
-  windowsMask <- "<>:\\\"|?*"
+  windowsMask <- "<>:\\\"|?*\\\\"
   if(isWindowsOS)
   {
     mask <- glue("{mask}{windowsMask}")
