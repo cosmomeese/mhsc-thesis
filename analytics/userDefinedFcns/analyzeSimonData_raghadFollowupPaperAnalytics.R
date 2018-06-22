@@ -2,12 +2,12 @@
 
 GENERATE_GRAPHS <- FALSE
 SAVE_GRAPHS <- FALSE  # N.B. GENERATE_GRAPHS must also be true
-SAVE_CSVS <- FALSE
+SAVE_CSVS <- TRUE
 SAVE_STAT_TEST <- TRUE
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("plyr","tidyverse","reshape2","glue", "ggthemes")
+pkg <- c("plyr","tidyverse","reshape2","glue", "ggthemes","hmisc")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -21,6 +21,7 @@ library(plyr)
 library(dplyr)
 library(reshape2)
 library(glue)
+library(Hmisc)
 
 ## Import Required Functions
 sourceDir <- "userDefinedFcns"
@@ -104,6 +105,7 @@ if(!exists("m_cData"))
                         sd = sd(as.numeric(value),na.rm=TRUE),
                         sem = sd(as.numeric(value),na.rm=TRUE)/sqrt(sum(!(is.na(as.numeric(value))))),
                         n = sum(!(is.na(as.numeric(value)))))  # i.e. length without NAs
+    
     # sort by variable name for easier visual comparison (if desired)
     temp <- temp %>% arrange(variable)
     
@@ -119,7 +121,50 @@ if(!exists("m_cData"))
            temp %>% tidyr::drop_na_(group))  # var value
   }
   
-  cat('\nSTART Summary Statistics Calculation (Overall) ====================', sep="")
+  cat('\nSTART Summary Statistics Calculation (Overall + rcorr) ====================', sep="")
+  
+  ### rcorr ####
+  #wrapper for rcorr for dplyr function
+  # x = x for rcorr
+  # y = y for rcorr
+  # out_name : r, P or n depending on desired variable from rcorr output matrix (for intersection element of x & y)
+  # N.B. if number of (!NA) observations < 4 then will return NA instead of rcorr (since rcorr doesn't support < 4 obs.)
+  rcorrForDplyr <- function(x,y,out_name)
+  {
+    n.x <- sum(!(is.na(as.numeric(x))))
+    n.y <- sum(!(is.na(as.numeric(y))))
+    isR2 <- 'r2'==out_name
+    
+    if(out_name %in% c('r','P','n','r2'))
+    {
+      out_val <- out_name
+      if(isR2)
+      {
+        out_val <- 'r'
+      }
+      
+      if(n.x > 4 && n.y > 4)
+      {
+        #browser()
+        result <- rcorr(as.numeric(x),as.numeric(y))[[out_val]][2]
+        if(isR2)
+        {
+          result <- result^2
+        }
+      }
+      else
+      {
+        result <- NA
+      }
+      
+    }
+    else
+    {
+      stop("out_name must be either r, r2, P, or n")
+    }
+    return(result)
+  }
+  
   
   # calculate summary statistics
   summarizedOverall <- plyr::ddply(melted %>% tidyr::drop_na_("NYHAClass"),
@@ -129,6 +174,25 @@ if(!exists("m_cData"))
                                    sd = sd(as.numeric(value),na.rm=TRUE),
                                    sem = sd(as.numeric(value),na.rm=TRUE)/sqrt(sum(!(is.na(as.numeric(value))))),
                                    n = sum(!(is.na(as.numeric(value)))))  # i.e. length without NAs
+  
+  vars <- c("r","r2","P")
+  for(var in vars)
+  {
+    for(group in groupingType)
+    {
+      vName <- paste(group,tolower(var),sep=".")
+      
+      overallTemp <- plyr::ddply(melted %>% tidyr::drop_na_("NYHAClass"),
+                                 c("variable"),
+                                 dplyr::summarise,
+                                 !!vName := rcorrForDplyr(value, (!!as.name(group)), var))
+      
+      summarizedOverall <- merge.data.frame(x=summarizedOverall,
+                                            y=overallTemp,
+                                            by='variable',
+                                            all=TRUE)
+    }
+  }
   
   # Kruskal-Wallis rank sum test ========================
   # for each grouping type run a kruskal test on each variable
@@ -199,7 +263,7 @@ if(!exists("m_cData"))
   {
     #redirect back to console
     sink(NULL)
-    print("done!")
+    cat("\ndone!")
   }
   
   # Plotting All Results ================================
