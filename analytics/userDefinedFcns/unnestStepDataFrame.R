@@ -49,9 +49,9 @@ unnestStepDataFrame <- function(originalOutputDataFrame)
   originalOutputDataFrame$StepData <- NULL
   
   unnestedDataFrame <- merge(x = originalOutputDataFrame,
-                         y = unnestedStepData, 
-                         by = "StudyIdentifier", 
-                         all = TRUE)
+                             y = unnestedStepData, 
+                             by = "StudyIdentifier", 
+                             all = TRUE)
   
   return(unnestedDataFrame)
 }
