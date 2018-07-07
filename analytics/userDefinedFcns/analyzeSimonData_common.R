@@ -8,8 +8,9 @@
 
 ################################################################################
 # Common Helper Functions
-require(lubridate)
 require(tidyverse)
+require(lubridate)
+require(stringr)
 
 addBMIColumn <- function(fullData) {
   
@@ -19,13 +20,27 @@ addBMIColumn <- function(fullData) {
   
 }
 
-addMissingClassGroupings <- function(fullData) {
+# adds based on NYHAClassMixed
+addMissingClassGroupings <- function(fullData,
+                                     removeHF018=TRUE,
+                                     trimExtraPureFacLevels=TRUE,
+                                     trimExtraRoundedFacLevels=TRUE) {
   #### Clean up factor levels ###########################
+  
+  C1 <- "I"
+  C1.2 <- "I/II"
+  C2 <- "II"
+  C2.3 <- "II/III"
+  C3 <- "III"
+  C3.4 <- "III/IV"
+  C4 <- "IV"
+  
+  mixedClassColName <- "NYHAClassMixed"
   
   ## Factor Levels
   # All factors with dirty factor names
   FACTOR_LEVELS <- list()
-  FACTOR_LEVELS$ALL <- levels(fullData$NYHAClassMixed)
+  FACTOR_LEVELS$ALL <- levels(fullData[[mixedClassColName]])
   # Factors where the given class occurs in any of the dirty factor level names, including as a mixed class
   FACTOR_LEVELS$ANY1 <- grep("(\\b(1|I)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
   FACTOR_LEVELS$ANY2 <- grep("(\\b(2|II)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
@@ -45,17 +60,30 @@ addMissingClassGroupings <- function(fullData) {
   FACTOR_LEVELS$MIXED23 <- setdiff(FACTOR_LEVELS$ROUNDDOWN3,FACTOR_LEVELS$PURE3)
   FACTOR_LEVELS$MIXED34 <- setdiff(FACTOR_LEVELS$ROUNDDOWN4,FACTOR_LEVELS$PURE4)
   
+  ## nHelper fcn
+  factorLevels2Index <- function(levels)
+  {
+    temp <- !is.na(factor(fullData[[mixedClassColName]], levels=levels))
+    return(temp)
+  }
   
   #### Add MixedNYHAClass (already in Simon Data) #######
   
-  # Add NYHAClass, i.e. those using rounddown technique
-  # already done (manually) in Simon's data set (in fact we're used it above as the 'cleaned up' factor names
+  # Already using
   
-  factorLevels2Index <- function(levels)
-  {
-    temp <- !is.na(factor(fullData$NYHAClassMixed, levels=levels))
-    return(temp)
-  }
+  #### Add ExplicitNYHAClass ############################
+  
+  # Add ExplicitNYHAClass, i.e. those with class I, I/II, II, II/III, III, III/IV, IV
+  explicitNYHAClassVector <- vector(mode="character",nrow(fullData))
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE1))] <- C1  # populate pure I
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$MIXED12))] <- C1.2  # populate mixed I/II
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE2))] <- C2  # populate pure II
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$MIXED23))] <- C2.3  # populate mixed II/III
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE3))] <- C3  # populate pure III
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$MIXED34))] <- C3.4  # populate mixed III/IV
+  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE4))] <- C4  # populate pure IV
+  fullData$ExplicitNYHAClass <- factor(explicitNYHAClassVector,levels=c(C1,C1.2,C2,C2.3,C3,C3.4,C4))
+  rm(explicitNYHAClassVector)
   
   #### Add PureNYHAClass ################################
   
@@ -65,28 +93,49 @@ addMissingClassGroupings <- function(fullData) {
                                              FACTOR_LEVELS$PURE2,
                                              FACTOR_LEVELS$PURE3,
                                              FACTOR_LEVELS$PURE4))  # get indices for NYHA Classes that are pure 1, 2, 3 or 4 only
-  pureNYHAClassVector[pureFactorIndicies] <- as.character(fullData$NYHAClass[pureFactorIndicies])  # select/copy the 'cleaned up' factor names
-  fullData$PureNYHAClass <- factor(pureNYHAClassVector, levels=levels(fullData$NYHAClass))  # convert to factor
+  pureNYHAClassVector[pureFactorIndicies] <- as.character(fullData$ExplicitNYHAClass[pureFactorIndicies])  # select/copy the 'cleaned up' factor names
+  pureFactorLevels <- c(C1,C2,C3,C4)
+  pureNYHAClassVector <- factor(pureNYHAClassVector,
+                                levels=pureFactorLevels)  # convert to factor (will use only existing levels in the vector)
+  if(trimExtraPureFacLevels)
+  {
+    # convert to character and back to factor will remove
+    # extra unused factor levels
+    pureNYHAClassVector <- as.factor(as.character(pureNYHAClassVector))
+  }
+  fullData$PureNYHAClass <- pureNYHAClassVector
   rm(pureFactorIndicies,pureNYHAClassVector)
   
-  #### Add ExplicitNYHAClass ############################
+  #### Add RoundDownNYHAClass ################################
   
-  # Add ExplicitNYHAClass, i.e. those with class I, I/II, II, II/III, III, III/IV, IV
-  explicitNYHAClassVector <- vector(mode="character",nrow(fullData))
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE1))] <- "I"  # populate pure I
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$MIXED12))] <- "I/II"  # populate mixed I/II
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE2))] <- "II"  # populate pure II
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$MIXED23))] <- "II/III"  # populate mixed II/III
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE3))] <- "III"  # populate pure III
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$MIXED34))] <- "III/IV"  # populate mixed III/IV
-  explicitNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE4))] <- "IV"  # populate pure IV
-  fullData$ExplicitNYHAClass <- factor(explicitNYHAClassVector,levels=c("I","I/II","II","II/III","III","III/IV","IV"))
-  rm(explicitNYHAClassVector)
+  # Add (generated) NYHAClass i.e. those using rounddown technique (see factor lvl definitions above)
+  roundDownNYHAClassVector <- vector(mode="character",nrow(fullData))
+  roundDownNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$PURE1))] <- C1  # populate roundown (pure) group 1
+  roundDownNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$ROUNDDOWN2))] <- C2  # populate roundown group 2
+  roundDownNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$ROUNDDOWN3))] <- C3  # populate roundown group 3
+  roundDownNYHAClassVector[factorLevels2Index(c(FACTOR_LEVELS$ROUNDDOWN4))] <- C4  # populate roundown group 4
+  roundDownNYHAClassVector <- factor(roundDownNYHAClassVector,
+                                        levels=pureFactorLevels)
+  if(trimExtraPureFacLevels)
+  {
+    # convert to character and back to factor will remove
+    # extra unused factor levels
+    roundDownNYHAClassVector <- as.factor(as.character(roundDownNYHAClassVector))
+    
+  }
+  fullData$RoundDownNYHAClass <- roundDownNYHAClassVector
+  rm(roundDownNYHAClassVector)
   
-  # Remove participants where we have missing important (see step) data
-  warning("Forcing HF018 to NA since HF018 has no step data - come up with a better way to do this if using different data set")
-  fullData$PureNYHAClass[fullData$StudyIdentifier == "HF018"] <- NA # drop HF018 since they don't have step data
-  fullData$ExplicitNYHAClass[fullData$StudyIdentifier == "HF018"] <- NA # as above
+  #### Remove HF018 ####
+  
+  if(removeHF018)
+  {
+    # Remove participants where we have missing important (see step) data
+    warning("Forcing HF018 to NA since HF018 has no step data - come up with a better way to do this if using different data set")
+    fullData$PureNYHAClass[fullData$StudyIdentifier == "HF018"] <- NA # drop HF018 since they don't have step data
+    fullData$ExplicitNYHAClass[fullData$StudyIdentifier == "HF018"] <- NA # as above
+    fullData$RoundDownNYHAClass[fullData$StudyIdentifier == "HF018"] <- NA # as above
+  }
   
   return(fullData)
 }
@@ -113,29 +162,19 @@ splitDateTimeToDayAndTime <- function(df,
   df <- clearNADateTimeColumns(df)
   
   # create new Day, Time & BaseDay columns
-  df <- df %>% group_by(StudyIdentifier) %>%
-          mutate(Day = lubridate::yday(DateTime) - lubridate::yday(first(DateTime)),
-                 Time = DateTime,
-                 BaseDay = lubridate::ymd(first(DateTime))
-          )
-  
-  unixEpochStartDate <- "1970-01-01"
-  secondsInDay <- 60*60*24 #60 sec * 60 min * 24 hr
-  df$Time <- as.POSIXct(as.numeric(dateForTimeCol) + (as.numeric(df$Time) %% secondsInDay),
-                        origin = unixEpochStartDate,
-                        tz = lubridate::tz(df$Time))
-
-  # BIGGEST PERFORMANCE HIT V
-  #year(df$Time) <- year(dateForTimeCol) #reset to default year
-  #yday(df$Time) <- yday(dateForTimeCol) #reset to first day
-  #tz(df$Time) <- tz(dateForTimeCol) #reset to corresponding time zone
-  # BIGGEST PERFORMANCE HIT ^
+  df <- df %>% group_by(StudyIdentifier) %>% 
+    dplyr::arrange(DateTime, .by_group=TRUE) %>%
+    mutate(Day = lubridate::yday(DateTime) - lubridate::yday(first(DateTime)),
+           Time = DateTime,
+           BaseDay = lubridate::floor_date(first(DateTime),
+                                           unit="day")
+    )
   
   if(dropOldColumns)
   {
     df$DateTime <- NULL  # drop DateTime    
   }
-
+  
   df <- df %>% ungroup()
   
   return(df)
@@ -159,9 +198,11 @@ mergeDayAndTimeToDateTime <- function(df,
   if(isValidBaseDayArgSupplied &&
      hasBaseDayCol)
   {
-      df$BaseDay <- NULL # this is here so addBaseDayToPatient can operate
-      hasBaseDayCol <- FALSE # since we need to replace
+    df$BaseDay <- NULL # this is here so addBaseDayToPatient can operate
+    hasBaseDayCol <- FALSE # since we need to replace
   }
+  
+  #browser() # so tester can follow along
   
   # add base day column
   if(!hasBaseDayCol)
@@ -173,11 +214,7 @@ mergeDayAndTimeToDateTime <- function(df,
     # BIGGEST PERFORMANCE HIT ^
   }
   
-  # we need this for later
-  unixEpochStartDate <- "1970-01-01" #out common origin
-  
   # since timezones are messed up to use: back up the timezone first - will restore later
-  df$TimeTZ <- df$Time
   lubridate::tz(df$Time) <- "UTC"
   
   # since we only want the seconds offset (i.e. not date) from time let's get that
@@ -185,24 +222,15 @@ mergeDayAndTimeToDateTime <- function(df,
   # create new TimeSec column
   df$TimeSec <- as.numeric(df$Time) %% secondsInDay
   
-  browser()
-  
-  df <- df %>% mutate(BaseDaywithTZ = lubridate::force_tz(BaseDay,
-                                                          tzone = attributes(TimeTZ)$tzone,
-                                                          roll=TRUE))
+  #browser() # so tester can follow along
   
   # create new DateTime column, combining BaseDay, Day (as added days) & seconds (from from our common origin)
-  df$DateTime2 <- as.POSIXct(df$BaseDaywithTZ + lubridate::days(df$Day) + lubridate::seconds(df$TimeSec),
-                             origin = unixEpochStartDate)
+  df$DateTime <- df$BaseDay + lubridate::days(df$Day) + lubridate::seconds(df$TimeSec)
   
-  # restore the timezone
   # N.B. WARN!!!!!! roll must be set to TRUE to avoiding getting NAs during DST-breaks
-
   
-  # delete the now redundant TimeTZ & TimeSec column
-  df$TimeTZ <- NULL
+  # delete the now redundant TimeSec column
   df$TimeSec <- NULL
-  df$BaseDaywithTZ <- NULL
   
   if(dropOldColumns)
   {
@@ -283,7 +311,7 @@ testSplitAndMerge <- function(testDF,
   splitMergeColName <- 'splitMerged'
   result[[origColName]] <- testDF.noNAs
   result[[splitMergeColName]] <- secondCompareDF
-
+  
   return(result)
 }
 
@@ -303,7 +331,7 @@ addBaseDayToPatient <- function(df,
   {
     baseDayList <- list()
   }
-
+  
   for(studyID in levels(dframe$StudyIdentifier))
   {
     # get valid base day
@@ -319,12 +347,13 @@ addBaseDayToPatient <- function(df,
     
     # create as data frame row
     dframe <- data.frame(StudyIdentifier=studyID,
-                         BaseDay=as.POSIXct(baseDay))
+                         BaseDay=as.POSIXct(baseDay,
+                                            tz=lubridate::tz(baseDay)))
     baseDayList[[studyID]] <- dframe
   }
   
   baseDayDFrame <- do.call(rbind, baseDayList)
-
+  
   # biggest performance hit V
   df <- merge(x=df,
               y=baseDayDFrame,
@@ -332,6 +361,25 @@ addBaseDayToPatient <- function(df,
               all.x=TRUE
   )
   # biggest performance hit ^
+  
+  return(df)
+}
+
+# adds BaseDay column from DateTime Column but based on first element in df Patient group (by StudyIdentifier)
+# N.B. also requires Time & Day columns
+addBaseDayFromTime <- function(df)
+{
+  # remove entries with no valid datetime
+  df <- clearNADateTimeColumns(df)
+  
+  # create new Day, Time & BaseDay columns
+  df <- df %>% group_by(StudyIdentifier) %>% 
+    dplyr::arrange(Day, Time, .by_group=TRUE) %>%
+    mutate(BaseDay = lubridate::floor_date(first(Time),
+                                           unit="day")
+    )
+  
+  df <- df %>% ungroup()
   
   return(df)
 }
@@ -361,7 +409,72 @@ clearNADateTimeColumns <- function(df)
 expandNYHAClassToEntirePatient <- function(df)
 {
   df <- df %>% group_by(StudyIdentifier) %>%
-              mutate(NYHAClass = first(NYHAClass))
+    mutate(NYHAClass = first(NYHAClass))
   df <- df %>% ungroup()
   return(df)
+}
+
+# works for both handedness and wristband
+# N.B. order matters for eligibleFactors (first will become 0)
+# defaults to handedness
+cleanFactorColumnForAnalysis <- function(fullData,
+                                         colName="Handedness",
+                                         eligibleFactors=c("Left","Right")) {
+  
+  # remove all non-valid factors
+  fullData[[colName]] <- factor(fullData[[colName]],
+                              levels=eligibleFactors,
+                              ordered=TRUE)
+  # conver to numeric between with value 0|1
+  fullData[[colName]] <- as.numeric(fullData[[colName]]) - 1
+  
+  return(fullData)
+  
+}
+
+# Left = 0, Right = 1
+cleanHandednessColumnForAnalysis <- function(fullData) {
+  cName <- "Handedness"
+  fctrs <- c("Left","Right")
+  result <- cleanFactorColumnForAnalysis(fullData,
+                                         colName=cName,
+                                         eligibleFactors=fctrs)
+  return(result)
+}
+
+# Left = 0, Right = 1
+cleanWristbandColumnForAnalysis <- function(fullData) {
+  cName <- "WristbandPreference"
+  fctrs <- c("Left","Right")
+  result <- cleanFactorColumnForAnalysis(fullData,
+                                         colName=cName,
+                                         eligibleFactors=fctrs)
+  return(result)
+}
+
+# Male = 0, Female = 1
+cleanSexColumnForAnalysis <- function(fullData) {
+  cName <- "Sex"
+  fctrs <- c("M","F")
+  result <- cleanFactorColumnForAnalysis(fullData,
+                                         colName=cName,
+                                         eligibleFactors=fctrs)
+  return(result)
+}
+
+# use to verify addMissingClassGroups (or to get simply view the class groupings once calculated)
+# requires columns:
+# StudyIdentifier
+# NYHAClassMixed
+# PureNYHAClass
+# ExplicitNYHAClass
+# RoundDownNYHAClass
+getClassesByStudyID <- function(fullData) {
+  classesByStudyID <- fullData %>% 
+                        group_by(StudyIdentifier) %>% 
+                          dplyr::summarize(NCMixed = first(NYHAClassMixed),
+                                    NCPure = first(PureNYHAClass),
+                                    NCExplicit = first(ExplicitNYHAClass),
+                                    NCRound = first(RoundDownNYHAClass))
+  return(classesByStudyID)
 }
