@@ -2,8 +2,9 @@
 
 GENERATE_GRAPHS <- FALSE
 SAVE_GRAPHS <- FALSE  # N.B. GENERATE_GRAPHS must also be true
-SAVE_CSVS <- TRUE
-SAVE_STAT_TEST <- TRUE
+SAVE_CSVS <- FALSE
+SAVE_STAT_TEST <- FALSE
+SAVE_JMIR_TABLE <- TRUE
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
@@ -61,6 +62,14 @@ if(!exists("m_cData"))
   #### Clean up factor levels ###########################
   
   fullData <- addMissingClassGroupings(fullData)
+  fullData$NYHAClass <- fullData$RoundDownNYHAClass
+  fullData$RoundDownNYHAClass <- NULL
+  
+  fullData <- cleanHandednessColumnForAnalysis(fullData)
+  
+  fullData <- cleanWristbandColumnForAnalysis(fullData)
+  
+  fullData <- cleanSexColumnForAnalysis(fullData)
   
   #### Tag fullData as immutable
   FULL_DATA <- fullData
@@ -79,6 +88,9 @@ if(!exists("m_cData"))
   #### Analysis #########################################
   
   #melt so they're all together (also use ForViewing so that we don't melt the raw step data)
+  # N.B. warning message: attributes are not identical across measure variables; they will be dropped 
+  # ^ can be safely ignored (https://stackoverflow.com/questions/25688897/reshape2-melt-warning-message)
+  # it just means that the 'value' column results have no factor levels (which is expected)
   melted <- reshape2::melt(FULL_DATA.ForViewing, id.vars=c("StudyIdentifier", 
                                                            "NYHAClass",
                                                            "PureNYHAClass",
@@ -342,7 +354,7 @@ if(!exists("m_cData"))
   }
 
   # Save Files as CSV ===================================
-  
+
   if(SAVE_CSVS)
   {
     write.csv(summarizedByExplicitNYHAClass.noNAs, file = "results/summarizedByExplicitNYHAClass.csv")
@@ -351,6 +363,497 @@ if(!exists("m_cData"))
     write.csv(summarizedOverall, file = "results/summarizedOverall.csv")
     
   }
+  
+  # Save Files as JMIR Table (for Paper) ===================================
+  
+  if(SAVE_JMIR_TABLE)
+  {
+    
+    #### WARNING!!! HERE THERE BE DRAGONS ####
+    # welcome to some of the worst code I have ever written
+    
+    pThreshold <- 0.05
+    dirPath <- "../../Other/Follow-up on Raghad's Study"
+    fileNamePrefix <- "analyzeSimonData_raghadFollowupPaperAnalytics_"
+    tableRowDictFileName <- "TableRowDictionary.csv"
+    acronymDictFileName <- "AcronymDictionary.csv"
+    
+    NYHAClassColNames <- c("II^M (= I/II + II)",
+                           "III^M (= II/III + III)")
+    
+    SORTING_COLUMN <- "SortPriority"
+    
+    UNDESIRED_COLUMNS <- c("NYHAClassMixed",
+                          "HFDiagnosisYear",
+                          "EjectionFraction",
+                          "HFTreatmentsToDate",
+                          "RegularPhysicalActivities",
+                          "Exercises",
+                          "DeviceID",
+                          "ID",
+                          "CPSDate",
+                          "TestEnd.Reason",
+                          "TestEnd.Symptom",
+                          "RPEper20.Peak",
+                          "PETCO2.Peak",
+                          "OUES",
+                          "TotalRiskScore")
+    
+    #### Get Files
+    
+    require(readr)
+    tableDict <- read_csv(tableDictFullPath, 
+                          col_types = cols(OutputBase = col_skip(), 
+                                           OutputPrefix = col_skip()))
+    
+    acronymDF <- read_csv(acronymDictFullPath)
+    acronymDict <- setNames(as.character(acronymDF$Description),
+                            acronymDF$Acronym)
+    rm(acronymDF)
+    
+    # combine with getwd() + evalute the ".."'s
+    dirPath <- normalizePath(file.path(getwd(),dirPath), winslash="/")
+    
+    # assemble final full path
+    tableDictFullPath <- file.path(dirPath,paste0(fileNamePrefix,
+                                                  tableRowDictFileName))
+    acronymDictFullPath <- file.path(dirPath,paste0(fileNamePrefix,
+                                                    acronymDictFileName))
+    
+    
+      
+    #### Unmelt Results
+    
+    # change factor names to new column names
+    # N.B. strip factor levels since otherwise it causes problems with rbind
+    roundedClassSummary <-  summarizedByNYHAClass.noNAs %>%
+      mutate(NYHAClass=as.character(factor(NYHAClass,
+                                           labels=NYHAClassColNames)))
+    roundedClassSummary$Group <- "Rounded"
+    # explicit names don't need to be changed to anything fancier
+    # N.B. strip factor levels since otherwise it causes problems with rbind
+    explicitClassSummary <- summarizedByExplicitNYHAClass.noNAs %>%
+      mutate(NYHAClass=as.character(ExplicitNYHAClass))
+    explicitClassSummary$ExplicitNYHAClass <- NULL
+    explicitClassSummary$Group <- "Explicit"
+    
+    combinedSummaryByClass <- rbind(roundedClassSummary,
+                                    explicitClassSummary)
+    rm(roundedClassSummary, explicitClassSummary)
+    #make a factor again
+    combinedSummaryByClass$NYHAClass <- as.factor(combinedSummaryByClass$NYHAClass)
+    
+    value.vars <- c("mean","sd","n")
+    isFirstRun <- TRUE
+    for(value.var in value.vars)
+    {
+      temp <- dcast(combinedSummaryByClass,
+                    Group + NYHAClass ~ variable,
+                    value.var=value.var)
+      temp$Metric <- value.var
+      if(isFirstRun)
+      {
+        unmeltSummary <- temp
+        isFirstRun <- FALSE
+      }
+      else
+      {
+        unmeltSummary <- rbind(unmeltSummary, temp)
+      }
+    }
+    # move last column (Metric) back to front (for easier reading)
+    unmeltSummary <- unmeltSummary %>%
+                      select(Metric, everything())
+    
+    # rename NYHAClass to what it will actually be: the header
+    unmeltSummary$Header <- unmeltSummary$NYHAClass
+    unmeltSummary$NYHAClass <- NULL
+    
+    fwdTranspose <- function(df,headervar='variable')
+    {
+      # transpose
+      df <- as.data.frame(t(df))
+      # variables are now rownames, but we want as column
+      df[[headervar]] <- factor(row.names(df)) 
+      # move last column (variable) back to front (for easier reading)
+      df <- df %>%
+        select(!!!headervar, everything())
+      # reset row numbers (again for easier reading)
+      rownames(df) <- seq(length=nrow(df))
+      return(df)
+    }
+    
+    bwdTranspose <- function(df,headervar='variable',dropFirstCol=FALSE)
+    {
+      originalVarNames <- df[[headervar]]
+      dfToTrans <- df
+      if(dropFirstCol)
+      {
+        dfToTrans <- df[,-1]
+      }
+      df.t <- as.data.frame(t(dfToTrans))
+      colnames(df.t) <- originalVarNames
+      return(df.t)
+    }
+    
+    unmeltSummary.T <- fwdTranspose(unmeltSummary)
+    summarizedOverall.bT <- bwdTranspose(summarizedOverall)
+    
+    # transpose summarizedOverall data frame to make it easier to add group, metric & header
+    
+    
+    determineGroup <- function(df)
+    {
+      vec <- rownames(df)
+      var.values <- setNames(c('Rounded','Pure','Explicit'),
+                             c('NYHAClass','PureNYHAClass','ExplicitNYHAClass'))
+      for(var.value in names(var.values))
+      {
+        # get columns with var.values as prefix follows by a .
+        regex <- paste0('\\b',var.value,'.')
+        varCols <- grep(regex,
+                        vec)
+        vec[varCols] <- var.values[var.value]
+      }
+      return(vec)
+    }
+    
+    determineMetric <- function(df)
+    {
+      vec <- rownames(df)
+      var.values <- c('r','r2','p')
+      for(var.value in var.values)
+      {
+        # get columns with var.values as suffix
+        regex <- paste0(var.value,'\\b')
+        varCols <- grep(regex,
+                        vec)
+        vec[varCols] <- var.value
+      }
+      return(vec)
+    }
+    
+    determineHeader <- function(groupVec,metricVec)
+    {
+      vec <- metricVec
+      groupHeaderPart <- setNames(c('','(II vs. III)','(all)'),
+                                  c('Rounded','Pure','Explicit'))
+      metricHeaderPart <- setNames(c('R','R^2 ','P-value'),
+                                   c('r','r2','p'))
+      for(eleIdx in 1:length(metricVec))
+      {
+        ele <- NA
+        metricEle <- metricHeaderPart[metricVec[[eleIdx]]]
+        groupEle <- groupHeaderPart[groupVec[[eleIdx]]]
+        
+        if(!is.na(metricEle))
+        {
+          ele <- metricEle
+          if(!is.na(groupEle) && (groupEle != ''))
+          {
+            ele <- paste0(ele, "\n", groupEle)
+          }
+        }
+        vec[[eleIdx]] <- ele
+      }
+      return(vec)
+    }
+    
+    # add group, metric + header
+    summarizedOverall.bT$Group <- determineGroup(summarizedOverall.bT)
+    summarizedOverall.bT$Metric <- determineMetric(summarizedOverall.bT)
+    summarizedOverall.bT$Header <- determineHeader(groupVec=summarizedOverall.bT$Group,
+                                                  metricVec=summarizedOverall.bT$Metric)
+    
+    # transpose back
+    summarizedOverall.fbT <- fwdTranspose(summarizedOverall.bT)
+    rm(summarizedOverall.bT)
+    
+    # merge
+    mergeByColname <- 'variable'
+    unmeltSummary.T <- merge(x=unmeltSummary.T,
+                           y=summarizedOverall.fbT,
+                           by=mergeByColName,
+                           sort=FALSE, # don't reorder rows post join (but it does put it at the end..)
+                           all.x = TRUE # left join
+    )
+    unmeltSummary <- bwdTranspose(unmeltSummary.T,
+                                  dropFirstCol=TRUE)
+    unmeltSummary <- unmeltSummary %>%
+                      select(Header, everything())
+    
+    dropNonUsefulVariablesObservations <- function(df,undesiredColumns=UNDESIRED_COLUMNS)
+    {
+      df <- df[ , !names(df) %in% undesiredColumns]
+      return(df)
+    }
+    
+    unmeltSummaryTrimmed <- dropNonUsefulVariablesObservations(unmeltSummary)
+    
+    # Identify significant vs. non-significant values
+    roundedTName <- "Rounded"
+    nonRoundedTName <- "Pure+All"
+    
+    classTables <- list()
+
+    # Split the combined table into our two tables
+    classTables[[roundedTName]] <- unmeltSummaryTrimmed %>% 
+                              subset(.$Group %in% c("Rounded"))
+    classTables[[nonRoundedTName]] <- unmeltSummaryTrimmed %>% 
+                                 subset(.$Group %in% c("Pure","Explicit"))
+    classTables[[roundedTName]] <- fwdTranspose(classTables[[roundedTName]])
+    classTables[[nonRoundedTName]] <- fwdTranspose(classTables[[nonRoundedTName]])
+    
+    subsetSignificantVariables <- function(df,
+                                           levelOfSignificance=pThreshold,
+                                           getNonSignificant=FALSE)
+    {
+      require(glue)
+      
+      tableHeaderVars <- c("Header","Metric","Group")
+      
+      # get columns with r as suffix
+      regex <- paste0('p\\b')
+      varCols <- colnames(df)[grep(regex,colnames(df))]
+
+      dfname <- "dfValuesOnly"
+      # if value@varCols < level of Signifiance
+      # and the varCol is not na then it's significant
+      subsetCond <- glue("(!is.na({dfname}${varCols}) & ", 
+                         "({dfname}${varCols} < {levelOfSignificance}))")
+      #subsetCond <- glue("({varCols} < {levelOfSignificance})")
+      
+      
+      # for any of the columns in the list (so ||)
+      subsetCond <- glue::collapse(subsetCond," | ")
+      if(getNonSignificant)
+      {
+        subsetCond <- glue("!({subsetCond})")
+      }
+      
+      #make values numeric
+      dfHeadersOnly <- df %>% subset(variable %in% tableHeaderVars)
+      dfValuesOnly <- df %>% subset(!(variable %in% tableHeaderVars))
+      
+      variablesCol.bac <- dfValuesOnly$variable
+      indx <- sapply(dfValuesOnly, is.factor)
+      dfValuesOnly[indx] <- lapply(dfValuesOnly[indx], function(x) as.numeric(as.character(x)))
+      dfValuesOnly$variable <- variablesCol.bac
+      rm(variablesCol.bac)
+      
+    
+      dfValuesSubset <- dfValuesOnly[eval(parse(text=subsetCond)),]
+      dfValuesSubset[] <- lapply(dfValuesSubset[], function(x) as.character(x))
+      df <- rbind(dfHeadersOnly,dfValuesSubset,
+                  stringsAsFactors=FALSE)
+      return(df)
+    }
+    
+    sigTName <- "Significant"
+    notSigTName <- "NonSignificant"
+    for(tableName in names(classTables))
+    {
+      tableVal <- classTables[[tableName]]
+      if(is.data.frame(tableVal))
+      {
+        classTables[[tableName]] <- list()
+      }
+      classTables[[tableName]][[sigTName]] <- subsetSignificantVariables(tableVal)
+      classTables[[tableName]][[notSigTName]] <- subsetSignificantVariables(tableVal,
+                                                                          getNonSignificant=TRUE)
+      
+    }
+
+    #### Generate Acronmyms for Tables
+    
+    # also adds the units
+    generateFinalRowNameAndFootnotes <- function(outputTable,
+                                                 acronymDict,
+                                                 tableDict,
+                                                 outputTableMergeName="variable",
+                                                 tableDictMergeName="VarName",
+                                                 sortingColumn=SORTING_COLUMN)
+    {
+      
+      require(stringr)
+      #### A helper function (thank you flodel)
+      # https://stackoverflow.com/a/25881167
+      extend <- function(alphabet) function(i) {
+        base10toA <- function(n, A) {
+          stopifnot(n >= 0L)
+          N <- length(A)
+          j <- n %/% N 
+          if (j == 0L) A[n + 1L] else paste0(Recall(j - 1L, A), A[n %% N + 1L])
+        }   
+        vapply(i-1L, base10toA, character(1L), alphabet)
+      }
+      moreletters <- extend(letters)
+      
+      footnoteLetterDict <- c()
+      tableFootNotes <- c()
+      
+      # first merge
+    
+      updatedTable <- merge(x=outputTable,
+                            y=tableDict,
+                            all.x=TRUE,
+                            by.x=outputTableMergeName,
+                            by.y=tableDictMergeName,
+                            sort=FALSE)
+      # order final table by sort priority     
+      
+      updatedTable <- updatedTable[order(updatedTable[[sortingColumn]]),]
+      
+      
+      # extract possible acronymns, sort decreasing order
+      # to ensure that the longer acronyms are always 
+      # tested (& replaced) first.
+      # replace every acronym makes this problem too
+      # complicated to solve for what we're trying to
+      # accomplish
+      possibleAcronyms <- sort(names(acronymDict))
+      
+      nextLetterIdx <- 1
+      
+      for(rowIdx in 1:nrow(updatedTable))
+      {
+        rowContent <- updatedTable[rowIdx,]
+        
+        fullOutputName <- rowContent$FullOutputName
+        
+        if(!is.na(fullOutputName))
+        {
+          # find best matching acronym
+          # N.B. we only replace 1 because it gets too
+          # complicated to do multiple ones since we then
+          # have to seperate, e.g. 'SBP', vs 'SBP, Resting'
+          # which is not presently worth the effort to fix
+          matchedAcronym <- ""
+          for(possibleAcronym in possibleAcronyms)
+          {
+            isAcronymInOutputName <- grepl(possibleAcronym,
+                                           fullOutputName,
+                                           fixed=TRUE)
+            # we do assess 'better match' by length for now
+            # if it's longer it matches more of string
+            # therefore better match
+            #browser()
+            isNewAcronymBetterMatch <- str_length(possibleAcronym) > str_length(matchedAcronym)
+            if(isAcronymInOutputName && isNewAcronymBetterMatch)
+            {
+              matchedAcronym <- possibleAcronym
+            }
+          }
+          
+          # now add to footnotes & modify output name
+          
+          if(str_length(matchedAcronym) > 0)
+          {
+            isAcronymAlreadyAssignedLetter <- !(is.null(footnoteLetterDict) ||
+                                                  is.na(footnoteLetterDict[matchedAcronym]))
+            if(isAcronymAlreadyAssignedLetter)
+            {
+              nextCaretLetter <- footnoteLetterDict[[matchedAcronym]]
+            }
+            else
+            {
+              nextCaretLetter <- paste0('^',
+                                        moreletters(nextLetterIdx))
+              footnoteLetterDict[matchedAcronym] <- nextCaretLetter
+              # create foodnote
+              footnote <- paste0(nextCaretLetter,
+                                 matchedAcronym,
+                                 ": ",
+                                 acronymDict[[matchedAcronym]],
+                                 "\n")
+              # add to footnote table
+              tableFootNotes <- rbind(tableFootNotes,
+                                      footnote)
+              nextLetterIdx <- nextLetterIdx + 1
+            }
+            
+            # add caret letter immediately after acronmym
+            fullOutputName <- gsub(pattern=matchedAcronym,
+                                   replacement=paste0(matchedAcronym,
+                                                      nextCaretLetter),
+                                   x=fullOutputName,
+                                   fixed=TRUE)
+          }
+        }
+        
+        
+        
+        # add units
+        rowLabelWithUnits <- fullOutputName
+        hasUnits <- is.character(rowContent$Units) && 
+          !is.na(rowContent$Units)
+        if(hasUnits)
+        { # actually add units
+          rowLabelWithUnits <- paste0(rowLabelWithUnits,
+                                      " [",rowContent$Units,"]")
+        }
+        updatedTable[rowIdx,]$FullOutputName <- rowLabelWithUnits
+      }
+      
+      updatedTable <- updatedTable %>%
+                        select(FullOutputName, everything())
+
+      # reorder headers
+      updatedTable <- updatedTable[order(updatedTable[[sortingColumn]]),]
+      #tableHeaderVars <- c("Header","Metric","Group")
+      #tableHeadersOnly <- updatedTable %>% subset(variable %in% tableHeaderVars)
+      #tableValuesOnly <- updatedTable %>% subset(!(variable %in% tableHeaderVars))
+      #updatedTable <- rbind(tableHeadersOnly,tableValuesOnly,
+      #                      stringsAsFactors=FALSE)
+      
+      # drop undesired columns
+      updatedTable[[sortingColumn]] <- NULL
+      updatedTable$variable <- NULL
+      updatedTable$Units <- NULL
+      
+      result <- list()
+      result$Footnotes <- tableFootNotes
+      result$UpdatedTable <- updatedTable
+      return(result)
+    }
+    
+    footNoteTxtFileName <- "footnotes.txt"
+    dividerPipeCharSet <- "=============="
+    
+    # clear previous file
+    sink(file.path(dirPath,
+                   footNoteTxtFileName))
+    sink()
+    
+    for(tableName in names(classTables))
+    {
+      tableVal <- classTables[[tableName]]
+      for(subTableName in names(tableVal))
+      {
+        subTable <- tableVal[[subTableName]]
+        subTable <- generateFinalRowNameAndFootnotes(outputTable=subTable,
+                                                     acronymDict=acronymDict,
+                                                     tableDict=tableDict)
+        # save for debugging of course
+        classTables[[tableName]][[subTableName]] <- subTable
+        
+        tableRootName <- glue("{tableName}-{subTableName}")
+        csvFileSaveName <- glue("{tableRootName}.csv")
+        write.csv(subTable$UpdatedTable, 
+                  file = file.path(dirPath,
+                                   csvFileSaveName))
+        
+        sink(file.path(dirPath,
+                       footNoteTxtFileName),
+             append=TRUE)
+        cat("\n",dividerPipeCharSet,tableRootName,dividerPipeCharSet,"\n\n")
+        print(collapse(subTable$Footnotes))
+        sink()
+      }
+    }
+  }
+  
+
 }
 
 # END ------------------------------------------------------- 

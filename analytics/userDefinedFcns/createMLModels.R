@@ -134,6 +134,7 @@ generateMLModels <- function(m_cData,
   
   #### Clean up factor levels ###########################
   
+  warning("Double check class groupings are as desired. Removew warning when checked.")
   fullData <- addMissingClassGroupings(fullData)
   
   #### Tag fullData as immutable
