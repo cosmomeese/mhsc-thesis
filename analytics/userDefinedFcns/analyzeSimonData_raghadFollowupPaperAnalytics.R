@@ -278,6 +278,45 @@ if(!exists("m_cData"))
     cat("\ndone!")
   }
   
+  #### generate kw results data frame  ####
+  
+  ktests.df <- data.frame()
+  for(groupName in names(ktests.saved))
+  {
+    for(varName in names(ktests.saved[[groupName]]))
+    {
+      ktests.subdf <- data.frame(Group=groupName,
+                                 variable=varName,
+                                 kw.ChiSquared=ktests.saved[[groupName]][[varName]]$statistic,
+                                 kw.DoF=ktests.saved[[groupName]][[varName]]$parameter,
+                                 kw.p=ktests.saved[[groupName]][[varName]]$p.value)
+      #ktests.df.list[[length(ktests.df.list)+1]] <- ktest.subdf
+      
+      ktests.df <- rbind(ktests.df,ktests.subdf)
+    }
+  }
+  rownames(ktests.df) <- NULL
+  rm(ktests.subdf)
+  
+  ### now one that's formated for reading/csv output
+  
+  mergeVarName <- "variable"
+  ktests.csvOutput <- data.frame(character())
+  colnames(ktests.csvOutput) <- mergeVarName
+  for(groupName in names(ktests.saved))
+  {
+    ktst.df <- ktests.df[ktests.df$Group==groupName,]
+    ktst.df$Group <- NULL # drop Group col
+    colSubset <- !(colnames(ktst.df) %in% c(mergeVarName))
+    colnames(ktst.df)[colSubset] <- paste0(groupName,".",colnames(ktst.df)[colSubset])
+    ktests.csvOutput <- merge(x=ktests.csvOutput,
+                              y=ktst.df,
+                              by=mergeVarName,
+                              all.y=TRUE,
+                              sort=FALSE)
+  }
+  
+  
   # Plotting All Results ================================
   
   if(GENERATE_GRAPHS)
@@ -361,7 +400,7 @@ if(!exists("m_cData"))
     write.csv(summarizedByNYHAClass.noNAs, file = "results/summarizedByNYHAClass.csv")
     write.csv(summarizedByPureNYHAClass.noNAs, file = "results/summarizedByPureNYHAClass.csv")
     write.csv(summarizedOverall, file = "results/summarizedOverall.csv")
-    
+    write.csv(ktests.csvOutput,file="results/kruskal-wallis-tests.csv")
   }
   
   # Save Files as JMIR Table (for Paper) ===================================
@@ -378,39 +417,106 @@ if(!exists("m_cData"))
     tableRowDictFileName <- "TableRowDictionary.csv"
     acronymDictFileName <- "AcronymDictionary.csv"
     
-    NYHAClassColNames <- c("II^M (= I/II + II)",
-                           "III^M (= II/III + III)")
+    NYHAClassColNames <- c("II{M} (= I/II + II)",
+                           "III{M} (= II/III + III)")
     
     SORTING_COLUMN <- "SortPriority"
     
+    NEW_VARIABLE_COLUMNS <- c("Duration",
+                              "Watts",
+                              "Watts.Predicted.Percentage",
+                              "SBP.Resting",
+                              "DBP.Resting",
+                              "HR.Resting",
+                              "O2Sat.Resting",
+                              "FEV.Resting",
+                              "FEV.Resting.Percentage",
+                              "FVC.Resting",
+                              "FVC.Resting.Percentage",
+                              "SBP","DBP",
+                              "HR","HR.1min","HR.1minDrop",
+                              "O2Sat",
+                              "VO2.perBodyWeight",
+                              "VO2.Predicted.Relative",
+                              "VO2.Predicted.Relative.Percentage",
+                              "VO2",
+                              "VO2.Predicted.Absolute",
+                              "VO2.Predicted.Absolute.Percentage",
+                              "AT","VO2.Peak.Measured.Percentage",
+                              "VO2.Peak.Predicted.Percentage",
+                              "VE.Peak",
+                              "VCO2.Peak",
+                              "VEperVCO2.atAT",
+                              "VEperVCO2.Peak",
+                              "RER.Peak",
+                              "StepData.HighestValuedStreak",
+                              "StepData.LongestActiveStreak",
+                              "StepData.MaxActiveMinutes_Pure",
+                              "StepData.MeanActiveMinutes_Pure",
+                              "StepData.StdDevActiveMinutes_Pure",
+                              "StepData.ModeActiveMinutes_Pure",
+                              "StepData.TotalActiveMinutes_Pure",
+                              "StepData.MaxMETClass.BelowMin",
+                              "StepData.MeanMETClass.BelowMin",
+                              "StepData.StdDevMETClass.BelowMin",
+                              "StepData.ModeMETClass.BelowMin",
+                              "StepData.TotalMETClass.BelowMin",
+                              "StepData.MaxActiveMinutes_PosMET",
+                              "StepData.MeanActiveMinutes_PosMET",
+                              "StepData.StdDevActiveMinutes_PosMET",
+                              "StepData.ModeActiveMinutes_PosMET",
+                              "StepData.TotalActiveMinutes_PosMET",
+                              "StepData.MaxMETClassIV",
+                              "StepData.MeanMETClassIV",
+                              "StepData.StdDevMETClassIV",
+                              "StepData.ModeMETClassIV",
+                              "StepData.TotalMETClassIV",
+                              "StepData.MaxMETClassIII",
+                              "StepData.MeanMETClassIII",
+                              "StepData.StdDevMETClassIII",
+                              "StepData.ModeMETClassIII",
+                              "StepData.TotalMETClassIII",
+                              "StepData.MaxMETClassII",
+                              "StepData.MeanMETClassII",
+                              "StepData.StdDevMETClassII",
+                              "StepData.ModeMETClassII",
+                              "StepData.TotalMETClassII",
+                              "StepData.MaxMETClassI",
+                              "StepData.MeanMETClassI",
+                              "StepData.StdDevMETClassI",
+                              "StepData.ModeMETClassI",
+                              "StepData.TotalMETClassI",
+                              "StepData.OverallMETClassIV.Percentage",
+                              "StepData.OverallMETClassIII.Percentage",
+                              "StepData.OverallMETClassII.Percentage",
+                              "StepData.OverallMETClassI.Percentage",
+                              "StepData.OverallMETClass.BelowMin.PercentageAll",
+                              "StepData.OverallMETClassIV.PercentageAll",
+                              "StepData.OverallMETClassIII.PercentageAll",
+                              "StepData.OverallMETClassII.PercentageAll",
+                              "StepData.OverallMETClassI.PercentageAll")
+    
     UNDESIRED_COLUMNS <- c("NYHAClassMixed",
-                          "HFDiagnosisYear",
-                          "EjectionFraction",
-                          "HFTreatmentsToDate",
-                          "RegularPhysicalActivities",
-                          "Exercises",
-                          "DeviceID",
-                          "ID",
-                          "CPSDate",
-                          "TestEnd.Reason",
-                          "TestEnd.Symptom",
-                          "RPEper20.Peak",
-                          "PETCO2.Peak",
-                          "OUES",
-                          "TotalRiskScore")
+                           "HFDiagnosisYear",
+                           "EjectionFraction",
+                           "HFTreatmentsToDate",
+                           "RegularPhysicalActivities",
+                           "Exercises",
+                           "DeviceID",
+                           "ID",
+                           "CPSDate",
+                           "TestEnd.Reason",
+                           "TestEnd.Symptom",
+                           "RPEper20.Peak",
+                           "PETCO2.Peak",
+                           "OUES",
+                           "TotalRiskScore",
+                           NEW_VARIABLE_COLUMNS)
     
     #### Get Files
     
     require(readr)
-    tableDict <- read_csv(tableDictFullPath, 
-                          col_types = cols(OutputBase = col_skip(), 
-                                           OutputPrefix = col_skip()))
-    
-    acronymDF <- read_csv(acronymDictFullPath)
-    acronymDict <- setNames(as.character(acronymDF$Description),
-                            acronymDF$Acronym)
-    rm(acronymDF)
-    
+
     # combine with getwd() + evalute the ".."'s
     dirPath <- normalizePath(file.path(getwd(),dirPath), winslash="/")
     
@@ -420,7 +526,14 @@ if(!exists("m_cData"))
     acronymDictFullPath <- file.path(dirPath,paste0(fileNamePrefix,
                                                     acronymDictFileName))
     
+    tableDict <- read_csv(tableDictFullPath, 
+                          col_types = cols(OutputBase = col_skip(), 
+                                           OutputPrefix = col_skip()))
     
+    acronymDF <- read_csv(acronymDictFullPath)
+    acronymDict <- setNames(as.character(acronymDF$Description),
+                            acronymDF$Acronym)
+    rm(acronymDF)    
       
     #### Unmelt Results
     
@@ -496,8 +609,15 @@ if(!exists("m_cData"))
       return(df.t)
     }
     
+    #combined summarized overall with ktests
+    summarizedOverallktests <- merge(summarizedOverall,
+                                     ktests.csvOutput,
+                                     all=TRUE,
+                                     by='variable',
+                                     sort=FALSE)
+    
     unmeltSummary.T <- fwdTranspose(unmeltSummary)
-    summarizedOverall.bT <- bwdTranspose(summarizedOverall)
+    summarizedOverall.bT <- bwdTranspose(summarizedOverallktests)
     
     # transpose summarizedOverall data frame to make it easier to add group, metric & header
     
@@ -521,11 +641,14 @@ if(!exists("m_cData"))
     determineMetric <- function(df)
     {
       vec <- rownames(df)
-      var.values <- c('r','r2','p')
+      var.values <- c('r','r2','p','kw.p','kw.ChiSquared','kw.DoF')
       for(var.value in var.values)
       {
-        # get columns with var.values as suffix
-        regex <- paste0(var.value,'\\b')
+        # get columns with var.values as suffix:
+        # beginning of string followed by "a word" (any number of 
+        # alphanumerics and _ followed by at most {1} period character
+        # then the var.value and end of string)
+        regex <- paste0('^\\w+(\\.){1}',var.value,'\\b')
         varCols <- grep(regex,
                         vec)
         vec[varCols] <- var.value
@@ -538,8 +661,8 @@ if(!exists("m_cData"))
       vec <- metricVec
       groupHeaderPart <- setNames(c('','(II vs. III)','(all)'),
                                   c('Rounded','Pure','Explicit'))
-      metricHeaderPart <- setNames(c('R','R^2 ','P-value'),
-                                   c('r','r2','p'))
+      metricHeaderPart <- setNames(c('R','R^2 ','P-value (Pearson)', "P-value", "Chi{^2}","KW Degrees of Freedom"),
+                                   c('r','r2','p','kw.p','kw.ChiSquared','kw.DoF'))
       for(eleIdx in 1:length(metricVec))
       {
         ele <- NA
@@ -551,7 +674,7 @@ if(!exists("m_cData"))
           ele <- metricEle
           if(!is.na(groupEle) && (groupEle != ''))
           {
-            ele <- paste0(ele, "\n", groupEle)
+            ele <- paste0(ele, " ", groupEle)
           }
         }
         vec[[eleIdx]] <- ele
@@ -570,7 +693,7 @@ if(!exists("m_cData"))
     rm(summarizedOverall.bT)
     
     # merge
-    mergeByColname <- 'variable'
+    mergeByColName <- 'variable'
     unmeltSummary.T <- merge(x=unmeltSummary.T,
                            y=summarizedOverall.fbT,
                            by=mergeByColName,
@@ -606,14 +729,19 @@ if(!exists("m_cData"))
     
     subsetSignificantVariables <- function(df,
                                            levelOfSignificance=pThreshold,
-                                           getNonSignificant=FALSE)
+                                           getNonSignificant=FALSE,
+                                           significanceVarCode="kw.p")
     {
       require(glue)
       
       tableHeaderVars <- c("Header","Metric","Group")
       
       # get columns with r as suffix
-      regex <- paste0('p\\b')
+      # get columns with var.values as suffix:
+      # beginning of string followed by "a word" (any number of 
+      # alphanumerics and _ followed by at most {1} period character
+      # then the significance var code and end of string)
+      regex <- paste0('^\\w+(\\.){1}',significanceVarCode,'\\b')
       varCols <- colnames(df)[grep(regex,colnames(df))]
 
       dfname <- "dfValuesOnly"
@@ -757,8 +885,9 @@ if(!exists("m_cData"))
             }
             else
             {
-              nextCaretLetter <- paste0('^',
-                                        moreletters(nextLetterIdx))
+              nextCaretLetter <- paste0('{',
+                                        moreletters(nextLetterIdx),
+                                        '}')
               footnoteLetterDict[matchedAcronym] <- nextCaretLetter
               # create foodnote
               footnote <- paste0(nextCaretLetter,
