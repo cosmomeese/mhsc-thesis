@@ -39,13 +39,18 @@ addMissingClassGroupings <- function(fullData,
   
   ## Factor Levels
   # All factors with dirty factor names
+  bound <- "(\\b|(to))"
+  c1Regex <- paste0(bound,"(1|I)",bound)
+  c2Regex <- paste0(bound,"(2|II)",bound)
+  c3Regex <- paste0(bound,"(3|III)[AaBb]?",bound)
+  c4Regex <- paste0(bound,"(4|IV)",bound)
   FACTOR_LEVELS <- list()
   FACTOR_LEVELS$ALL <- levels(fullData[[mixedClassColName]])
   # Factors where the given class occurs in any of the dirty factor level names, including as a mixed class
-  FACTOR_LEVELS$ANY1 <- grep("(\\b(1|I)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
-  FACTOR_LEVELS$ANY2 <- grep("(\\b(2|II)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
-  FACTOR_LEVELS$ANY3 <- grep("(\\b(3|III)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
-  FACTOR_LEVELS$ANY4 <- grep("(\\b(4|IV)\\b)",FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY1 <- grep(c1Regex,FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY2 <- grep(c2Regex,FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY3 <- grep(c3Regex,FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
+  FACTOR_LEVELS$ANY4 <- grep(c4Regex,FACTOR_LEVELS$ALL, perl=TRUE, value = TRUE)
   # Factors where the given class occurs in any of the dirty factor level names, but not as a mixed class
   FACTOR_LEVELS$PURE1 <- setdiff(setdiff(setdiff(FACTOR_LEVELS$ANY1,FACTOR_LEVELS$ANY2),FACTOR_LEVELS$ANY3),FACTOR_LEVELS$ANY4)
   FACTOR_LEVELS$PURE2 <- setdiff(setdiff(setdiff(FACTOR_LEVELS$ANY2,FACTOR_LEVELS$ANY3),FACTOR_LEVELS$ANY4),FACTOR_LEVELS$ANY1)
