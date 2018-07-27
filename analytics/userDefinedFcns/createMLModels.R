@@ -251,6 +251,13 @@ generateMLModels <- function(m_cData,
                      )
   }
   
+  # v1.2
+  if(as.numeric(simonExtraMetrics.CodeVersion) > 1.1)
+  {
+    #excludeVars <- c(excludeVars # v1.0 excludeVars
+    #)
+  }
+  
   if(isKEEP_ONLY_CPET)
   {
     cpetNamesToDrop <- colnames(FULL_DATA)[grepl("StepData", colnames(FULL_DATA))]

@@ -6,7 +6,7 @@
 
 #set these appropriate and optionally run them
 simonData.Importer.CodeVersion <- "1.2"
-simonExtraMetrics.CodeVersion <- "1.1"
+#simonExtraMetrics.CodeVersion <- "1.2" moved to calculate function
 
 
 #------------------------------------------------------

@@ -3,13 +3,17 @@
 
 ## Import Required Libraries
 require(tidyverse)
+require(e1071) 
+
+simonExtraMetrics.CodeVersion <- "1.2"
 
 #local functions
 
-#### define MET_INTERVALS ####
-# intervals for MET_Groups
-MET_BASELINE <- 0 # consider 0 (if MET calc is assumed to include base metabolic rate) or 1 (if it doesn't)
-MET_INTERVALS <- setNames(-MET_BASELINE + c(0, # 0 <= METs < 1, N.B. below 0 is grouped seperately
+#### define MET$INTERVALS ####
+# intervals for MET$Groups
+MET <- list()
+MET$BASELINE <- 0 # consider 0 (if MET calc is assumed to include base metabolic rate) or 1 (if it doesn't)
+MET$INTERVALS <- setNames(-MET$BASELINE + c(0, # 0 <= METs < 1, N.B. below 0 is grouped seperately
                                             1, # 1 <= METs < 1.6, (roughly below NYHA IV)
                                             1.6, # 1.6 <= METS < 2, (for NYHA IV) 
                                             2, # 2 <= MET < 3 (for NYHA III)
@@ -23,7 +27,7 @@ MET_INTERVALS <- setNames(-MET_BASELINE + c(0, # 0 <= METs < 1, N.B. below 0 is 
                             "LowModerate", # 3 <= MET < 5 (for NYHA III)
                             "Moderate", # 5 <= MET < 7 (for NYHA II)
                             "Vigorous")) # 7+)
-#MET_INTERVALS <- setNames(c(0, # 0 <= METs < 2 (for NYHA IV), N.B. below 0 is grouped seperately
+#MET$INTERVALS <- setNames(c(0, # 0 <= METs < 2 (for NYHA IV), N.B. below 0 is grouped seperately
 #                            2, # 2 <= MET < 5 (for NYHA III)
 #                            5, # 5 <= MET < 7 (for NYHA II)
 #                            7), # 7 < MET (for NYHA I)
@@ -32,13 +36,14 @@ MET_INTERVALS <- setNames(-MET_BASELINE + c(0, # 0 <= METs < 1, N.B. below 0 is 
 #                            "II",
 #                            "I"))
 
-#### define STEP_INTERVALS ####
-STEP_BASELINE <- 0
-STEP_INTERVAL_MAX <- 10 # in thousands of steps
-STEP_INTEVAL_FACTOR <- 1000
-STEP_INTERVAL_NAME_SUFFIX <- "Steps"
-STEP_INTERVALS <- seq(0,STEP_INTERVAL_MAX,by=0.5)*STEP_INTEVAL_FACTOR # in thousands of steps
-names(STEP_INTERVALS) <- paste0(STEP_INTERVALS,STEP_INTERVAL_NAME_SUFFIX)
+#### define STEP$INTERVALS ####
+STEP <- list()
+STEP$BASELINE <- 0
+STEP$INTERVAL_MAX <- 10 # in thousands of steps
+STEP$INTEVAL_FACTOR <- 1000
+STEP$INTERVAL_NAME_SUFFIX <- "Steps"
+STEP$INTERVALS <- seq(0,STEP$INTERVAL_MAX,by=0.5)*STEP$INTEVAL_FACTOR # in thousands of steps
+names(STEP$INTERVALS) <- paste0(STEP$INTERVALS,STEP$INTERVAL_NAME_SUFFIX)
 
 # converts Steps to METs (metabolic equivalent)
 # valuesed based on: https://www.ajpmonline.org/article/S0749-3797(09)00087-7/fulltext
@@ -134,6 +139,7 @@ calculateSimonDataMetrics <- function(processedData)
   STEPDATA.METCLASSPREFIX <- "StepData.METClass"
   ### for each Participant/Sheet
   oldNumVars <- length(processedData)
+  hasWarnedTime <- FALSE
   
   for(participant_Index in 1:nrow(processedData)) 
   { #for each participant
@@ -154,6 +160,9 @@ calculateSimonDataMetrics <- function(processedData)
         processedData$StepData[[participant_Index]][day_Index,"Total"] <- sum(IntraDay.InstanceOf$Steps)
         processedData$StepData[[participant_Index]][day_Index,"Mean"]  <- mean(IntraDay.InstanceOf$Steps)
         processedData$StepData[[participant_Index]][day_Index,"StdDev"] <- sd(IntraDay.InstanceOf$Steps)
+        processedData$StepData[[participant_Index]][day_Index,"Skewness"] <- e1071::skewness(IntraDay.InstanceOf$Steps)
+        processedData$StepData[[participant_Index]][day_Index,"Kurtosis"] <- e1071::kurtosis(IntraDay.InstanceOf$Steps)
+        
         
         FiveNumSummary <- fivenum(IntraDay.InstanceOf$Steps)
         processedData$StepData[[participant_Index]][day_Index,"Max"]  <- FiveNumSummary[[5]] #Max
@@ -164,6 +173,7 @@ calculateSimonDataMetrics <- function(processedData)
         
         processedData$StepData[[participant_Index]][day_Index,"Mode"]  <- Statistical.Mode(IntraDay.InstanceOf$Steps)
         
+        
         #per day v1.1 additions #####
         processedData$StepData[[participant_Index]][day_Index,"StepData.ActiveMinutes_Pure"] <- sum(IntraDay.InstanceOf$Steps > 0)
         
@@ -171,19 +181,19 @@ calculateSimonDataMetrics <- function(processedData)
         #https://www.heartfoundation.org.au/images/uploads/publications/Chronic_Heart_Failure_Guidelines_2011.pdf
         
         METGroups <-  findInterval(IntraDay.InstanceOf$Steps,
-                                   convertStepsMETs(MET_INTERVALS,isMale,TRUE))
+                                   convertStepsMETs(MET$INTERVALS,isMale,TRUE))
         
         processedData$StepData[[participant_Index]][day_Index,"StepData.ActiveMinutes_PosMET"] <- sum(METGroups > 0)
         
         belowMinSuffix <- ".BelowMin"
-        for(indexMET in 0:length(MET_INTERVALS))
+        for(indexMET in 0:length(MET$INTERVALS))
         {
           name <- STEPDATA.METCLASSPREFIX
           isMETInterval <- indexMET > 0
           if(isMETInterval)
           {
             name <- paste(name,
-                          names(MET_INTERVALS)[[indexMET]],
+                          names(MET$INTERVALS)[[indexMET]],
                           sep="")
           }
           else
@@ -228,17 +238,54 @@ calculateSimonDataMetrics <- function(processedData)
          (length(participantStepSeries) < 1) ||
          is.na(participantStepSeries)))
     {
+      #!!!!! N.B. you can't do this 1) TimeStamp doesn't exist for SimonData & 2) only Time exists & sorting by this will mess everything up
       #order the series by time stamp
-      participantStepSeries <- participantStepSeries[order(participantStepSeries$Timestamp),]$Steps
+      #participantStepSeries <- participantStepSeries[order(participantStepSeries$Timestamp),]
+      #!!!!! N.B. above
+      if(!hasWarnedTime)
+      {
+        if("Timestamp" %in% names(participantStepSeries))
+        {
+          msg <- 'Timestamp exists in participant step series but did not sort'
+          warning(msg)
+          hasWarnedTime <- TRUE
+        }
+        else
+        {
+          msg <- "Timestamp does not exist in StepData; could not sort"
+          if('Time' %in% names(participantStepSeries))
+          {
+            msg <- paste0(msg, " (Time exists, but this alone does not help)")
+          }
+          warning(msg)
+          hasWarnedTime <- TRUE
+        }
+      }
+      
+      participantSteps <- participantStepSeries$Steps
       # get longest uninterupted streak
-      processedData[participant_Index,"StepData.LongestActiveStreak"] <- longestStreak(participantStepSeries)
+      processedData[participant_Index,"StepData.LongestActiveStreak"] <- longestStreak(participantSteps)
       
       # get highest valued uninterrupted streak
-      splitSteps <- split(participantStepSeries[participantStepSeries>0],
-                          cumsum(participantStepSeries==0)[participantStepSeries>0])
+      splitSteps <- split(participantSteps[participantSteps>0],
+                          cumsum(participantSteps==0)[participantSteps>0])
       processedData[participant_Index,"StepData.HighestValuedStreak"] <- max(unlist(lapply(splitSteps,sum)))
       
+      #### v1.2 stats ####
+      processedData.BasicStats <- calculateBasicStatisticalMetrics(participantStepSeries,
+                                                        COL_NAME="Steps",
+                                                        SAVE_COL_PREFIX="Overall",
+                                                        removeNAFlag=TRUE,
+                                                        SEP="")
+      names(processedData.BasicStats) <- paste0("StepData.",names(processedData.BasicStats))
+      for(name in names(processedData.BasicStats))
+      {
+        processedData[participant_Index,name] <- processedData.BasicStats[[name]]
+      }
       
+      processedData[participant_Index,"StepData.OverallSkewness"] <- e1071::skewness(participantSteps)
+      processedData[participant_Index,"StepData.OverallKurtosis"] <- e1071::kurtosis(participantSteps)
+      #### v1.2 stats
     }
     
     
@@ -264,6 +311,13 @@ calculateSimonDataMetrics <- function(processedData)
       processedData[participant_Index,"StepData.MeanDailyMaxSteps"] <- mean(updatedParticipantStepData[['Max']])
       processedData[participant_Index,"StepData.StdDevDailyMaxSteps"] <- sd(updatedParticipantStepData[['Max']])
       
+      #averaged over day v1.2 additions #####
+      # add the some of the missing, possibly important, raw step value calculations
+      processedData[participant_Index,"StepData.MeanDailyStdDevSteps"] <- mean(updatedParticipantStepData[['StdDev']], na.rm=TRUE)
+      processedData[participant_Index,"StepData.MeanDailySkewness"] <- mean(updatedParticipantStepData[['Skewness']], na.rm=TRUE)
+      processedData[participant_Index,"StepData.MeanDailyKurtosis"] <- mean(updatedParticipantStepData[['Kurtosis']], na.rm=TRUE)
+      
+      #continue v1.1 additions
       # add the MET derived features
       matchPrefix <- "StepData."
       pDataCNames <- grep(matchPrefix, colnames(updatedParticipantStepData), value = TRUE)
@@ -302,6 +356,10 @@ calculateSimonDataMetrics <- function(processedData)
 calculateFitbitDataMetrics <- function(processedData,
                                        unworn.mode=4)
 {
+  # TODO: update with v1.2 metrics
+  # overall basic stats + overall & day-by-day skewness and kurtosis
+  stop('Not updated with v1.2 metrics')
+  # 
   SEP_CHAR="."
   DATA_COL_NAME <- "FitbitData"
   INTRADAY_COL_NAME <- "Intraday"
@@ -396,9 +454,9 @@ calculateFitbitDataMetrics <- function(processedData,
         
         #per day v1.1 + 1.2 additions #####
 
-        convertedMETStepIntervals <- convertStepsMETs(MET_INTERVALS,isMale,TRUE)
+        convertedMETStepIntervals <- convertStepsMETs(MET$INTERVALS,isMale,TRUE)
         metStatistics <- commonDailyActiveMinutesFcn(cum.sum=FALSE,
-                                                     bl=MET_BASELINE,
+                                                     bl=MET$BASELINE,
                                                      at.keywd=MET_KWD,
                                                      interval=convertedMETStepIntervals,
                                                      tu='min')
@@ -428,9 +486,9 @@ calculateFitbitDataMetrics <- function(processedData,
       
       stepActiveStatistics <- commonDailyActiveMinutesFcn(iddf=participantFBDataSeries,
                                                           cum.sum=TRUE,
-                                                          bl=STEP_BASELINE,
+                                                          bl=STEP$BASELINE,
                                                           at.keywd=ACTIVESTEPS_KWD,
-                                                          interval=STEP_INTERVALS,
+                                                          interval=STEP$INTERVALS,
                                                           tu='day')
       
       seriesStepStats <- calculateSeriesStepMetrics(participantFBDataSeries,
@@ -523,7 +581,7 @@ calculateBasicStatisticalMetrics <- function(intraDayData,
   
   result[[paste0(SAVE_COL_PREFIX,SEP,"Total")]] <- sum(intraDayData[[COL_NAME]],
                                                        na.rm=removeNAFlag)
-  result[[paste0(SAVE_COL_PREFIX,SEP,"n")]] <- which(intraDayData[[COL_NAME]] %>% is.na()) %>% length()
+  result[[paste0(SAVE_COL_PREFIX,SEP,"n")]] <- which(intraDayData[[COL_NAME]] %>% is.na() %>% !.) %>% length()
   
   result.df <- as.data.frame(result)
   return(result.df)
