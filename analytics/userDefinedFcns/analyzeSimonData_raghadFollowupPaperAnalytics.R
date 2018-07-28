@@ -451,10 +451,6 @@ if(!exists("m_cData"))
                               "RER.Peak",
                               "StepData.HighestValuedStreak",
                               "StepData.LongestActiveStreak",
-                              "StepData.OverallMean",
-                              "StepData.OverallStdDev",
-                              "StepData.OverallSkewness",
-                              "StepData.OverallKurtosis",
                               "StepData.MaxActiveMinutes_Pure",
                               "StepData.MeanActiveMinutes_Pure",
                               "StepData.StdDevActiveMinutes_Pure",
@@ -500,6 +496,74 @@ if(!exists("m_cData"))
                               "StepData.OverallMETClassII.PercentageAll",
                               "StepData.OverallMETClassI.PercentageAll")
     
+    V2Columns <- c(#"StepData.OverallMean",
+                   #"StepData.OverallStdDev",
+                   #"StepData.OverallSkewness",
+                   #"StepData.OverallKurtosis",
+                   #"StepData.MeanDailyStdDevSteps",
+                   #"StepData.MeanDailySkewnessSteps",
+                   #"StepData.MeanDailyKurtosisSteps",
+                   # THESE Definitely do not keep (all 0 or duplicates)
+                   #"StepData.OverallMaximum",
+                   #"StepData.OverallQ3",
+                   #"StepData.OverallMedian",
+                   #"StepData.OverallMode",
+                   #"StepData.OverallQ1",
+                   #"StepData.OverallMinimum",
+                   #"StepData.OverallTotal",
+                   "StepData.Overalln")
+    
+    V2METColumns <- c("StepData.MaxMETClassNegligible",
+                      "StepData.MeanMETClassNegligible",
+                      "StepData.StdDevMETClassNegligible",
+                      "StepData.ModeMETClassNegligible",
+                      "StepData.TotalMETClassNegligible",
+                      "StepData.MaxMETClassSedentary",
+                      "StepData.MeanMETClassSedentary",
+                      "StepData.StdDevMETClassSedentary",
+                      "StepData.ModeMETClassSedentary",
+                      "StepData.TotalMETClassSedentary",
+                      "StepData.MaxMETClassVeryLight",
+                      "StepData.MeanMETClassVeryLight",
+                      "StepData.StdDevMETClassVeryLight",
+                      "StepData.ModeMETClassVeryLight",
+                      "StepData.TotalMETClassVeryLight",
+                      "StepData.MaxMETClassLight",
+                      "StepData.MeanMETClassLight",
+                      "StepData.StdDevMETClassLight",
+                      "StepData.ModeMETClassLight",
+                      "StepData.TotalMETClassLight",
+                      "StepData.MaxMETClassLowModerate",
+                      "StepData.MeanMETClassLowModerate",
+                      "StepData.StdDevMETClassLowModerate",
+                      "StepData.ModeMETClassLowModerate",
+                      "StepData.TotalMETClassLowModerate",
+                      "StepData.MaxMETClassModerate",
+                      "StepData.MeanMETClassModerate",
+                      "StepData.StdDevMETClassModerate",
+                      "StepData.ModeMETClassModerate",
+                      "StepData.TotalMETClassModerate",
+                      "StepData.MaxMETClassVigorous",
+                      "StepData.MeanMETClassVigorous",
+                      "StepData.StdDevMETClassVigorous",
+                      "StepData.ModeMETClassVigorous",
+                      "StepData.TotalMETClassVigorous",
+                      "StepData.OverallMETClassNegligible.Percentage",
+                      "StepData.OverallMETClassSedentary.Percentage",
+                      "StepData.OverallMETClassVeryLight.Percentage",
+                      "StepData.OverallMETClassLight.Percentage",
+                      "StepData.OverallMETClassLowModerate.Percentage",
+                      "StepData.OverallMETClassModerate.Percentage",
+                      "StepData.OverallMETClassVigorous.Percentage",
+                      "StepData.OverallMETClassNegligible.PercentageAll",
+                      "StepData.OverallMETClassSedentary.PercentageAll",
+                      "StepData.OverallMETClassVeryLight.PercentageAll",
+                      "StepData.OverallMETClassLight.PercentageAll",
+                      "StepData.OverallMETClassLowModerate.PercentageAll",
+                      "StepData.OverallMETClassModerate.PercentageAll",
+                      "StepData.OverallMETClassVigorous.PercentageAll"
+                      )
+    
     UNDESIRED_COLUMNS <- c("NYHAClassMixed",
                            "HFDiagnosisYear",
                            "EjectionFraction",
@@ -515,7 +579,9 @@ if(!exists("m_cData"))
                            "PETCO2.Peak",
                            "OUES",
                            "TotalRiskScore",
-                           NEW_VARIABLE_COLUMNS)
+                           NEW_VARIABLE_COLUMNS,
+                           V2Columns,
+                           V2METColumns)
     
     #### Get Files
     
@@ -940,6 +1006,7 @@ if(!exists("m_cData"))
       #                      stringsAsFactors=FALSE)
       
       # drop undesired columns
+      #browser()
       updatedTable[[sortingColumn]] <- NULL
       updatedTable$variable <- NULL
       updatedTable$Units <- NULL
