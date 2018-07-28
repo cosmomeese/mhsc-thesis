@@ -94,5 +94,20 @@ if('1.0' == simonExtraMetrics.CodeVersion)
 
 # Remove functions
 
+rm(addByTimeUnitColumn,
+   calculateBasicStatisticalMetrics,
+   calculateByTimeUnitVar,
+   calculateDailyActiveMinutes,
+   calculateFitbitDataMetrics,
+   calculateOverallSummaries,
+   calculateSeriesHRMetrics,
+   calculateSeriesStepMetrics,
+   convertUnWornValuesToNA,
+   isSeriesNotEmpty,
+   nestDataFrame,
+   nestStepDataFrame,
+   summarizeToTimeUnit,
+   unnestDataFrame)
+
 rm(list=unlist(fcns)) #remove functions
 rm(fcns)

@@ -30,7 +30,7 @@ importSimonCPSData <- function(VIEW=FALSE,USE.CHOOSEDIALOG=FALSE)
   }
   ## Specify Important Excel Import Parameters
   initialRowsToSkip <- 3 #skip the first two (Simon left hidden data there...) +  1 (since we specify col_names)
-  excludeSheets <- c("Sheet2","Minute conv")
+  excludeSheets <- c("Sheet2","Minute conv","JFB-LabelInvestigation")
   #date helper function for later
   dateInputFormat = "%m/%d/%Y"
   as.DateWithSimonsFormat <- function(X,dIF=dateInputFormat,...){
