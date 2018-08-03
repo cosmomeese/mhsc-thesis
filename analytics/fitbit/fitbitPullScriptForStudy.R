@@ -87,7 +87,7 @@ CSV_FILEPATH5 <- "H:/fitbitLogins/fitbitLoginsForScript-Part5-NoMissingPasswords
 CSV_FILEPATH_ALL <- "H:/fitbitLogins/fitbitLoginsForScript-Part1to5-NoMissingPasswords.csv"
 CSV_FILEPATH_OVERWITE <- "H:/fitbitLogins/fitbitLoginsForScript-PartX-ProblemChildren.csv"
 
-RDATA_SAVE_FILEPATH <- "H:/raghads data/JFBDataRawPull.Rdata"
+RDATA_SAVE_FILEPATH <- "H:/jfbData/JFBDataRawPull.Rdata"
 
 # Patients
 

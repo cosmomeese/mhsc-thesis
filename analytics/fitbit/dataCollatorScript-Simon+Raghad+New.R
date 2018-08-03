@@ -33,7 +33,9 @@ addUniversalIDCol <- function(df,matrix.file=ID_MATRIX_FILE)
                                         `Raghad ID` = col_character(),
                                         `Simon ID` = col_character(), 
                                         `Universal ID` = col_character(), 
-                                        `Yaz Study ID` = col_character()))
+                                        `Yaz Study ID` = col_character(),
+                                        `Lubdub ID` = col_character())
+                                        )
   
   cat("Adding universal IDs. This may take a while...")
   #melt the ID matrix so that we get a 1:1 table of 'old ID' to universal ID
@@ -118,6 +120,18 @@ save(list = saveVariablesCombined,
      file = STUDYCOMBINED_FILE,
      precheck = TRUE)
 # save CSV
+
+# JFB
 currentStudyOnly <- combinedData %>% 
                     filter((!!rlang::sym(dataSetColname)) == jfbDataSetID)
 write.csv(currentStudyOnly, file="H:/allStudiesData/AllStudiesDataForCedricsTeam.csv")
+
+# Simon
+#currentStudyOnly <- combinedData %>% 
+#  filter((!!rlang::sym(dataSetColname)) == simonDataSetID)
+#write.csv(currentStudyOnly, file="H:/allStudiesData/SimonFitbitDataForCedricsTeam.csv")
+
+# Raghad
+#currentStudyOnly <- combinedData %>% 
+#  filter((!!rlang::sym(dataSetColname)) == raghadDataSetID)
+#write.csv(currentStudyOnly, file="H:/allStudiesData/RaghadFitbitDataForCedricsTeam.csv")

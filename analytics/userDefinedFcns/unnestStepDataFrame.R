@@ -138,9 +138,9 @@ unnestDataFrame <- function(nestedDataFrame,
   return(unnestedDataFrame)
 }
 
-## N.B. don't rely on the StepData list's name ID's for compatability
+## N.B. don't rely on the metaDataTokenList/StepData list() names/IDs for compatability
 ## since old versions nested versions aren't labelled that way.
-## this was added more for viewing usability
+## this IDs that exist in old versions was added more for viewing usability than as keys
 nestDataFrame <- function(unnestedDataFrame,
                           studyIDCol=c("UniversalStudyID","StudyIdentifier","Dataset"),
                           uniqueKeyColName="UUID",
