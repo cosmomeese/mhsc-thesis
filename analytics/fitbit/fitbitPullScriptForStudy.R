@@ -47,11 +47,6 @@ cat("N.B.: There are presently problems with installing the non-official httr co
 # 5. install cosmomeese/httr (uncomment out cosmomeese/httr from above): devtools::install_github('cosmomeese/httr')
 # 6. restart RStudio
 
-sourceDir <- "userDefinedFcns"
-source(paste(sourceDir,"/","hmm_common.R",
-             sep=""))
-rm(sourceDir)
-
 # START ###############################################################
 
 # As a global variable
