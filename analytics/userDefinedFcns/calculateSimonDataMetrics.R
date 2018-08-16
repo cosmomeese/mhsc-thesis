@@ -5,7 +5,7 @@
 require(tidyverse)
 require(e1071) 
 
-simonExtraMetrics.CodeVersion <- "1.2"
+simonExtraMetrics.CodeVersion <- "1.4"
 
 #local functions
 
@@ -134,6 +134,17 @@ Statistical.Mode <- function(x, na.rm=FALSE) { #http://stackoverflow.com/a/81894
   ux[which.max(tabulate(match(x, ux)))]
 }
 
+#N.B. returns standard error
+std.err <- function(x, na.rm=FALSE) {
+  
+  if(na.rm) # then remove NAs
+  {
+    x <- x[!is.na(x)]
+  }
+  se <- sd(x,na.rm=na.rm)/sqrt(length(x))
+  return(se)
+}
+
 calculateSimonDataMetrics <- function(processedData)
 {
   STEPDATA.METCLASSPREFIX <- "StepData.METClass"
@@ -160,16 +171,20 @@ calculateSimonDataMetrics <- function(processedData)
         processedData$StepData[[participant_Index]][day_Index,"Total"] <- sum(IntraDay.InstanceOf$Steps)
         processedData$StepData[[participant_Index]][day_Index,"Mean"]  <- mean(IntraDay.InstanceOf$Steps)
         processedData$StepData[[participant_Index]][day_Index,"StdDev"] <- sd(IntraDay.InstanceOf$Steps)
+        processedData$StepData[[participant_Index]][day_Index,"StdErr"] <- std.err(IntraDay.InstanceOf$Steps)
+        
         processedData$StepData[[participant_Index]][day_Index,"Skewness"] <- e1071::skewness(IntraDay.InstanceOf$Steps)
         processedData$StepData[[participant_Index]][day_Index,"Kurtosis"] <- e1071::kurtosis(IntraDay.InstanceOf$Steps)
         
         
         FiveNumSummary <- fivenum(IntraDay.InstanceOf$Steps)
-        processedData$StepData[[participant_Index]][day_Index,"Max"]  <- FiveNumSummary[[5]] #Max
+        processedData$StepData[[participant_Index]][day_Index,"Maximum"]  <- FiveNumSummary[[5]] #Max
         processedData$StepData[[participant_Index]][day_Index,"Q3"]  <- FiveNumSummary[[4]] #3rd Quartile
         processedData$StepData[[participant_Index]][day_Index,"Median"]  <- FiveNumSummary[[3]] #Median
         processedData$StepData[[participant_Index]][day_Index,"Q1"]  <-  FiveNumSummary[[2]] #1st Quartile
-        processedData$StepData[[participant_Index]][day_Index,"Min"]  <- FiveNumSummary [[1]] #Min
+        processedData$StepData[[participant_Index]][day_Index,"Minimum"]  <- FiveNumSummary [[1]] #Min
+        processedData$StepData[[participant_Index]][day_Index,"IQR"]  <- FiveNumSummary[[4]] - FiveNumSummary[[2]] #Min
+        
         
         processedData$StepData[[participant_Index]][day_Index,"Mode"]  <- Statistical.Mode(IntraDay.InstanceOf$Steps)
         
@@ -283,9 +298,31 @@ calculateSimonDataMetrics <- function(processedData)
         processedData[participant_Index,name] <- processedData.BasicStats[[name]]
       }
       
+      #processedData[participant_Index,"StepData.OverallSkewness"] <- e1071::skewness(participantSteps)
+      #processedData[participant_Index,"StepData.OverallKurtosis"] <- e1071::kurtosis(participantSteps)
+      #### v1.2 stats
+      
+      #### v1.3 stats ####
+      processedData[participant_Index,"StepData.OverallTotal"] <- sum(participantSteps)
+      processedData[participant_Index,"StepData.OverallMean"]  <- mean(participantSteps)
+      processedData[participant_Index,"StepData.OverallStdDev"] <- sd(participantSteps)
+      processedData[participant_Index,"StepData.OverallStdErr"] <- std.err(participantSteps)
       processedData[participant_Index,"StepData.OverallSkewness"] <- e1071::skewness(participantSteps)
       processedData[participant_Index,"StepData.OverallKurtosis"] <- e1071::kurtosis(participantSteps)
-      #### v1.2 stats
+      
+      
+      FiveNumSummary <- fivenum(participantSteps)
+      processedData[participant_Index,"StepData.OverallMaximum"]  <- FiveNumSummary[[5]] #Max
+      processedData[participant_Index,"StepData.OverallQ3"]  <- FiveNumSummary[[4]] #3rd Quartile
+      processedData[participant_Index,"StepData.OverallMedian"]  <- FiveNumSummary[[3]] #Median
+      processedData[participant_Index,"StepData.OverallQ1"]  <-  FiveNumSummary[[2]] #1st Quartile
+      processedData[participant_Index,"StepData.OverallMinimum"]  <- FiveNumSummary [[1]] #Min
+      processedData[participant_Index,"StepData.OverallIQR"]  <- FiveNumSummary[[4]] - FiveNumSummary [[2]] #Min
+      
+      
+      processedData[participant_Index,"StepData.OverallMode"]  <- Statistical.Mode(participantSteps)
+      
+      #### v1.3 stats
     }
     
     
@@ -294,28 +331,51 @@ calculateSimonDataMetrics <- function(processedData)
     if(!(is.null(updatedParticipantStepData) || 
          is.na(updatedParticipantStepData)))
     { #i.e. if StepData is available
-      processedData[participant_Index,"StepData.MeanDailyTotalSteps"] <- mean(updatedParticipantStepData[['Total']])
-      processedData[participant_Index,"StepData.StdDevDailyTotalSteps"] <- sd(updatedParticipantStepData[['Total']])
-      processedData[participant_Index,"StepData.MeanDailyMeanSteps"] <- mean(updatedParticipantStepData[['Mean']])
-      processedData[participant_Index,"StepData.StdDevDailyMeanSteps"] <- sd(updatedParticipantStepData[['Mean']])
-      processedData[participant_Index,"StepData.ModeDailyModeSteps"] <- Statistical.Mode(updatedParticipantStepData[['Mode']])
-      processedData[participant_Index,"StepData.MeanDailyMinSteps"] <- mean(updatedParticipantStepData[['Min']])
-      processedData[participant_Index,"StepData.MeanDailyMaxSteps"] <- mean(updatedParticipantStepData[['Max']])
-      processedData[participant_Index,"StepData.ModeDailyMinSteps"] <- Statistical.Mode(updatedParticipantStepData[['Min']])
-      processedData[participant_Index,"StepData.ModeDailyMaxSteps"] <- Statistical.Mode(updatedParticipantStepData[['Max']])
-      processedData[participant_Index,"StepData.MaxDailyMaxSteps"] <- max(updatedParticipantStepData[['Max']])
+      
+      dailySummaryNames <- c('Total','Maximum','Q3','Median','Mean','StdDev','StdErr','Q1','Minimum','Mode','IQR','Skewness','Kurtosis')
+      noStepsSuffix <- c('IQR','Skewness','Kurtosis')
+      superSummaryFcnMappings <- list(Maximum=max,Mean=mean,Mode=Statistical.Mode,Minimum=min,StdDev=sd,StdErr=std.err)
+      
+      na.remove <- FALSE # default for all functions
+      for(summaryName in dailySummaryNames)
+      {
+        for(superSummaryIdx in seq_along(superSummaryFcnMappings))
+        {
+          superSummaryFcn <- superSummaryFcnMappings[[superSummaryIdx]]
+          superSummaryPrefix <- names(superSummaryFcnMappings)[superSummaryIdx]
+          finalSuffix <- 'Steps'
+          if(summaryName %in% noStepsSuffix) #i.e. if one of these (namely Skewness and Kurtosis) then don't add 'Steps' to the end
+          {
+            finalSuffix <- ''
+          }
+          saveName <- paste0('StepData.',superSummaryPrefix,'Daily',summaryName,finalSuffix)
+          #e.g. in the form: processedData[participant_Index,"StepData.MeanDailyTotalSteps"] <- mean(updatedParticipantStepData[['Total']])
+          processedData[participant_Index,saveName] <- superSummaryFcn(updatedParticipantStepData[[summaryName]],na.rm=na.remove)
+        }
+      }
+      
+      #processedData[participant_Index,"StepData.MeanDailyTotalSteps"] <- mean(updatedParticipantStepData[['Total']])
+      #processedData[participant_Index,"StepData.StdDevDailyTotalSteps"] <- sd(updatedParticipantStepData[['Total']])
+      #processedData[participant_Index,"StepData.MeanDailyMeanSteps"] <- mean(updatedParticipantStepData[['Mean']])
+      #processedData[participant_Index,"StepData.StdDevDailyMeanSteps"] <- sd(updatedParticipantStepData[['Mean']])
+      #processedData[participant_Index,"StepData.ModeDailyModeSteps"] <- Statistical.Mode(updatedParticipantStepData[['Mode']])
+      #processedData[participant_Index,"StepData.MeanDailyMinSteps"] <- mean(updatedParticipantStepData[['Min']])
+      #processedData[participant_Index,"StepData.MeanDailyMaxSteps"] <- mean(updatedParticipantStepData[['Max']])
+      #processedData[participant_Index,"StepData.ModeDailyMinSteps"] <- Statistical.Mode(updatedParticipantStepData[['Min']])
+      #processedData[participant_Index,"StepData.ModeDailyMaxSteps"] <- Statistical.Mode(updatedParticipantStepData[['Max']])
+      #processedData[participant_Index,"StepData.MaxDailyMaxSteps"] <- max(updatedParticipantStepData[['Max']])
       
       
       #averaged over day v1.1 additions #####
       # add the some of the missing, possibly important, raw step value calculations
-      processedData[participant_Index,"StepData.MeanDailyMaxSteps"] <- mean(updatedParticipantStepData[['Max']])
-      processedData[participant_Index,"StepData.StdDevDailyMaxSteps"] <- sd(updatedParticipantStepData[['Max']])
+      #processedData[participant_Index,"StepData.MeanDailyMaxSteps"] <- mean(updatedParticipantStepData[['Max']])
+      #processedData[participant_Index,"StepData.StdDevDailyMaxSteps"] <- sd(updatedParticipantStepData[['Max']])
       
       #averaged over day v1.2 additions #####
       # add the some of the missing, possibly important, raw step value calculations
-      processedData[participant_Index,"StepData.MeanDailyStdDevSteps"] <- mean(updatedParticipantStepData[['StdDev']], na.rm=TRUE)
-      processedData[participant_Index,"StepData.MeanDailySkewness"] <- mean(updatedParticipantStepData[['Skewness']], na.rm=TRUE)
-      processedData[participant_Index,"StepData.MeanDailyKurtosis"] <- mean(updatedParticipantStepData[['Kurtosis']], na.rm=TRUE)
+      #processedData[participant_Index,"StepData.MeanDailyStdDevSteps"] <- mean(updatedParticipantStepData[['StdDev']], na.rm=TRUE)
+      #processedData[participant_Index,"StepData.MeanDailySkewness"] <- mean(updatedParticipantStepData[['Skewness']], na.rm=TRUE)
+      #processedData[participant_Index,"StepData.MeanDailyKurtosis"] <- mean(updatedParticipantStepData[['Kurtosis']], na.rm=TRUE)
       
       #continue v1.1 additions
       # add the MET derived features

@@ -6,7 +6,7 @@
 
 #set these appropriate and optionally run them
 simonData.Importer.CodeVersion <- "1.2"
-#simonExtraMetrics.CodeVersion <- "1.2" moved to calculate function
+#simonExtraMetrics.CodeVersion <-  moved to calculate function
 
 
 #------------------------------------------------------
@@ -52,7 +52,32 @@ if(exists("force.ChooseDialog") && !is.null(force.ChooseDialog) && (TRUE == forc
 {
   force.ChooseDialog = TRUE
 } else { #why R must you force your own coding style on me. >:(
-  force.ChooseDialog = FALSE
+  
+  validEntry <- FALSE
+  overwriteWarnMsg <- paste0("Use default file? [Y], enter [N] to manually specify, [Q] to quit: \n")
+  keyEntry <- ''
+  while(!validEntry)
+  {
+    invisible(keyEntry <- readline(prompt=overwriteWarnMsg))
+    if(toupper(keyEntry) == 'Y')
+    {
+      force.ChooseDialog = FALSE
+      validEntry <- TRUE
+    }
+    else if(toupper(keyEntry) == 'N')
+    {
+      force.ChooseDialog = TRUE
+      validEntry <- TRUE
+    }
+    else if(toupper(keyEntry) == 'Q')
+    {
+      validEntry <- TRUE
+      rm(validEntry,overwriteWarnMsg,keyEntry)
+      stop('User Requested Stop')
+    }
+  }
+  rm(validEntry,overwriteWarnMsg,keyEntry)
+  
 }
   
 

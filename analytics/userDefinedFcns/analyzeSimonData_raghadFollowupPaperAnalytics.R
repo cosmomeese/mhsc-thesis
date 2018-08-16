@@ -27,7 +27,10 @@ library(Hmisc)
 ## Import Required Functions
 sourceDir <- "userDefinedFcns"
 fcns <- list("analyzeData_common",
-             "analyzeSimonData_common")
+             "analyzeSimonData_common",
+             "unnestStepDataFrame",
+             "removeInvalidFileNameChars",
+             "savePlot")
 
 # Perform actual import
 srcCreateFcn <- function(sfcn,sourceDir) #helper function to import
@@ -319,7 +322,7 @@ if(!exists("m_cData"))
   
   # Plotting All Results ================================
   
-  if(GENERATE_GRAPHS)
+  if(GENERATE_GRAPHS && FALSE)
   {
     for(group in groupingType)
     {
@@ -1054,6 +1057,173 @@ if(!exists("m_cData"))
   }
   
 
+  # Save new Graphs ===================================
+  
+  if(GENERATE_GRAPHS)
+  {
+    xlabel <- "per minute step count [steps/minute]"
+    filePrefix <- glue('plots/SimonPaper/')
+    unnestedDF <- unnestStepDataFrame(FULL_DATA)
+    for(group in groupingType)
+    {
+      
+      #Plot of Step Count Density Minute by Minute #---------------------------------------------------------------
+      summar_stepDistr <- unnestedDF[!is.na(unnestedDF[[group]]),] %>% group_by(StudyIdentifier,(!!group))
+      
+      #classCounts <- plyr::count(FULL_DATA, group) %>% mutate(stackedDensityWeighting = 1/freq)
+      classCounts <- summar_stepDistr %>% 
+                      group_by(!!rlang::sym(group)) %>% 
+                      dplyr::summarise(stackedDensityWeighting = 1/n())
+      
+      summar_stepDistr <- inner_join(summar_stepDistr,
+                                     classCounts,
+                                     by = group)
+      
+      labels <- levels(FULL_DATA[[group]])
+      labels <- setNames(labels , nm = labels)
+      if(group %in% c('NYHAClass'))
+      {
+        labels <- setNames(paste0(labels,'*'), nm = labels)
+      }
+      # Baseplot
+      basePlot <- ggplot(data = summar_stepDistr,
+                         aes(x = Steps,
+                             group=StudyIdentifier, 
+                             color=StudyIdentifier)) +
+                  theme_tufte(base_family = "serif", 
+                              ticks = FALSE) +
+                  facet_wrap(as.formula(paste("~", group)),
+                             labeller=as_labeller(labels)) +
+                  xlab(xlabel)
+      
+      # Complete plot
+      baseTitle <- "Histogram Individual Per Minute Counts"
+      graphTitlePrefix <- "Histogram"
+      for(threshold in c(0,1))
+      {
+        graphTitle <- baseTitle
+        if(threshold > 0)
+        {
+          graphTitle <- paste(baseTitle,"(zoomed in to >= ",threshold, "[steps/minute])")
+        }
+        
+        #Raw density plot
+        plot <- basePlot +
+                  geom_histogram(data=subset(summar_stepDistr,
+                                            Steps >= threshold), 
+                                position = "identity", 
+                                alpha = 0.1,
+                                binwidth = 1) +
+                  #ggtitle(graphTitle) +
+                  theme(legend.position="none",
+                        text = element_text(size=14))
+        print(plot)
+        
+        if(SAVE_GRAPHS)
+        {
+          fileName <- glue("{graphTitlePrefix}_{group}_GTE{threshold}.png")
+          savePlot(fileName,
+                   filePrefix,
+                   plot,
+                   isGGPlot = TRUE)
+        }
+      }
+      
+      # Complete plot
+      baseTitle <- "Frequency of Individual Per Minute Counts"
+      graphTitlePrefix <- "FreqPoly"
+      for(threshold in c(0,1,50,100,125))
+      {
+        graphTitle <- baseTitle
+        if(threshold > 0)
+        {
+          graphTitle <- paste(baseTitle,"(zoomed in to >= ",threshold, "[steps/minute])")
+        }
+        
+        #Raw density plot
+        plot <- basePlot +
+                  geom_freqpoly(data=subset(summar_stepDistr,
+                                           Steps >= threshold), 
+                                 position = "identity", 
+                                 alpha = 0.4,
+                                 binwidth = 1) +
+                  #ggtitle(graphTitle) +
+                  theme(legend.position="none",
+                        text = element_text(size=14))
+          
+        print(plot)
+        
+        if(SAVE_GRAPHS)
+        {
+          fileName <- glue("{graphTitlePrefix}_{group}_GTE{threshold}.png")
+          savePlot(fileName,
+                   filePrefix,
+                   plot,
+                   isGGPlot = TRUE)
+        }
+      }
+      
+      # Complete stacked plots
+      displaySimonData <- list()
+      baseTitle <- "Density Plot of Per Minute Step Count by "
+      if(group %in% c('NYHAClass'))
+      {
+        baseTitle <- glue('{baseTitle}Group')
+      }
+      else
+      {
+        baseTitle <- glue('{baseTitle}NYHA Functional Class')
+      }
+      graphTitlePrefix <- "StackedDensity"
+      for(threshold in c(0,1,50,100,125))
+      {
+        graphTitle <- baseTitle
+        if(threshold > 0)
+        {
+          graphTitle <- paste(baseTitle,"(zoomed in to >= ",threshold, "[steps/minute])")
+        }
+        
+        #Stacked density plot (can 'elucidate average/common peaks')
+        plot <- basePlot +
+                  geom_density(data=subset(summar_stepDistr,
+                                                   Steps >= threshold), 
+                               position = "stack", 
+                               alpha = 0.2,
+                               #inherit.aes = FALSE,
+                               #aes(x=Steps)) +
+                               
+                               inherit.aes = TRUE,
+                               aes(fill=StudyIdentifier,
+                                   weight=stackedDensityWeighting)) +
+                  #ggtitle(graphTitle) +
+          theme(legend.position="none",
+                text = element_text(size=14))
+        
+        displaySimonData[glue('{threshold}')] <- ggplot_build(plot)
+        print(plot)
+        
+        if(SAVE_GRAPHS)
+        {
+          fileName <- glue("{graphTitlePrefix}_{group}_GTE{threshold}_Stacked.png")
+          savePlot(fileName,
+                   filePrefix,
+                   plot,
+                   isGGPlot = TRUE)
+        }
+        
+      }
+      
+      #Clean up
+    }
+    rm(basePlot,baseTitle,graphTitle,xlabel,filePrefix,graphTitlePrefix)
+  }
+  
+  unnestedDF <- FULL_DATA %>% unnestStepDataFrame()
+  zeroCount <- unnestedDF[!is.na(unnestedDF$NYHAClass),] %>% aggregate(Steps ~ StudyIdentifier, . , function(x) {100*sum(x == 0)/length(x)})
+  cat(glue('\nPercentage zeros per patient mean ± SD {round(mean(zeroCount$Steps),1)} ± {round(sd(zeroCount$Steps),1)}\n'))
+  cat("As stem plot\n")
+  stem(zeroCount$Steps)
+  
 }
 
 # END ------------------------------------------------------- 

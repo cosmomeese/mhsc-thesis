@@ -25,7 +25,8 @@ library(stringr)
 sourceDir <- "userDefinedFcns"
 fcns <- list("improvedGammaDist",
              "hmm_common",
-             "analyzeData_common")
+             "analyzeData_common",
+             "removeInvalidFileNameChars")
 
 # Perform actual import
 srcCreateFcn <- function(sfcn,sourceDir) #helper function to import

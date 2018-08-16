@@ -139,7 +139,7 @@ displaySimonData <- function(processedData,analyzedData,
   
   
   unnestedDF <- unnestStepDataFrame(processedData)
-  #Plot of Minute by Minute Step Count Densities
+  #Plot of Step Count Density Minute by Minute #---------------------------------------------------------------
   summar_stepDistr <- unnestedDF %>% 
                         filter(!is.na(NYHAClass)) %>%
                         group_by(StudyIdentifier,NYHAClass)
