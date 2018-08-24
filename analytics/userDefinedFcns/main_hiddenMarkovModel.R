@@ -128,7 +128,7 @@ if(!SKIP_MICROSIMULATION)
   data.test <- data.clean; rm(data.clean); #rm(data.train)
 
 } else {
-  cat("\nM: Skipped microsimluation...")
+  cat("\nM: Skipped microsimulation...")
   data.test <- data.train; rm(data.train)
 }
 

@@ -4,7 +4,7 @@ GENERATE_GRAPHS <- FALSE
 SAVE_GRAPHS <- FALSE  # N.B. GENERATE_GRAPHS must also be true
 SAVE_CSVS <- FALSE
 SAVE_STAT_TEST <- FALSE
-SAVE_JMIR_TABLE <- TRUE
+SAVE_JMIR_TABLE <- FALSE
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer

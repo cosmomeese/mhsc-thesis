@@ -119,6 +119,7 @@ generateMLModels <- function(m_cData,
   FOLD_SEED <- 123
   TRAIN_SEED <- 11111111
   RAND_INT_MAX <- 10000
+  use_nested_kfold_cv <- FALSE
   
   studyIDColName <- "StudyIdentifier"
 
@@ -161,6 +162,7 @@ generateMLModels <- function(m_cData,
   if(is.null(kFolds) || !is.numeric(kFolds))
   {
     kFolds <- kFoldsMax
+    use_nested_kfold_cv <- TRUE
   }
   K_FOLDS <- max(min(kFolds, kFoldsMax), 1)
   
@@ -364,7 +366,15 @@ generateMLModels <- function(m_cData,
       trCtrlSeeds[[length(trCtrlSeeds)]] <- sample.int(RAND_INT_MAX, 1)
       
       # set trainingControl
-      trainingControl <- trainControl(method = "LOOCV", # leave one out cross validation
+      resampleMethod <- "LOOCV" # leave one out cross validation
+      nFoldsOrResamples <- ifelse(grepl("cv",resampleMethod),10,25) # default input for number param of trainControl
+      if(use_nested_kfold_cv)
+      {
+        resampleMethod <- "cv" # k-Fold cross validation
+        nFoldsOrResamples <- K_FOLDS
+      }
+      trainingControl <- trainControl(method = resampleMethod, 
+                                      number = nFoldsOrResamples,
                                       classProbs = TRUE,  # save output probs for AUC
                                       repeats = N_REPEATS,  # repeat train/cv
                                       seeds = trCtrlSeeds)  # random seeds

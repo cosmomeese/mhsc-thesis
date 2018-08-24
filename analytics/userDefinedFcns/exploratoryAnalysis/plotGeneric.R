@@ -45,34 +45,37 @@ rm(srcCreateFcn) #remove the extra unneeded variables
 
 #### WARN THIS REALLY NEEDS REFACTORING ####
 
+LABEL <- list(DATETIME=list(), HEARTRATE=list(), STEPS=list())
+FORMAT <- list(DATETIME=list(), HEARTRATE=list(), STEPS=list())
+
+# N.B. these constants should be 
+# (the upper case version) of the keywords used in generateXYZPlot functions
+LABEL$STEPS$perMinute <- "Step Count [Steps/minute]"
+VISUAL_SCALE_COMP <- 125
+FORMAT$STEPS$perMinute.limits <- c(CONSTANTS$UNSCALEDMIN.STEPS,CONSTANTS$UNSCALEDMAX.STEPS-VISUAL_SCALE_COMP)
+
+LABEL$HEARTRATE$perMinute <- "Heart Rate [bpm]"
+HRVISUAL_SCALE_COMP <- 0
+FORMAT$HEARTRATE$perMinute.limits <- c(CONSTANTS$UNSCALEDMIN.HEARTRATE,CONSTANTS$UNSCALEDMAX.HEARTRATE-HRVISUAL_SCALE_COMP)
+
+LABEL$DATETIME$full <- "Study Day + Time [Day Hour]"
+FORMAT$DATETIME$full <- "%j %R" # day of year (000-366) & decimal hour (0-23) & decimal minute (00-59)
+
+LABEL$DATETIME$hour <- "Study Time [Hour]"
+FORMAT$DATETIME$hour <- "%H" # decimal hour (0-23)
+
+LABEL$DATETIME$day <- "(start of) Normalized Study Day [Day]"
+FORMAT$DATETIME$day <- "%j" # day of year (000-366)
+
+TIME_COL_LABEL <- 'Time'
+DAYS_TO_KEEP <- 16
+
+
 plotX <- function(data.clean,CONSTANTS,withHeartRate=FALSE,showPlot=FALSE)
 {
   # Constants ####
   
-  LABEL <- list(DATETIME=list(), HEARTRATE=list(), STEPS=list())
-  FORMAT <- list(DATETIME=list(), HEARTRATE=list(), STEPS=list())
   
-  # N.B. these constants should be 
-  # (the upper case version) of the keywords used in generateXYZPlot functions
-  LABEL$STEPS$perMinute <- "Step Count [Steps/minute]"
-  VISUAL_SCALE_COMP <- 125
-  FORMAT$STEPS$perMinute.limits <- c(CONSTANTS$UNSCALEDMIN.STEPS,CONSTANTS$UNSCALEDMAX.STEPS-VISUAL_SCALE_COMP)
-  
-  LABEL$HEARTRATE$perMinute <- "Heart Rate [bpm]"
-  HRVISUAL_SCALE_COMP <- 0
-  FORMAT$HEARTRATE$perMinute.limits <- c(CONSTANTS$UNSCALEDMIN.HEARTRATE,CONSTANTS$UNSCALEDMAX.HEARTRATE-HRVISUAL_SCALE_COMP)
-  
-  LABEL$DATETIME$full <- "Study Day + Time [Day Hour]"
-  FORMAT$DATETIME$full <- "%j %R" # day of year (000-366) & decimal hour (0-23) & decimal minute (00-59)
-  
-  LABEL$DATETIME$hour <- "Study Time [Hour]"
-  FORMAT$DATETIME$hour <- "%H" # decimal hour (0-23)
-  
-  LABEL$DATETIME$day <- "(start of) Normalized Study Day [Day]"
-  FORMAT$DATETIME$day <- "%j" # day of year (000-366)
-  
-  TIME_COL_LABEL <- 'Time'
-  DAYS_TO_KEEP <- 16
   data.orig <- data.clean
   
   if(withHeartRate)
