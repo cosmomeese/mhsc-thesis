@@ -1,0 +1,3 @@
+$ cat .gitattributes
+design/* linguist-vendored
+fitbitIntegration/* linguist-vendored
