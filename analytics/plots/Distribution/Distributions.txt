@@ -1,0 +1,33 @@
+vectorRange Raw: 0, 180
+
+
+Simon NYHA II (normalized)
+min:  2.225074e-308   max:  1 
+median:  2.225074e-308 
+mean:  0.02028913 
+estimated sd:  0.0739067 
+estimated skewness:  5.07765 
+estimated kurtosis:  32.7385 
+summary statistics
+
+Fitting of the distribution ' beta ' by matching moments 
+Parameters:
+         estimate
+shape1 0.05354511
+shape2 2.58555789
+
+-----------------------------------------------------------------
+
+Simon NYHA III (normalized)
+min:  2.225074e-308   max:  0.8555556 
+median:  2.225074e-308 
+mean:  0.01504428 
+estimated sd:  0.05921918 
+estimated skewness:  5.51276 
+estimated kurtosis:  38.79259 
+
+Fitting of the distribution ' beta ' by matching moments 
+Parameters:
+         estimate
+shape1 0.04852333
+shape2 3.17684435

@@ -87,16 +87,20 @@ preProcessHelper <- function(dataForModelSearch, ignoreColumns, isIMPUTEMISSING_
 
 # generate ML Models. 
 # Use m_cData which is a data frame that contains StudyIDentifier, and the rest of the predictive variables
-# simonExtraMetrics.CodeVersion is the the same named variable included with the m_CData save files
+# extraMetricsVersion is the name variable simonExtraMetrics.CodeVersion included with the m_CData save files
+# USE FEATURES flag to change features used for training: "CPETOnly", "StepMetrics", "PaperMetrics" (N.B. misleading this is CPET + Step Metrics), "withSpecFeat" (CPET + Steps + custom metrics including MET)
 # Use isIMPUTEMISSING_nDROP = TRUE to impute missing data (instead of dropping)
 # Use isPRESELECT_FEATURES = TRUE to try to preselect features instead of using all of them
-# Use isKEEP_ONLY_CPET = TRUE to only keep CPET data
+# Use isKEEP_ONLY_CPET = TRUE to only keep CPET data\
+# Use isFORCE_LOOCV_TRAIN = TRUE to train (not validate) using LOOCV instead of nested CV for training and validation
 # Use kFolds to specify number of folds desired
 generateMLModels <- function(m_cData,
-                             simonExtraMetrics.CodeVersion,
+                             extraMetricsVersion,
+                             FEATURES="CPETOnly",
                              isIMPUTEMISSING_nDROP=FALSE,
                              isPRESELECT_FEATURES=FALSE,
                              isKEEP_ONLY_CPET=TRUE,
+                             isFORCE_LOOCV_TRAIN=FALSE,
                              kFolds=NULL
                              )
 {
@@ -104,11 +108,13 @@ generateMLModels <- function(m_cData,
   
   RESULTS_VAR_NAME_TEST <- 'testResults'
   RESULTS_VAR_NAME_FINAL_MODEL <- 'finalModels'
+  RESULTS_ATTR_NAME_FEATURES <- 'featureVariant'
   RESULTS_ATTR_NAME_METRICS_CODE_VERSION <- 'metricsCodeVersion'
   RESULTS_ATTR_NAME_IMPUTE <- 'isImpute'
   #RESULTS_VAR_NAME_PRE_PROCESS <- 'preProcess'
   RESULTS_ATTR_NAME_PRESELECT <- 'isPreselectFeatures'
   RESULTS_ATTR_NAME_CPET_ONLY <- 'isCPETOnly'
+  RESULTS_ATTR_NAME_FORCE_LOOCV_TRAIN <- 'isForceLOOCVTraining'
   RESULTS_ATTR_NAME_STUDYIDCOLNAME <- 'studyIDColName'
 
   
@@ -119,7 +125,7 @@ generateMLModels <- function(m_cData,
   FOLD_SEED <- 123
   TRAIN_SEED <- 11111111
   RAND_INT_MAX <- 10000
-  use_nested_kfold_cv <- FALSE
+  
   
   studyIDColName <- "StudyIdentifier"
 
@@ -159,10 +165,11 @@ generateMLModels <- function(m_cData,
     .$StudyIdentifier
   
   kFoldsMax <- length(studyIDs.NoNas)
+  use_nested_kfold_cv <- !isFORCE_LOOCV_TRAIN
   if(is.null(kFolds) || !is.numeric(kFolds))
   {
     kFolds <- kFoldsMax
-    use_nested_kfold_cv <- TRUE
+    use_nested_kfold_cv <- FALSE
   }
   K_FOLDS <- max(min(kFolds, kFoldsMax), 1)
   
@@ -172,7 +179,7 @@ generateMLModels <- function(m_cData,
   #melted <- reshape2::melt(FULL_DATA.ForViewing, id.vars=c("StudyIdentifier", 
   #                                                         "NYHAClass",
   #                                                         "PureNYHAClass",
-  #                                                      "ExplicitNYHAClass"))
+  #                                                         "ExplicitNYHAClass"))
   
   
   # Generate & train some models
@@ -197,9 +204,9 @@ generateMLModels <- function(m_cData,
   # Create Folds=========================================
   
   set.seed(FOLD_SEED)
-  folds <- caret::groupKFold(studyIDs.NoNas,
-                             k=K_FOLDS)
-  
+  smallfolds <- caret::createFolds(studyIDs.NoNas, # i.e. test folds
+                                   k=K_FOLDS)
+  folds <- lapply(smallfolds, function(x) {setdiff(seq_along(studyIDs.NoNas),x)})
   
   #### Best Parameter Search ############################
   
@@ -212,6 +219,7 @@ generateMLModels <- function(m_cData,
   excludeVars <- c("NYHAClassMixed",  # dirty outcome variable
                    "PureNYHAClass",  # alternate outcome variable
                    "ExplicitNYHAClass",  # alternate outcome variable
+                   "RoundDownNYHAClass", # alternate outcome variable (already folded into NYHAClass)
                    "WristbandPreference",
                    "Handedness",
                    "EjectionFraction",  # too many missing
@@ -232,12 +240,13 @@ generateMLModels <- function(m_cData,
                    "StepData.ModeDailyModeSteps", # all zero
                    "StepData.MeanDailyMinSteps", # all zero
                    "StepData.ModeDailyMinSteps", # all zero
-                   "StepData" # this is the minute by minute stuff
+                   "StepData", # this is the minute by minute stuff
+                   "StepData.Overalln" # this is a distractor
                    )
   # v1.1
-  if(as.numeric(simonExtraMetrics.CodeVersion) > 1.0)
+  if(as.numeric(extraMetricsVersion) > 1.0)
   {
-    excludeVars <- c(excludeVars, # v1.0 excludeVars
+    badV1Vars <- c(# v1.0 excludeVars
                      "StepData.TotalMETClass.BelowMin", # = constant*StepData.MeanMETClass.BelowMin
                      "StepData.TotalMETClassIV", # = constant*StepData.MeanMETClassIV
                      "StepData.TotalMETClassIII", # = constant*StepData.MeanMETClassIII
@@ -252,13 +261,119 @@ generateMLModels <- function(m_cData,
                      "StepData.ModeMETClassII" # all zero
                      #"StepData.OverallMETClassI.PercentageAll"  # (effectively) all zero (has zero variance in some folds)
                      )
+    excludeVars <- union(excludeVars,badV1Vars)
+    rm(badV1Vars)
   }
   
   # v1.2
-  if(as.numeric(simonExtraMetrics.CodeVersion) > 1.1)
+  if(as.numeric(extraMetricsVersion) > 1.1)
   {
     #excludeVars <- c(excludeVars # v1.0 excludeVars
     #)
+  }
+  
+  # v1.2
+  if(as.numeric(extraMetricsVersion) > 1.3)
+  {
+    badV4Vars <- c(# v1.4 non functioning
+                    "Exercises", # dirty
+                    "StepData.OverallIQR", # all zero
+                    "StepData.OverallMode", # all zero
+                    "StepData.OverallQ1", # all zero
+                    "StepData.OverallQ3", # all zero
+                    "StepData.MaximumDailyQ1Steps", # all zero
+                    "StepData.MaximumDailyModeSteps", # all zero
+                    "StepData.MaximumDailyMedianSteps", # all zero
+                    "StepData.MaximumDailyMinimumSteps", # all zero
+                    "StepData.MeanDailyQ1Steps", # all zero
+                    "StepData.MeanDailyModeSteps", # all zero
+                    "StepData.MeanDailyMedianSteps", # all zero
+                    "StepData.MeanDailyMinimumSteps", # all zero
+                    "StepData.OverallMedian", # all zero
+                    "StepData.OverallMinimum", # all zero
+                    "StepData.MinimumDailyQ3Steps", # all zero
+                    "StepData.MinimumDailyQ1Steps", # all zero
+                    "StepData.MinimumDailyIQR", # all zero
+                    "StepData.MinimumDailyModeSteps", # all zero
+                    "StepData.MinimumDailyMedianSteps", # all zero
+                    "StepData.MinimumDailyMinimumSteps", # all zero
+                    "StepData.ModeDailyQ1Steps", # all zero
+                    "StepData.ModeDailyIQR", # all zero
+                    "StepData.ModeDailyModeSteps", # all zero
+                    "StepData.ModeDailyMedianSteps", # all zero
+                    "StepData.ModeDailyMinimumSteps", # all zero
+                    "StepData.StdDevDailyQ1Steps", # all zero
+                    "StepData.StdDevDailyModeSteps", # all zero
+                    "StepData.StdDevDailyMedianSteps", # all zero
+                    "StepData.StdDevDailyMinimumSteps", # all zero
+                    "StepData.StdErrDailyQ1Steps", # all zero
+                    "StepData.StdErrDailyModeSteps", # all zero
+                    "StepData.StdErrDailyMedianSteps", # all zero
+                    "StepData.StdErrDailyMinimumSteps", # all zero
+                    "StepData.MeanMETClassVigorous", # all zero
+                    "StepData.StdDevMETClassVigorous", # all zero
+                    "StepData.MaxMETClassVigorous", # all zero
+                    "StepData.TotalMETClassVigorous", # (effectively) all zero
+                    "StepData.OverallMETClassVigorous.Percentage", # all zero
+                    "StepData.OverallMETClassVigorous.PercentageAll" # all zero
+    )
+    excludeVars <- union(excludeVars,badV4Vars)
+    rm(badV4Vars)
+    
+    modeMetricsToDrop <- colnames(FULL_DATA)[grepl("StepData.*Mode", colnames(FULL_DATA))]
+    excludeVars <- union(excludeVars, modeMetricsToDrop)
+    rm(modeMetricsToDrop)
+    
+    if("CPETOnly" == FEATURES)
+    {
+      # gets done below
+    }
+    else if("PaperMetrics" == FEATURES)
+    {
+      # drop metrics not in paper
+      nonPaperMetricsToDrop <- colnames(FULL_DATA)[grepl("StepData.*MET", colnames(FULL_DATA))]
+      excludeVars <- union(excludeVars, nonPaperMetricsToDrop)
+      rm(nonPaperMetricsToDrop)
+    }
+    else if("CPET+Step" == FEATURES)
+    {
+      # drop metrics not in paper
+      nonPaperMetricsToDrop <- colnames(FULL_DATA)[grepl("StepData.*MET", colnames(FULL_DATA))]
+      specialActivityFeatures <- c("StepData.HighestValuedStreak",
+                                   "StepData.LongestActiveStreak")
+      excludeVars <- union(excludeVars, union(nonPaperMetricsToDrop, specialActivityFeatures))
+      rm(nonPaperMetricsToDrop)
+    }
+    else if("StepMetrics" == FEATURES)
+    {
+      # drop non step data
+      nyhaMetricsToKeep <- colnames(FULL_DATA)[!grepl("StepData.", colnames(FULL_DATA))]
+      demographicMetricsToKeep <- c("StudyIdentifier","Height","Weight","Sex","NYHAClass","Age","BMI") # force keeping these
+      
+      ### WARNING N.B. THIS IS GREEDY! WHICH MEANS IF YOU'VE ADDED OTHER VARIABLES (not prefixed with 'StepData.' IT WILL KICK THEM OUT TOO!! ####
+      nonStepMetricsToDrop <- colnames(FULL_DATA)[!grepl("StepData.", colnames(FULL_DATA))]
+      nonStepMetricsToDrop <- setdiff(nonStepMetricsToDrop,demographicMetricsToKeep)
+      
+      # now drop metrics not base step metrics
+      nonPaperMetricsToDrop <- colnames(FULL_DATA)[grepl("StepData.*MET", colnames(FULL_DATA))] # not necessary due to greedy approach used above
+      specialActivityFeatures <- c("StepData.HighestValuedStreak",
+                                   "StepData.LongestActiveStreak")
+      
+      excludeVars <- union(excludeVars,union(nonStepMetricsToDrop,union(nonPaperMetricsToDrop,specialActivityFeatures)))
+      rm(nonStepMetricsToDrop)
+      
+      # and drop CPET metrics
+      
+    }
+    else if("withSpecFeat" == FEATURES)
+    {
+      # nothing to do
+    }
+    else
+    {
+      cat("FEATURES input variable is not valid. Please correct, apply and continue")
+      browser()
+    }
   }
   
   if(isKEEP_ONLY_CPET)
@@ -268,8 +383,6 @@ generateMLModels <- function(m_cData,
     rm(cpetNamesToDrop)
   }
 
-                  
-  
   ### Common instructions that don't need to be re-calculated every loop=========================
   # subset the FULL_DATA set to only deal with response and sig variables
   studyIDColName <- "StudyIdentifier"
@@ -330,6 +443,7 @@ generateMLModels <- function(m_cData,
       studyIDColNum.NoMiss <- which(names(dataForFold.NoMiss) %in% c(studyIDColName))
       
       ### Find the Best Features ############################################################
+      onlyOnePredictor <- FALSE
       if(isPRESELECT_FEATURES)
       {
         ### REVISIT THIS -> I THINK I NEED TO USE A SUBSET OF DATA FOR FEATURE SEARCH AGAIN
@@ -345,6 +459,7 @@ generateMLModels <- function(m_cData,
         #bestModelIdx <- which.min(modelSearch.summary$cp) # Mallow's CP -> AIC
         bestModelCols <- modelSearch.summary$which[bestModelIdx,]
         bestModelVars <- names(bestModelCols[bestModelCols == TRUE][-1]) # get names of all true, dropping first item which is (Intercept)
+        onlyOnePredictor <- 1 == length(bestModelVars)
 
         form <- as.formula(glue("{responseVar} ~ {paste(bestModelVars,collapse=' + ')}"))
       }
@@ -353,90 +468,134 @@ generateMLModels <- function(m_cData,
         form <- as.formula(glue("{responseVar} ~."))
       }
       
-      # create trainingControl seeds (from example)
-      # w/ help from: https://stackoverflow.com/a/21988897
-      print(glue("        setting random seed..."))
-      set.seed(TRAIN_SEED)
-      trCtrlSeeds <- vector(mode = "list", 
-                            length = (N_REPEATS * nrow(dataForFold.NoMiss)) + 1)
-      numFittingParameters <- FITTING_PARS[[mtd]] # this needs to at least be equal to number of tunning parameters 
-
-      for(i in 1:(length(trCtrlSeeds)-1)) trCtrlSeeds[[i]] <- sample.int(RAND_INT_MAX, numFittingParameters)
-      ## For the final model (just need one single integer vs list):
-      trCtrlSeeds[[length(trCtrlSeeds)]] <- sample.int(RAND_INT_MAX, 1)
-      
-      # set trainingControl
-      resampleMethod <- "LOOCV" # leave one out cross validation
-      nFoldsOrResamples <- ifelse(grepl("cv",resampleMethod),10,25) # default input for number param of trainControl
-      if(use_nested_kfold_cv)
-      {
-        resampleMethod <- "cv" # k-Fold cross validation
-        nFoldsOrResamples <- K_FOLDS
-      }
-      trainingControl <- trainControl(method = resampleMethod, 
-                                      number = nFoldsOrResamples,
-                                      classProbs = TRUE,  # save output probs for AUC
-                                      repeats = N_REPEATS,  # repeat train/cv
-                                      seeds = trCtrlSeeds)  # random seeds
-      finalFoldTrainData <- dataForFold.NoMiss[,-c(studyIDColNum.NoMiss)] # make sure to drop studyIdentifier
-      print(glue("        training on Fold..."))
-      foldResults[[foldName]] <- train(form,
-                                       method = mtd,
-                                       data = finalFoldTrainData, # make sure to drop studyIdentifier,
-                                       trControl = trainingControl)
-      
-      finalModels[[foldName]] <- foldResults[[foldName]]$finalModel
-      # test
-      print(glue("        preparing test data..."))
-      # get test data for this fold
-      testDataIndxNames <- setdiff(studyIDs.NoNas, studyIDs.NoNas[fold])
-      
-      testDataForFold.NoMiss <- dataForTest.NoMiss[dataForTest.NoMiss[[studyIDColName]] %in% testDataIndxNames,]
-      
-      if(nrow(testDataForFold.NoMiss) > 0)
-      {
-        testResponseColNum.NoMiss <- which(names(testDataForFold.NoMiss) %in% c(responseVar))
-        testStudyIDColNum.NoMiss <- which(names(testDataForFold.NoMiss) %in% c(studyIDColName))
+      if(!(('pcaNNet' == mtd) && onlyOnePredictor))
+      {# create trainingControl seeds (from example)
+        # w/ help from: https://stackoverflow.com/a/21988897
+        print(glue("        setting random seed..."))
+        set.seed(TRAIN_SEED)
+        trCtrlSeeds <- vector(mode = "list", 
+                              length = (N_REPEATS * nrow(dataForFold.NoMiss)) + 1)
+        numFittingParameters <- FITTING_PARS[[mtd]] # this needs to at least be equal to number of tunning parameters 
         
-        cat(glue("        testing..."))
-        for(indxName in testDataIndxNames)
+        for(i in 1:(length(trCtrlSeeds)-1)) trCtrlSeeds[[i]] <- sample.int(RAND_INT_MAX, numFittingParameters)
+        ## For the final model (just need one single integer vs list):
+        trCtrlSeeds[[length(trCtrlSeeds)]] <- sample.int(RAND_INT_MAX, 1)
+        saveOuputProbs <- TRUE
+        
+        # set trainingControl
+        #--- LOOCV Training ----#
+        resampleMethod <- "LOOCV" # leave one out cross validation
+        trainingControl <- trainControl(method = resampleMethod,
+                                        classProbs = saveOuputProbs,  # save output probs for AUC
+                                        seeds = trCtrlSeeds)  # random seeds
+        #--- Repeat CV Training ----#
+        if(use_nested_kfold_cv)
         {
-          cat(glue(" {indxName}..."))
-          finalFoldTestData <- testDataForFold.NoMiss[,-c(testStudyIDColNum.NoMiss)]
-          predictProb <- predict(foldResults[[foldName]],
-                                 newdata=finalFoldTestData,
-                                 type="prob"
-                                 )
-          # exact the (first) probability for the first factor level of the response variable
-          tempResult <- predictProb[1,levels(finalFoldTestData[[responseVar]])[[1]]] # get the 
-          testResults[indxName == testResults[studyIDColName],mtd] <- tempResult
-          rm(predictProb, tempResult)
+          resampleMethod <- "cv" # k-Fold cross validation
+          nFoldsOrResamples <- K_FOLDS
+          trainingControl <- trainControl(method = resampleMethod, 
+                                          number = nFoldsOrResamples,
+                                          classProbs = saveOuputProbs,  # save output probs for AUC
+                                          repeats = N_REPEATS,  # repeat train/cv
+                                          seeds = trCtrlSeeds)  # random seeds
         }
-        cat("\n")  # new line
-        print(glue("        done"))
+        #### Repeat CV Training ####
+        finalFoldTrainData <- dataForFold.NoMiss[,-c(studyIDColNum.NoMiss)] # make sure to drop studyIdentifier
+        
+        print(glue("        training on Fold..."))
+        foldResults[[foldName]] <- train(form,
+                                         method = mtd,
+                                         data = finalFoldTrainData, # make sure to drop studyIdentifier,
+                                         trControl = trainingControl)
+        
+        finalModels[[foldName]] <- foldResults[[foldName]]$finalModel
+        # test
+        print(glue("        preparing test data..."))
+        # get test data for this fold
+        testDataIndxNames <- setdiff(studyIDs.NoNas, studyIDs.NoNas[fold])
+        
+        testDataForFold.NoMiss <- dataForTest.NoMiss[dataForTest.NoMiss[[studyIDColName]] %in% testDataIndxNames,]
+        
+        if(nrow(testDataForFold.NoMiss) > 0)
+        {
+          testResponseColNum.NoMiss <- which(names(testDataForFold.NoMiss) %in% c(responseVar))
+          testStudyIDColNum.NoMiss <- which(names(testDataForFold.NoMiss) %in% c(studyIDColName))
+          
+          cat(glue("        testing..."))
+          for(indxName in testDataIndxNames)
+          {
+            cat(glue(" {indxName}..."))
+            finalFoldTestData <- testDataForFold.NoMiss[,-c(testStudyIDColNum.NoMiss)]
+            predictProb <- predict(foldResults[[foldName]],
+                                   newdata=finalFoldTestData,
+                                   type="prob"
+            )
+            # exact the (first) probability for the first factor level of the response variable
+            tempResult <- predictProb[1,levels(finalFoldTestData[[responseVar]])[[1]]] # get the 
+            testResults[indxName == testResults[studyIDColName],mtd] <- tempResult
+            rm(predictProb, tempResult)
+          }
+          cat("\n")  # new line
+          print(glue("        done"))
+        }
+        else
+        {
+          print(glue("        skipped testing..."))
+        }
       }
       else
       {
-        print(glue("        skipped testing..."))
+        msg <- paste0("\nW: only one predictor for PCA NNet - can't run this since PCA is a group transformation\n")
+        cat(msg)
+        warning(msg)
       }
-      
+
     }
     
-    print(glue("        saving results..."))
-    trainResults[[mtd]] <- finalModels
+    if(length(finalModels) > 0)
+    {
+      print(glue("        saving results..."))
+      trainResults[[mtd]] <- finalModels      
+    }
+    else
+    {
+      # if test results has less than minimum folds, drop test vector from results matrix
+      minimumTrainedFolds <- 1
+      if(length(testResults) > 0)
+      {
+        if(sum(!is.na(testResults[[mtd]])) < minimumTrainedFolds)
+        {
+          testResults[[mtd]] <- NULL
+        }
+      }
+    }
     
     print(glue("Ended {mtd}"))
   }
-  attr(testResults,'levels') <- levels(finalFoldTestData[[responseVar]])
-  result[[RESULTS_VAR_NAME_TEST]] <- testResults
-  result[[RESULTS_VAR_NAME_FINAL_MODEL]] <- trainResults
-  
-  attr(result,RESULTS_ATTR_NAME_METRICS_CODE_VERSION) <- simonExtraMetrics.CodeVersion
-  attr(result,RESULTS_ATTR_NAME_IMPUTE) <- isIMPUTEMISSING_nDROP
-  #result[[RESULTS_VAR_NAME_PRE_PROCESS]] <- 'preProcess'
-  attr(result,RESULTS_ATTR_NAME_PRESELECT) <- isPRESELECT_FEATURES
-  attr(result,RESULTS_ATTR_NAME_CPET_ONLY) <- isKEEP_ONLY_CPET
-  attr(result,RESULTS_ATTR_NAME_STUDYIDCOLNAME) <- studyIDColName
+  if(length(trainResults) > 0)
+  {
+    responseLevels <- levels(finalFoldTestData[[responseVar]])
+    attr(testResults,'levels') <- responseLevels
+    result[[RESULTS_VAR_NAME_TEST]] <- testResults
+    result[[RESULTS_VAR_NAME_FINAL_MODEL]] <- trainResults
+    
+    attr(result,RESULTS_ATTR_NAME_FEATURES) <- FEATURES
+    attr(result,RESULTS_ATTR_NAME_METRICS_CODE_VERSION) <- extraMetricsVersion
+    attr(result,RESULTS_ATTR_NAME_IMPUTE) <- isIMPUTEMISSING_nDROP
+    #result[[RESULTS_VAR_NAME_PRE_PROCESS]] <- 'preProcess'
+    attr(result,RESULTS_ATTR_NAME_PRESELECT) <- isPRESELECT_FEATURES
+    attr(result,RESULTS_ATTR_NAME_CPET_ONLY) <- isKEEP_ONLY_CPET
+    attr(result,RESULTS_ATTR_NAME_FORCE_LOOCV_TRAIN) <- isFORCE_LOOCV_TRAIN
+    attr(result,RESULTS_ATTR_NAME_STUDYIDCOLNAME) <- studyIDColName
+  }
+  else
+  {
+    # model failed to train, return NULL
+    msg <- "\nFailed to train any models, return NULL\n"
+    cat(msg)
+    warning(msg)
+    result <- NULL
+  }
   
   return(result)
 }
@@ -502,10 +661,10 @@ makeROCForMLTestResults <- function(testResults,
                                     outcomeVar="NYHAClass",
                                     ignoreVars=c("StudyIdentifier"),
                                     graphTitlePrefix="",
+                                    modelNamePlaceholderString="$",
                                     saveGraphs = TRUE)
 {
   #### Model Performance Evaluation #####################
-  
   PLOT_TYPE <- "ROC"
   
   METHODS <- setdiff(names(testResults), c(outcomeVar, ignoreVars))
@@ -521,6 +680,9 @@ makeROCForMLTestResults <- function(testResults,
              "))
     cat("\n")
     
+    completeGraphTitlePrefix <- gsub(modelNamePlaceholderString,mtd,graphTitlePrefix,
+                                     fixed=TRUE)
+    
     # Calculate ROC
 
     form <- formula(glue("{outcomeVar} ~ {mtd}"))
@@ -528,12 +690,12 @@ makeROCForMLTestResults <- function(testResults,
                      data=testResults,
                      direction = "<") # fix directions; default can change between models depending on control vs case results
     plot(rc[[mtd]],
-         main = glue("{graphTitlePrefix} {mtd} ROC Plot, AUC:{round(auc(rc[[mtd]]),4)}"))
+         main = glue("ROC Plot {completeGraphTitlePrefix}, AUC:{round(auc(rc[[mtd]]),4)}"))
     cat(glue(""))
     
     if(saveGraphs)
     {
-      fileName <- glue("{graphTitlePrefix}_{mtd}_{PLOT_TYPE}.png")
+      fileName <- glue("{PLOT_TYPE}_{completeGraphTitlePrefix}.png")
       filePrefix <- "plots/MLModels/"
       savePlot(fileName,
                filePrefix=filePrefix,
@@ -547,7 +709,7 @@ makeROCForMLTestResults <- function(testResults,
   cat(glue("All/Combined ROC: ----------------------------
              "))
   p <- pROC::ggroc(rc, size = 0.75) +
-       ggtitle(glue("{graphTitlePrefix} ROC Plot - All Methods")) +
+       ggtitle(glue("ROC Plot {completeGraphTitlePrefix} - All Methods")) +
        labs(colour="Model Type") +
        theme_tufte() +
        geom_abline(colour='gray',
@@ -556,7 +718,7 @@ makeROCForMLTestResults <- function(testResults,
   plot(p)
   if(saveGraphs)
   {
-    fileName <- glue("{graphTitlePrefix}_all_{PLOT_TYPE}.png")
+    fileName <- glue("{PLOT_TYPE}_{completeGraphTitlePrefix}.png")
     filePrefix <- "plots/MLModels/"
     savePlot(fileName,
              filePrefix=filePrefix,
@@ -571,11 +733,13 @@ makeROCForMLTestResults <- function(testResults,
 # generate histogram for the ML Models predictor
 makePredictorHistogram <- function(finalModels,
                                    graphTitlePrefix="",
+                                   modelNamePlaceholderString="$",
+                                   tableRowDictionary=NULL,
                                    saveGraphs=FALSE)
 {
-  
+  NA_REMOVE_FLAG <- TRUE
   PLOT_TYPE <- "varBar"
-  
+
   # mlModelResults$finalModels$glmboost$Fold01
   METHODS <- names(finalModels)
   
@@ -639,37 +803,51 @@ makePredictorHistogram <- function(finalModels,
     if(!is.null(totalVarImp[[mtd]]))
     {
       # put variables as row names
+      featureColName <- "Feature" #N.B. not dynamically changed in ggplot fcn
       rownames(totalVarImp[[mtd]]) <- totalVarImp[[mtd]]$Variable
       # drop the seperate column for variable
       totalVarImp[[mtd]]$Variable <- NULL
-      
-      featureColNum <- which(names(totalVarImp[[mtd]]) == "Feature")
+      featureColNum <- which(names(totalVarImp[[mtd]]) == featureColName)
       totalVarImp[[mtd]][,-featureColNum] <- apply(totalVarImp[[mtd]][,-featureColNum],
                                                     MARGIN = 2, #use columns
-                                                    FUN = function(X) (X - min(X))/diff(range(X)))
+                                                    FUN = function(X) (X - min(X, na.rm=NA_REMOVE_FLAG))/diff(range(X,na.rm=NA_REMOVE_FLAG)))
+      
+      # get only the VarName and FullOutputName cols (the first two columns)
+      tableDictFeatureColName <- 'VarName' #N.B. not dynamically changed in ggplot fcn
+      colsToKeep <- c(tableDictFeatureColName,'FullOutputName')
+      tableNamesDictOnly <- tableRowDictionary[,colnames(tableRowDictionary) %in% colsToKeep]
       
       # melt the data frame from wide to long
       plotDF <- reshape2::melt(totalVarImp[[mtd]], 
-                               id.var="Feature",
+                               id.var=featureColName,
                                variable.name="Fold",
                                value.name="Importance")
-      # order so they'll be nicely in order of importance
+     
+      plotDFWithOutputNames <- merge(plotDF,
+                                     tableNamesDictOnly,
+                                     by.x=featureColName,
+                                     by.y=tableDictFeatureColName,
+                                     all.x=TRUE)
 
-      p <- plotDF %>% ggplot(aes(x = reorder(.$Feature, .$Importance, 
+      # get title quickly before plotting
+      ttl <- gsub(modelNamePlaceholderString,mtd,graphTitlePrefix,
+                  fixed=TRUE)
+      # order so they'll be nicely in order of importance
+      p <- plotDFWithOutputNames %>% ggplot(aes(x = reorder(.$FullOutputName, .$Importance, 
                                              function(x) {sum(x,na.rm=TRUE)}), # to order in descending order
-                                 y = Importance,
-                                 fill = Fold)) +
-                      geom_bar(stat = "identity") +
-                      labs(title = glue("{graphTitlePrefix} {mtd}"),
-                           x = "Feature")  +
-                      coord_flip() +
-                      theme(legend.position = "none")
+                                             y = Importance,
+                                             fill = Fold)) +
+                                    geom_bar(stat = "identity") +
+                                    labs(title = ttl,
+                                         x = "Feature")  +
+                                    coord_flip() +
+                                    theme(legend.position = "none")
       
       plot(p)
       
       if(saveGraphs)
       {
-        fileName <- glue("{graphTitlePrefix}_{mtd}_{PLOT_TYPE}.png")
+        fileName <- glue("{PLOT_TYPE}_{ttl}.png")
         filePrefix <- "plots/MLModels/"
         savePlot(fileName,
                  filePrefix=filePrefix,

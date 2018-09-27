@@ -32,6 +32,8 @@ invisible(lapply(fcns,srcCreateFcn,
 
 #### START
 
+DAYS_IN_TWO_WEEKS <- 14
+
 #### Helper Fcn #####
 plotDayByDayData <- function(df,
                              cls="")
@@ -63,13 +65,21 @@ plotDayByDayData <- function(df,
                     theme_tufte() +
                     xlab('Study Day (relative to onboarding)') +
                     ylab('Step Count [Steps/6 hours]') +
-                    theme(legend.position = "none")
+                    theme(legend.position = "none",
+                          text = element_text(size=14),
+                          axis.text = element_text(size=14))
       #plt <- plt + geom_line(aes(x=XAxis,
       #                           y=Steps))
       plt <- plt + geom_col(aes(x=XAxis,
                                 y=Steps,
                                 color=StudyIdentifier,
                                 fill=StudyIdentifier))
+
+      breakSeq <- seq(0,DAYS_IN_TWO_WEEKS,1)
+      plt <- plt + scale_x_continuous(breaks=breakSeq,
+                                       labels=breakSeq+1
+                                       #limits
+                                       )
       
       fName <- glue("{id}-{title} - Pt{pat} - FC{cls}.png")
       fPrefix=glue("plotsSimon/6Hour_PatientDayByDay/NYHA{cls}/")

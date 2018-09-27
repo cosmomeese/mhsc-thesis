@@ -31,7 +31,7 @@ rm(srcCreateFcn) #remove the extra unneeded variables
 # -------------------------------------------------------
 
 # local functions
-hmm_convertRawData <- function(rawData, fitbitDownload=FALSE, CONSTANTS=CONSTANTS)
+hmm_convertRawData <- function(rawData, fitbitDownload=FALSE, CONSTS=CONSTANTS)
 {
   DATA_SET_RAW <- rawData[!is.na(rawData$NYHAClass),] #i.e. m_cData excluding patients w/o NYHAClass
   cat("\nM: Loaded Dataset...")
@@ -66,8 +66,8 @@ hmm_convertRawData <- function(rawData, fitbitDownload=FALSE, CONSTANTS=CONSTANT
   
   ## Normalize the predictors
   cat("\nM: Normalizing variables...")
-  dataSet$Steps <- (dataSet$Steps - CONSTANTS$UNSCALEDMIN.STEPS)*CONSTANTS$RESCALEFACTOR.STEPS + CONSTANTS$RESCALEDMIN.STEPS  # rescale steps
-  dataSet$HeartRate <- (dataSet$HeartRate - CONSTANTS$UNSCALEDMIN.HEARTRATE)*CONSTANTS$RESCALEFACTOR.HEARTRATE + CONSTANTS$RESCALEDMIN.HEARTRATE  # rescale heart rate
+  dataSet$Steps <- (dataSet$Steps - CONSTS$UNSCALEDMIN.STEPS)*CONSTS$RESCALEFACTOR.STEPS + CONSTS$RESCALEDMIN.STEPS  # rescale steps
+  dataSet$HeartRate <- (dataSet$HeartRate - CONSTS$UNSCALEDMIN.HEARTRATE)*CONSTS$RESCALEFACTOR.HEARTRATE + CONSTS$RESCALEDMIN.HEARTRATE  # rescale heart rate
   
   cat("\nM: Finished importing DataSet...")
   

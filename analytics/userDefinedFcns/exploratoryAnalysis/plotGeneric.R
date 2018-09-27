@@ -39,6 +39,7 @@ invisible(lapply(fcns,srcCreateFcn,
 rm(srcCreateFcn) #remove the extra unneeded variables
 
 #######################################################################
+#### INSTRUCTIONS ####
 
 #to use, first pass m_cData through hmm_convertRawData(m_cData, fitbitDownload=FALSE), use output as data.clean
 #then load hmm_common for constants
@@ -71,10 +72,19 @@ TIME_COL_LABEL <- 'Time'
 DAYS_TO_KEEP <- 16
 
 
-plotX <- function(data.clean,CONSTANTS,withHeartRate=FALSE,showPlot=FALSE)
+plotX <- function(data.clean,CONSTS=CONSTANTS,withHeartRate=FALSE,showPlot=FALSE)
 {
-  # Constants ####
+  bypassForThesisFlag <- TRUE
   
+  
+  freqSpecPlot <- FALSE # NOT DONE YET
+  stackedDayByDay <- !bypassForThesisFlag
+  patientDayByDay <- TRUE #only to keep for thesis
+  normalDayByDay <- !bypassForThesisFlag
+  byHoursPlot <- !bypassForThesisFlag
+  byDaysPlot <- !bypassForThesisFlag
+  
+  # Constants ####
   
   data.orig <- data.clean
   
@@ -89,13 +99,13 @@ plotX <- function(data.clean,CONSTANTS,withHeartRate=FALSE,showPlot=FALSE)
   
   ######################################## PLOTS
   
-  if(FALSE)
+  if(freqSpecPlot)
   {
     # Frequency Spectrum Day by Day by Patient Plot ####
     # prep
     id <- "Freq-DayByDayByPatient"
     #title <- "Step Time Series"
-    plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
+    plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTS$NORMALIZED_STUDY_DAY_START))
     
     # plot
     for(pat in levels(plotData$StudyIdentifier))
@@ -127,99 +137,160 @@ plotX <- function(data.clean,CONSTANTS,withHeartRate=FALSE,showPlot=FALSE)
     warning("Not finished programming spectral plots")
   }
 
-  
-  # Stacked Day by Day by Patient Plot ####
-  # prep
-  id <- "DayByDayByPatient(Stacked)"
-  #title <- "Step Time Series"
-  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-  
-  # plot
-  for(pat in levels(plotData$StudyIdentifier))
+  if(stackedDayByDay)
   {
-    data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
-    if(nrow(data.plotSubset) > 0)
+    # Stacked Day by Day by Patient Plot ####
+    # prep
+    id <- "DayByDayByPatient(Stacked)"
+    #title <- "Step Time Series"
+    plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTS$NORMALIZED_STUDY_DAY_START))
+    
+    # plot
+    for(pat in levels(plotData$StudyIdentifier))
     {
-      cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
-      title.patient <- paste(title," | Pt",pat,sep="")
-
-      mappingList <- list()
-      
-      mappingList[['STEPS']] = aes(x=TIME_PLACEHOLDER,
-                                   y=Steps/CONSTANT_CONSTS$RESCALEFACTOR.STEPS,
-                                   fill=as.factor(yday(DateTime)),
-                                   colour=as.factor(yday(DateTime)))
-
-      if(withHeartRate)
+      data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
+      if(nrow(data.plotSubset) > 0)
       {
-        mappingList[['HEARTRATE']] = aes(x=TIME_PLACEHOLDER,
-                                         y=HeartRate/CONSTANT_CONSTS$RESCALEFACTOR.HEARTRATE,
-                                         #fill=as.factor(yday(DateTime)),
-                                         colour=as.factor(yday(DateTime)))
+        cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
+        title.patient <- paste(title," | Pt",pat,sep="")
+        
+        mappingList <- list()
+        
+        mappingList[['STEPS']] = aes(x=TIME_PLACEHOLDER,
+                                     y=Steps/CONSTANT_CONSTS$RESCALEFACTOR.STEPS,
+                                     fill=as.factor(yday(DateTime)),
+                                     colour=as.factor(yday(DateTime)))
+        
+        if(withHeartRate)
+        {
+          mappingList[['HEARTRATE']] = aes(x=TIME_PLACEHOLDER,
+                                           y=HeartRate/CONSTANT_CONSTS$RESCALEFACTOR.HEARTRATE,
+                                           #fill=as.factor(yday(DateTime)),
+                                           colour=as.factor(yday(DateTime)))
+        }
+        
+        plt <- generateTimeHeartStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
+                                         plotData=data.plotSubset,
+                                         id=id,
+                                         mappingList=mappingList,
+                                         title=title.patient,
+                                         LABEL_CONSTS=LABEL,
+                                         FORMAT_CONSTS=FORMAT,
+                                         CONSTANT_CONSTS=CONSTS,
+                                         nyhaClass=cls)
+        
+        
+        # modify it to scale time axis by hours
+        plt <- plt + 
+          scale_x_datetime(LABEL$DATETIME$hour,
+                           date_labels=FORMAT$DATETIME$hour,
+                           date_breaks="6 hour")
+        
+        # show the plot
+        if(showPlot)
+        {
+          print(plt) # can get away with this since we're using ggplot, if using regular plot need to print first
+        }
+        
+        # save plot
+        savePNGPlot(plt)
       }
-      
-      plt <- generateTimeHeartStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
-                                       plotData=data.plotSubset,
-                                       id=id,
-                                       mappingList=mappingList,
-                                       title=title.patient,
-                                       LABEL_CONSTS=LABEL,
-                                       FORMAT_CONSTS=FORMAT,
-                                       CONSTANT_CONSTS=CONSTANTS,
-                                       nyhaClass=cls)
-
-      
-      # modify it to scale time axis by hours
-      plt <- plt + 
-        scale_x_datetime(LABEL$DATETIME$hour,
-                         date_labels=FORMAT$DATETIME$hour,
-                         date_breaks="6 hour")
-      
-      # show the plot
-      if(showPlot)
+      else
       {
-        print(plt) # can get away with this since we're using ggplot, if using regular plot need to print first
+        cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
       }
-      
-      # save plot
-      savePNGPlot(plt)
-    }
-    else
-    {
-      cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
     }
   }
   
-  #### RESET mappingList ####
-  mappingList <- list(STEPS=NA)
-  if(withHeartRate)
+  if(patientDayByDay)
   {
-    mappingList[['HEARTRATE']] <- NA
+    #### RESET mappingList ####
+    mappingList <- list(STEPS=NA)
+    if(withHeartRate)
+    {
+      mappingList[['HEARTRATE']] <- NA
+    }
+    
+    # Day by Day by Patient Plot ####
+    # prep
+    id <- "DayByDayByPatient"
+    #title <- "Step Time Series"
+    plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTS$NORMALIZED_STUDY_DAY_START))
+    
+    # plot
+    for(pat in levels(plotData$StudyIdentifier))
+    {
+      data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
+      if(nrow(data.plotSubset) > 0)
+      {
+        cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
+        title.patient <- paste(title," | Pt",pat,sep="")
+        
+        data.plotSubsetWithDayLabel <- data.plotSubset
+        data.plotSubsetWithDayLabel$DayLabel <- factor(yday(data.plotSubset$DateTime),
+                                                       labels=paste0("Day ",unique(yday(data.plotSubset$DateTime))))
+          
+        
+        plt <- generateTimeHeartStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
+                                         plotData=data.plotSubsetWithDayLabel,
+                                         id=id,
+                                         mappingList=mappingList,
+                                         title=title.patient,
+                                         LABEL_CONSTS=LABEL,
+                                         FORMAT_CONSTS=FORMAT,
+                                         CONSTANT_CONSTS=CONSTS,
+                                         nyhaClass=cls)
+        
+        # modify it to scale time axis by hours
+        plt <- plt + 
+          scale_x_datetime(LABEL$DATETIME$hour,
+                           date_labels=FORMAT$DATETIME$hour,
+                           date_breaks="6 hour")
+        
+        # make sure there are more than 1 day (for facet to work)
+        if(length(unique(yday(data.plotSubset$DateTime))) > 1)
+        {
+          plt <- plt + facet_wrap(~DayLabel)
+        }
+        
+        # show the plot
+        print(plt)
+        # save plot
+        savePNGPlot(plt)
+      }
+      else
+      {
+        cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
+      }
+    }
   }
   
-  # Day by Day by Patient Plot ####
-  # prep
-  id <- "DayByDayByPatient"
-  #title <- "Step Time Series"
-  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-  
-  # plot
-  for(pat in levels(plotData$StudyIdentifier))
+  if(normalDayByDay)
   {
-    data.plotSubset <- plotData %>% dplyr::filter(StudyIdentifier %in% c(pat)) # keep only this patient for plot
-    if(nrow(data.plotSubset) > 0)
+    #### RESET mappingList ####
+    mappingList <- list(STEPS=NA)
+    if(withHeartRate)
     {
-      cls <- getSingleFactorFromVector(data.plotSubset$NYHAClass, asCharacter=TRUE)
-      title.patient <- paste(title," | Pt",pat,sep="")
-      
+      mappingList[['HEARTRATE']] <- NA
+    }
+    
+    # Day by Day Plot ####
+    # prep
+    id <- "DayByDay"
+    #title <- "Step Time Series"
+    plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTS$NORMALIZED_STUDY_DAY_START))
+    
+    # plot
+    for(cls in CONSTS$NYHA_CLASS_VEC)
+    {
       plt <- generateTimeHeartStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
-                                       plotData=data.plotSubset,
+                                       plotData=plotData,
                                        id=id,
                                        mappingList=mappingList,
-                                       title=title.patient,
+                                       title=title,
                                        LABEL_CONSTS=LABEL,
                                        FORMAT_CONSTS=FORMAT,
-                                       CONSTANT_CONSTS=CONSTANTS,
+                                       CONSTANT_CONSTS=CONSTS,
                                        nyhaClass=cls)
       
       # modify it to scale time axis by hours
@@ -229,154 +300,121 @@ plotX <- function(data.clean,CONSTANTS,withHeartRate=FALSE,showPlot=FALSE)
                          date_breaks="6 hour")
       
       # make sure there are more than 1 day (for facet to work)
-      if(length(unique(yday(data.plotSubset$DateTime))) > 1)
+      if(length(unique(yday(plotData$DateTime))) > 1)
       {
         plt <- plt + facet_wrap(~yday(DateTime))
+        
       }
       
-      # show the plot
-      print(plt)
-      # save plot
-      savePNGPlot(plt)
-    }
-    else
-    {
-      cat('\nNo data for patient ',pat,'. Skipped printing & plotting.',sep="")
-    }
-  }
-  
-  #### RESET mappingList ####
-  mappingList <- list(STEPS=NA)
-  if(withHeartRate)
-  {
-    mappingList[['HEARTRATE']] <- NA
-  }
-  
-  # Day by Day Plot ####
-  # prep
-  id <- "DayByDay"
-  #title <- "Step Time Series"
-  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-  
-  # plot
-  for(cls in CONSTANTS$NYHA_CLASS_VEC)
-  {
-    plt <- generateTimeHeartStepPlot(TIME_COL_LABEL=TIME_COL_LABEL,
-                                     plotData=plotData,
-                                     id=id,
-                                     mappingList=mappingList,
-                                     title=title,
-                                     LABEL_CONSTS=LABEL,
-                                     FORMAT_CONSTS=FORMAT,
-                                     CONSTANT_CONSTS=CONSTANTS,
-                                     nyhaClass=cls)
-    
-    # modify it to scale time axis by hours
-    plt <- plt + 
-      scale_x_datetime(LABEL$DATETIME$hour,
-                       date_labels=FORMAT$DATETIME$hour,
-                       date_breaks="6 hour")
-      
-    # make sure there are more than 1 day (for facet to work)
-    if(length(unique(yday(plotData$DateTime))) > 1)
-    {
-      plt <- plt + facet_wrap(~yday(DateTime))
+      if(nrow(plt$data) > 0)
+      {
+        # show the plot
+        print(plt)
+        # save plot
+        savePNGPlot(plt)
+      }
+      else
+      {
+        cat("\nSkipped printing ", id, " plot for class: ", cls, " (no data for class)\n")
+      }
       
     }
-    
-    if(nrow(plt$data) > 0)
-    {
-      # show the plot
-      print(plt)
-      # save plot
-      savePNGPlot(plt)
-    }
-    else
-    {
-      cat("\nSkipped printing ", id, " plot for class: ", cls, " (no data for class)\n")
-    }
-
   }
   
   
-  #### RESET mappingList ####
-  mappingList <- list(STEPS=NA)
-  if(withHeartRate)
+  if(byHoursPlot)
   {
-    mappingList[['HEARTRATE']] <- NA
+    #### RESET mappingList ####
+    mappingList <- list(STEPS=NA)
+    if(withHeartRate)
+    {
+      mappingList[['HEARTRATE']] <- NA
+    }
+    
+    # Hours Plot ####
+    # prep
+    id <- "Hours"
+    #title <- "Step Time Series"
+    plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTS$NORMALIZED_STUDY_DAY_START))
+    # plot
+    for(cls in CONSTS$NYHA_CLASS_VEC)
+    {
+      # generate basic plot
+      plt <- generateDateTimeHeartStepPlot(plotData=plotData,
+                                           id=id,
+                                           mappingList=mappingList,
+                                           title=title,
+                                           LABEL_CONSTS=LABEL,
+                                           FORMAT_CONSTS=FORMAT,
+                                           CONSTANT_CONSTS=CONSTS,
+                                           nyhaClass=cls)
+      
+      # modify it to scale time axis by hours
+      plt <- plt + scale_x_datetime(LABEL$DATETIME$hour,
+                                    date_labels=FORMAT$DATETIME$hour,
+                                    date_breaks="6 hour")
+      
+      if(nrow(plt$data) > 0)
+      {
+        # show the plot
+        print(plt)
+        # save plot
+        savePNGPlot(plt)
+      }
+      else
+      {
+        cat("\nSkipped printing ", id, " plot for class: ", cls, " (no data for class)\n")
+      }
+    }
   }
   
-  # Hours Plot ####
-  # prep
-  id <- "Hours"
-  #title <- "Step Time Series"
-  plotData <- data.orig %>% dplyr::filter(DateTime < (days(DAYS_TO_KEEP) + CONSTANTS$NORMALIZED_STUDY_DAY_START))
-  # plot
-  for(cls in CONSTANTS$NYHA_CLASS_VEC)
+  if(byDaysPlot)
   {
-    # generate basic plot
-    plt <- generateDateTimeHeartStepPlot(plotData=plotData,
-                                         id=id,
-                                         mappingList=mappingList,
-                                         title=title,
-                                         LABEL_CONSTS=LABEL,
-                                         FORMAT_CONSTS=FORMAT,
-                                         CONSTANT_CONSTS=CONSTANTS,
-                                         nyhaClass=cls)
-    
-    # modify it to scale time axis by hours
-    plt <- plt + scale_x_datetime(LABEL$DATETIME$hour,
-                                  date_labels=FORMAT$DATETIME$hour,
-                                  date_breaks="6 hour")
-    
-    if(nrow(plt$data) > 0)
+    #### RESET mappingList ####
+    mappingList <- list(STEPS=NA)
+    if(withHeartRate)
     {
-      # show the plot
-      print(plt)
-      # save plot
-      savePNGPlot(plt)
+      mappingList[['HEARTRATE']] <- NA
     }
-    else
+    
+    # Days Plot ####
+    # prep
+    id <- "AllDays"
+    #title <- "Step Time Series"
+    plotData <- data.orig
+    # plot
+    for(cls in CONSTS$NYHA_CLASS_VEC)
     {
-      cat("\nSkipped printing ", id, " plot for class: ", cls, " (no data for class)\n")
+      # generate basic plot
+      plt <- generateDateTimeHeartStepPlot(plotData=plotData,
+                                           id=id,
+                                           mappingList=mappingList,
+                                           title=title,
+                                           LABEL_CONSTS=LABEL,
+                                           FORMAT_CONSTS=FORMAT,
+                                           CONSTANT_CONSTS=CONSTS,
+                                           nyhaClass=cls)
+      
+      # modify it to scale time axis by days
+      plt <- plt +  scale_x_datetime(LABEL$DATETIME$day,
+                                     date_labels=FORMAT$DATETIME$day,
+                                     date_breaks="1 day")
+      
+      if(nrow(plt$data) > 0)
+      {
+        # show the plot
+        print(plt)
+        # save plot
+        savePNGPlot(plt)
+      }
+      else
+      {
+        cat("\nSkipped printing ", id, " plot for class: ", cls, " (no data for class)\n")
+      }
     }
   }
   
-  # Days Plot ####
-  # prep
-  id <- "AllDays"
-  #title <- "Step Time Series"
-  plotData <- data.orig
-  # plot
-  for(cls in CONSTANTS$NYHA_CLASS_VEC)
-  {
-    # generate basic plot
-    plt <- generateDateTimeHeartStepPlot(plotData=plotData,
-                                         id=id,
-                                         mappingList=mappingList,
-                                         title=title,
-                                         LABEL_CONSTS=LABEL,
-                                         FORMAT_CONSTS=FORMAT,
-                                         CONSTANT_CONSTS=CONSTANTS,
-                                         nyhaClass=cls)
-    
-    # modify it to scale time axis by days
-    plt <- plt +  scale_x_datetime(LABEL$DATETIME$day,
-                                   date_labels=FORMAT$DATETIME$day,
-                                   date_breaks="1 day")
-    
-    if(nrow(plt$data) > 0)
-    {
-      # show the plot
-      print(plt)
-      # save plot
-      savePNGPlot(plt)
-    }
-    else
-    {
-      cat("\nSkipped printing ", id, " plot for class: ", cls, " (no data for class)\n")
-    }
-  }
+  
 }
 
 # adds a column with label TIME_COL_LABEL to the DATA that contains only the time component of the column with sourceColumnlabel.
@@ -437,7 +475,9 @@ generateDateTimeHeartStepPlot <- function(plotData,
   plt <- ggplot(data=plotData) +
          ggtitle(fullTitle) +
          theme_tufte() +
-         theme(legend.position = "none")
+         theme(legend.position = "none",
+               text = element_text(size=18),
+               axis.text = element_text(size=18))
   
   if(length(mappingList) > 0)
   {

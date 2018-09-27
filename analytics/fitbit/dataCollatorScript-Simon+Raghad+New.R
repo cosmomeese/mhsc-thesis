@@ -124,7 +124,7 @@ save(list = saveVariablesCombined,
 # JFB
 currentStudyOnly <- combinedData %>% 
                     filter((!!rlang::sym(dataSetColname)) == jfbDataSetID)
-write.csv(currentStudyOnly, file="H:/allStudiesData/AllStudiesDataForCedricsTeam.csv")
+write.csv(currentStudyOnly, file="H:/allStudiesData/JonathanSudiesDataForCedricsTeam.csv")
 
 # Simon
 #currentStudyOnly <- combinedData %>% 
