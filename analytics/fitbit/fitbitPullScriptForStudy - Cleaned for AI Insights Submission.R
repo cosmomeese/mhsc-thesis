@@ -306,8 +306,8 @@ getTokenForParticipant <- function(metaDataAndTokens.list,
                                 use_basic_auth=TRUE,
                                 config_init=c(header, content_type),
                                 cache=FALSE,
-                                auth_page_query_params=list(email=email,
-                                                            prompt="login"))
+                                query_authorize_extra=list(email=email,
+                                                           prompt="login"))
   token$refresh() # for good measure?
   
   cat("\nM: Received token response")

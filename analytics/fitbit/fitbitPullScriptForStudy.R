@@ -15,9 +15,10 @@ if (length(new.pkg)) {
 rm(pkg,new.pkg)
 
 # Github Packages
-pkg <- c(#"teramonagi/fitbitr",
-  "cosmomeese/httr",
-  "cosmomeese/fitbitr")
+pkg <- c(
+          #"teramonagi/fitbitr",
+          "cosmomeese/httr", #otherwise force to commit: cosmomeese/httr@1d85300
+          "cosmomeese/fitbitr") #otherwise force to commit: cosmomeese/fitbitr@b2041ea
 #pkg <- c("avsecz/fitbitr")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
@@ -25,6 +26,7 @@ if (length(new.pkg)) {
   devtools::install_github(new.pkg)
 }
 rm(pkg,new.pkg)
+
 
 # Load Libraries
 
@@ -578,8 +580,8 @@ getTokenForParticipant <- function(metaDataAndTokens.list,
                                 use_basic_auth=TRUE,
                                 config_init=c(header, content_type),
                                 cache=FALSE,
-                                auth_page_query_params=list(email=email,
-                                                            prompt="login"))
+                                query_authorize_extra=list(email=email,
+                                                           prompt="login"))
   result <- list(
     token=token,
     locale=LOCALE,
