@@ -2,13 +2,13 @@
 
 GENERATE_GRAPHS <- FALSE
 SAVE_GRAPHS <- FALSE  # N.B. GENERATE_GRAPHS must also be true
-SAVE_CSVS <- FALSE
+SAVE_CSVS <- TRUE
 SAVE_STAT_TEST <- FALSE
-SAVE_JMIR_TABLE <- FALSE
+SAVE_JMIR_TABLE <- TRUE
 
 ## Install & Load Required Library Packages
 # Install if it's not installed on this computer
-pkg <- c("plyr","tidyverse","reshape2","glue", "ggthemes","hmisc")
+pkg <- c("plyr","tidyverse","reshape2","glue", "ggthemes","Hmisc")
 new.pkg <- pkg[!(pkg %in% installed.packages())]
 
 if (length(new.pkg)) {
@@ -76,7 +76,7 @@ if(!exists("m_cData"))
   
   #### Tag fullData as immutable
   FULL_DATA <- fullData
-  rm(fullData)
+#rm(fullData)
   
   # Create FULL_DATA.ForViewing for easier viewing of data using: View(FULL_DATA.ForViewing)
   FULL_DATA.ForViewing <- createViewableFullData(FULL_DATA);
@@ -110,16 +110,34 @@ if(!exists("m_cData"))
   
   cat('\nSTART Summary Statistics Calculation ==============================', sep="")
   
+  mode_v2.reviewer = TRUE
   for(group in groupingType)
   {
-    # calculate summary statistics
-    temp <- plyr::ddply(melted,
-                        c(group, "variable"),
-                        dplyr::summarise,
-                        mean = mean(as.numeric(value),na.rm=TRUE), 
-                        sd = sd(as.numeric(value),na.rm=TRUE),
-                        sem = sd(as.numeric(value),na.rm=TRUE)/sqrt(sum(!(is.na(as.numeric(value))))),
-                        n = sum(!(is.na(as.numeric(value)))))  # i.e. length without NAs
+    if(mode_v2.reviewer)
+    {
+      # calculate summary statistics
+      temp <- plyr::ddply(melted,
+                          c(group, "variable"),
+                          dplyr::summarise,
+                          mean = mean(as.numeric(value),na.rm=TRUE), 
+                          sd = sd(as.numeric(value),na.rm=TRUE),
+                          sem = sd(as.numeric(value),na.rm=TRUE)/sqrt(sum(!(is.na(as.numeric(value))))),
+                          median = median(as.numeric(value),na.rm=TRUE),
+                          q1 = quantile(as.numeric(value),probs=c(0.25),na.rm=TRUE),
+                          q3 = quantile(as.numeric(value),probs=c(0.75),na.rm=TRUE),
+                          n = sum(!(is.na(as.numeric(value)))))  # i.e. length without NAs
+    }
+    else
+    {
+      # calculate summary statistics
+      temp <- plyr::ddply(melted,
+                          c(group, "variable"),
+                          dplyr::summarise,
+                          mean = mean(as.numeric(value),na.rm=TRUE), 
+                          sd = sd(as.numeric(value),na.rm=TRUE),
+                          sem = sd(as.numeric(value),na.rm=TRUE)/sqrt(sum(!(is.na(as.numeric(value))))),
+                          n = sum(!(is.na(as.numeric(value)))))  # i.e. length without NAs
+    }
     
     # sort by variable name for easier visual comparison (if desired)
     temp <- temp %>% arrange(variable)
@@ -161,7 +179,7 @@ if(!exists("m_cData"))
       if(n.x > 4 && n.y > 4)
       {
         #browser()
-        result <- rcorr(as.numeric(x),as.numeric(y))[[out_val]][2]
+        result <- Hmisc::rcorr(as.numeric(x),as.numeric(y))[[out_val]][2]
         if(isR2)
         {
           result <- result^2
@@ -185,9 +203,12 @@ if(!exists("m_cData"))
   summarizedOverall <- plyr::ddply(melted %>% tidyr::drop_na_("NYHAClass"),
                                    c("variable"),
                                    dplyr::summarise,
-                                   mean = mean(as.numeric(value),na.rm=TRUE), 
+                                   mean = mean(as.numeric(value),na.rm=TRUE),
                                    sd = sd(as.numeric(value),na.rm=TRUE),
                                    sem = sd(as.numeric(value),na.rm=TRUE)/sqrt(sum(!(is.na(as.numeric(value))))),
+                                   median = median(as.numeric(value),na.rm=TRUE),
+                                   q1 = quantile(as.numeric(value),probs=c(0.25),na.rm=TRUE),
+                                   q3 = quantile(as.numeric(value),probs=c(0.75),na.rm=TRUE),
                                    n = sum(!(is.na(as.numeric(value)))))  # i.e. length without NAs
   
   vars <- c("r","r2","P")
@@ -629,9 +650,16 @@ if(!exists("m_cData"))
     #make a factor again
     combinedSummaryByClass$NYHAClass <- as.factor(combinedSummaryByClass$NYHAClass)
     
-    value.vars <- c("mean","sd","n")
+    value.vars <- c("mean",
+                    "sd",
+                    "n",
+                    "q1",
+                    "median",
+                    "q3")
+    
     isFirstRun <- TRUE
     for(value.var in value.vars)
+      
     {
       temp <- dcast(combinedSummaryByClass,
                     Group + NYHAClass ~ variable,
@@ -1220,7 +1248,7 @@ if(!exists("m_cData"))
   
   unnestedDF <- FULL_DATA %>% unnestStepDataFrame()
   zeroCount <- unnestedDF[!is.na(unnestedDF$NYHAClass),] %>% aggregate(Steps ~ StudyIdentifier, . , function(x) {100*sum(x == 0)/length(x)})
-  cat(glue('\nPercentage zeros per patient mean ± SD {round(mean(zeroCount$Steps),1)} ± {round(sd(zeroCount$Steps),1)}\n'))
+  cat(glue('\nPercentage zeros per patient mean ? SD {round(mean(zeroCount$Steps),1)} ? {round(sd(zeroCount$Steps),1)}\n'))
   cat("As stem plot\n")
   stem(zeroCount$Steps)
   

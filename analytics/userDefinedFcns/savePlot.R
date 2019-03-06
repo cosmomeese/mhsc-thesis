@@ -33,7 +33,11 @@ invisible(lapply(fcns,srcCreateFcn,
 savePlot <- function(fileName,
                      filePrefix="plots/",
                      plot,
-                     isGGPlot=FALSE)
+                     isGGPlot=FALSE,
+                     height=8,
+                     width=11,
+                     units="in",
+                     res.dpi = 300)
 {
   fileName <- removeInvalidFileNameChars(fileName)
   fullFileName <- glue('{filePrefix}{fileName}')
@@ -59,9 +63,10 @@ savePlot <- function(fileName,
     ggsave(fullFileName,
            plot=plot,
            path = getwd(),
-           height = 8,
-           width = 11,
-           units = "in")
+           height = height,
+           width = width,
+           units = units,
+           dpi = res.dpi)
     cat("Printed ",fullFileName,"\n",sep="")
   }
   else
@@ -70,10 +75,10 @@ savePlot <- function(fileName,
       # create title
       dev.copy(png,
                fullFileName,
-               width = 11,
-               height = 8,
-               units = "in",
-               res = 300)
+               width = width,
+               height = height,
+               units = units,
+               res = res.dpi)
       cat("Printed ",fullFileName,"\n",sep="")
     },error = function(err) {
       cat("\n")
